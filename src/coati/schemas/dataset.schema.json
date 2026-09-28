@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enerplanet.github.io/Coati/schemas/dataset-1.0.schema.json",
+  "title": "Coati dataset document",
+  "description": "Everything a netCDF or HDF5 file holds: groups, dimensions, variables and attributes, with the values. The layout follows the data model of netCDF.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "format",
+    "attributes",
+    "dimensions",
+    "variables",
+    "groups",
+    "warnings",
+    "metadata"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "description": "The version of the layout of this document.",
+      "const": "1.0"
+    },
+    "format": {"$ref": "#/$defs/format"},
+    "attributes": {"$ref": "#/$defs/attributes"},
+    "dimensions": {"$ref": "#/$defs/dimensions"},
+    "variables": {"$ref": "#/$defs/variables"},
+    "groups": {"$ref": "#/$defs/groups"},
+    "warnings": {
+      "description": "What the reader could not represent, such as a link into another file.",
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "metadata": {
+      "description": "How the document was made.",
+      "type": "object",
+      "required": ["generator", "generator_version", "source", "properties"],
+      "additionalProperties": false,
+      "properties": {
+        "generator": {"description": "The program that wrote the document.", "const": "coati"},
+        "generator_version": {"description": "The version of the program.", "type": "string"},
+        "source": {
+          "description": "The file the document was made from.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "description": "The name of the file, without its directory.",
+              "type": "string"
+            },
+            "format": {"$ref": "#/$defs/format"},
+            "size": {
+              "description": "The size of the file in bytes.",
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "properties": {
+          "description": "What the file says about the software that wrote it.",
+          "type": "object",
+          "additionalProperties": {"type": "string"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "format": {
+      "description": "The format of the file.",
+      "enum": [
+        "netcdf4",
+        "hdf5",
+        "netcdf3-classic",
+        "netcdf3-64bit-offset",
+        "netcdf3-64bit-data"
+      ]
+    },
+    "attributes": {
+      "description": "The attributes by name. A value is text, a number, a truth value, null, a list of these or, with decoded text, the document that a text holds.",
+      "type": "object"
+    },
+    "dimensions": {
+      "description": "The dimensions that a group defines, by name.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["size", "unlimited"],
+        "additionalProperties": false,
+        "properties": {
+          "size": {"description": "The length of the dimension.", "type": "integer", "minimum": 0},
+          "unlimited": {
+            "description": "Whether the dimension may grow, as that of records does.",
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "variables": {
+      "description": "The variables of a group, by name.",
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/variable"}
+    },
+    "groups": {
+      "description": "The groups within a group, by name.",
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/group"}
+    },
+    "group": {
+      "type": "object",
+      "required": ["attributes", "dimensions", "variables", "groups"],
+      "additionalProperties": false,
+      "properties": {
+        "attributes": {"$ref": "#/$defs/attributes"},
+        "dimensions": {"$ref": "#/$defs/dimensions"},
+        "variables": {"$ref": "#/$defs/variables"},
+        "groups": {"$ref": "#/$defs/groups"}
+      }
+    },
+    "variable": {
+      "type": "object",
+      "required": ["dtype", "dimensions", "shape", "attributes"],
+      "additionalProperties": false,
+      "properties": {
+        "dtype": {
+          "description": "The type of the values: that of NumPy for numbers, such as float64, or string, char, bool, datetime, compound, opaque, reference or vlen<...>.",
+          "type": "string"
+        },
+        "dimensions": {
+          "description": "The name of the dimension of each axis; null for an axis without one, which occurs in HDF5 files that are not netCDF.",
+          "type": "array",
+          "items": {"type": ["string", "null"]}
+        },
+        "shape": {
+          "description": "The extent of each axis.",
+          "type": "array",
+          "items": {"type": "integer", "minimum": 0}
+        },
+        "attributes": {"$ref": "#/$defs/attributes"},
+        "encoding": {
+          "description": "The attributes that the interpretation of the values has consumed, such as units and _FillValue.",
+          "type": "object"
+        },
+        "enumeration": {
+          "description": "For a variable of an enumerated type, the name of each value.",
+          "type": "object",
+          "additionalProperties": {"type": "integer"}
+        },
+        "data": {
+          "description": "The values: nested lists with one level for each axis, or a single value for a variable without axes."
+        },
+        "data_omitted": {
+          "description": "Present and true if the values were left out because the variable has more elements than the limit.",
+          "const": true
+        }
+      }
+    }
+  }
+}
