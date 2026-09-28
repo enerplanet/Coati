@@ -1,3 +1,6 @@
+![Coati banner](docs/assets/logos/coati-banner-dark.png#gh-dark-mode-only)
+![Coati banner](docs/assets/logos/coati-banner-light.png#gh-light-mode-only)
+
 # Coati
 
 [![CI](https://github.com/enerplanet/Coati/actions/workflows/ci.yml/badge.svg)](https://github.com/enerplanet/Coati/actions/workflows/ci.yml)

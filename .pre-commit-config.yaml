@@ -7,6 +7,8 @@ repos:
     hooks:
       - id: check-added-large-files
         args: ["--maxkb=200"]
+        # The banners of the readme are images of 2560 x 640.
+        exclude: ^docs/assets/logos/
       - id: check-merge-conflict
       - id: check-toml
       - id: check-yaml

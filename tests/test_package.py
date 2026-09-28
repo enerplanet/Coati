@@ -145,6 +145,58 @@ def test_the_documentation_is_built_with_what_the_extra_names(project: dict[str,
     assert sorted(listed) == sorted(project["optional-dependencies"]["docs"])
 
 
+# -- the artwork ------------------------------------------------------------------------------
+
+#: An image of a page in Markdown: what it shows, without a title.
+IMAGE = re.compile(r"!\[[^\]]*\]\(([^)\s]+)\)")
+
+LOGOS = ROOT / "docs" / "assets" / "logos"
+
+
+@pytest.mark.parametrize(
+    ("page", "schemes"),
+    [
+        ("README.md", ["gh-dark-mode-only", "gh-light-mode-only"]),
+        ("docs/index.md", ["only-dark", "only-light"]),
+    ],
+)
+def test_the_banner_is_shown_for_both_colour_schemes(page: str, schemes: list[str]) -> None:
+    above_the_title = read(page).split("# Coati")[0]
+    shown = IMAGE.findall(above_the_title)
+    assert [target.partition("#")[2] for target in shown] == schemes
+    names = [Path(target.partition("#")[0]).name for target in shown]
+    assert names == ["coati-banner-dark.png", "coati-banner-light.png"]
+
+
+def test_the_images_of_the_pages_exist() -> None:
+    pages = [ROOT / "README.md", *sorted((ROOT / "docs").rglob("*.md"))]
+    if not pages[0].is_file():
+        pytest.skip("the pages are not part of what is tested here")
+    for page in pages:
+        for target in IMAGE.findall(page.read_text(encoding="utf-8")):
+            if not target.startswith(("http://", "https://")):
+                image = page.parent / target.partition("#")[0]
+                assert image.is_file(), f"{page.relative_to(ROOT)} shows {target}"
+
+
+@pytest.mark.parametrize("key", ["favicon", "logo"])
+def test_the_documentation_has_the_mark_of_the_project(key: str) -> None:
+    found = re.search(rf"(?m)^  {key}: (\S+)", read("mkdocs.yml"))
+    assert found is not None
+    assert found[1].startswith("assets/logos/coati-")
+    assert (ROOT / "docs" / found[1]).is_file()
+
+
+def test_the_vector_images_run_nothing_and_load_nothing() -> None:
+    images = sorted(LOGOS.glob("*.svg"))
+    if not images:
+        pytest.skip("the artwork is not part of what is tested here")
+    for image in images:
+        text = image.read_text(encoding="utf-8").lower()
+        for unwanted in ("<script", "<foreignobject", "<image", "href=", "onload=", "onclick="):
+            assert unwanted not in text, f"{image.name} holds {unwanted}"
+
+
 # -- what is said about the frameworks --------------------------------------------------------
 
 

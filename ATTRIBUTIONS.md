@@ -24,6 +24,7 @@ Used to build, test and document the package, and not part of it:
 | MkDocs | <https://www.mkdocs.org/> | BSD-2-Clause | documentation site generator |
 | Material for MkDocs | <https://squidfunk.github.io/mkdocs-material/> | MIT | documentation theme |
 | mkdocstrings | <https://mkdocstrings.github.io/> | ISC | reference of the Python package |
+| Coati mark, icons, banners and favicons in `docs/assets/logos/` (`coati-*`, `favicon-*`, `favicon.ico`, `apple-touch-icon.png`) | BigGeoData & Spatial AI, Technische Hochschule Deggendorf | project assets | README and documentation branding |
 | Spatial AI logos in `docs/assets/logos/` | BigGeoData & Spatial AI, Technische Hochschule Deggendorf | project assets | documentation branding |
 
 ## The frameworks

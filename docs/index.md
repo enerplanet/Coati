@@ -1,3 +1,6 @@
+![Coati banner](assets/logos/coati-banner-dark.png#only-dark)
+![Coati banner](assets/logos/coati-banner-light.png#only-light)
+
 # Coati
 
 Coati converts the result files of energy system models to JSON. It reads the

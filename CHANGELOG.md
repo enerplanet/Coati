@@ -11,6 +11,9 @@ minor release may change the Python interface and the command line.
 
 ### Added
 
+- The Coati identity: the banner on the README and the docs landing page
+  (light and dark), the mark as the docs logo and the kit's favicon; the
+  artwork lives under `docs/assets/logos/`.
 - The `coati` command: `coati SOURCE OUTPUT [FRAMEWORK]` writes the results
   of a solved model as JSON. The framework is named together with its
   version, as in `calliope-v0-6-10`, `pypsa-v1-2-4` or `adopt-net0-v0-1-10`,
