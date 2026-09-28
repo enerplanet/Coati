@@ -89,6 +89,9 @@ Repository = "https://github.com/enerplanet/Coati"
 Issues = "https://github.com/enerplanet/Coati/issues"
 Changelog = "https://github.com/enerplanet/Coati/blob/main/CHANGELOG.md"
 
+[project.scripts]
+coati = "coati.cli:main"
+
 [tool.hatch.version]
 path = "src/coati/_version.py"
 
