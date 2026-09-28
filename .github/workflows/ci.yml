@@ -85,7 +85,8 @@ jobs:
       matrix:
         include:
           - name: PyPSA
-            packages: pypsa
+            # The export to HDF5 needs PyTables, which PyPSA installs with this extra alone.
+            packages: '"pypsa[hdf5]"'
             python: "3.13"
           - name: Calliope
             packages: calliope

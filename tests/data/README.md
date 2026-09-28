@@ -73,7 +73,7 @@ Coati and run on Python 3.9, which Calliope 0.6 requires.
 
 | Framework | Installed with | Solver |
 | --- | --- | --- |
-| PyPSA | `pip install pypsa==1.2.4` | HiGHS, which comes with PyPSA |
+| PyPSA | `pip install "pypsa[hdf5]==1.2.4"` | HiGHS, which comes with PyPSA |
 | PyPSA 0.25 | `pip install pypsa==0.25.2 linopy==0.2.6 highspy "numpy<2" "pandas<2.1" "xarray<2023.13"` | HiGHS |
 | Calliope 0.7 | `pip install calliope==0.7.0` | CBC |
 | Calliope 0.6 | `pip install calliope==0.6.10` on Python 3.9 | CBC |

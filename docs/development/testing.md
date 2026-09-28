@@ -94,19 +94,20 @@ the test suite runs without them.
 
 ```console
 $ python -m venv .venv-pypsa && . .venv-pypsa/bin/activate
-$ pip install pypsa -e ".[test]"
+$ pip install "pypsa[hdf5]" -e ".[test]"
 $ make test-frameworks
 ```
 
 | Framework | Install | Solver |
 |---|---|---|
-| PyPSA | `pip install pypsa` | HiGHS, which comes with PyPSA |
+| PyPSA | `pip install "pypsa[hdf5]"` | HiGHS, which comes with PyPSA |
 | Calliope 0.7 | `pip install calliope` | CBC or GLPK |
 | AdOpT-NET0 | `pip install adopt-net0 "tsam<3"` | GLPK |
 
-Calliope 0.6 needs a version of Python that Coati does not support, so the
-two cannot be installed together. Its files are tested from `tests/data`
-alone.
+PyPSA exports to HDF5 with PyTables, which it installs with its extra `hdf5`
+alone. Calliope 0.6 needs a version of Python that Coati does not support,
+so the two cannot be installed together. Its files are tested from
+`tests/data` alone.
 
 ### Properties
 
