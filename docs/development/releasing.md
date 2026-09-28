@@ -63,6 +63,11 @@ publisher with these settings creates it on the first upload. The
 environment `pypi` of the repository can require a review, so that a
 release is published only after a maintainer has approved it.
 
+The badges of the readme take the version from `CITATION.cff` and the
+versions of Python from `pyproject.toml`, as they are on `main`. They do not
+ask PyPI, which knows nothing of a project before its first release and
+would have the badges say so.
+
 The description of the project on PyPI is the readme from its title on. The
 banner above the title is left out, because GitHub chooses it by the colour
 scheme of the viewer and PyPI would show both, and the links that are

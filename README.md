@@ -5,8 +5,8 @@
 
 [![CI](https://github.com/enerplanet/Coati/actions/workflows/ci.yml/badge.svg)](https://github.com/enerplanet/Coati/actions/workflows/ci.yml)
 [![MkDocs](https://github.com/enerplanet/Coati/actions/workflows/docs.yml/badge.svg)](https://enerplanet.github.io/Coati)
-[![PyPI](https://img.shields.io/pypi/v/enerplanet-coati)](https://pypi.org/project/enerplanet-coati/)
-[![Python](https://img.shields.io/pypi/pyversions/enerplanet-coati)](https://pypi.org/project/enerplanet-coati/)
+[![Version](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fenerplanet%2FCoati%2Fmain%2FCITATION.cff&query=%24.version&label=version)](CHANGELOG.md)
+[![Python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fenerplanet%2FCoati%2Fmain%2Fpyproject.toml)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Coati converts the result files of energy system models to JSON. It reads the

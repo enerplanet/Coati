@@ -7,6 +7,7 @@ import sys
 from importlib import metadata, resources
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote
 
 import pytest
 import yaml
@@ -180,6 +181,26 @@ def test_the_images_of_the_pages_exist() -> None:
             if not target.startswith(("http://", "https://")):
                 image = page.parent / target.partition("#")[0]
                 assert image.is_file(), f"{page.relative_to(ROOT)} shows {target}"
+
+
+def test_the_badges_read_files_that_exist() -> None:
+    # A badge that reads a file of the repository says "not found" once the file is renamed.
+    raw = "https://raw.githubusercontent.com/enerplanet/Coati/main/"
+    read_by_badges = [
+        unquote(address).partition(raw)[2].partition("&")[0]
+        for address in IMAGE.findall(read("README.md"))
+        if raw in unquote(address)
+    ]
+    assert sorted(read_by_badges) == ["CITATION.cff", "pyproject.toml"]
+    for name in read_by_badges:
+        assert (ROOT / name).is_file()
+
+
+def test_no_badge_asks_pypi_before_the_first_release() -> None:
+    # PyPI knows a project from its first release on; until then its badges say "not found".
+    released = re.findall(r"(?m)^## \[(\d[^\]]*)\]", read("CHANGELOG.md"))
+    asking = [address for address in IMAGE.findall(read("README.md")) if "/pypi/" in address]
+    assert released or not asking
 
 
 @pytest.mark.parametrize("key", ["favicon", "logo"])
