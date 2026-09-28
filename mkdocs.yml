@@ -1,13 +1,13 @@
 # Project information
-site_name: THD-Spatial-AI GitHub Template
-site_author: THD-Spatial-AI
+site_name: Coati
+site_author: BigGeoData & Spatial AI, Technische Hochschule Deggendorf
 site_description: >-
-  Template repository for open source projects in the THD-Spatial-AI GitHub organisation
-site_url: https://THD-Spatial-AI.github.io/gitHub-template
+  Converts the netCDF and HDF5 result files of Calliope, PyPSA and AdOpT-NET0 to JSON
+site_url: https://enerplanet.github.io/Coati
 
 # Repository
-repo_name: THD-Spatial/GitHub-Template
-repo_url: https://github.com/THD-Spatial-AI/gitHub-template
+repo_name: enerplanet/Coati
+repo_url: https://github.com/enerplanet/Coati
 edit_uri: edit/main/docs/
 
 # Theme configuration
@@ -68,6 +68,8 @@ plugins:
       separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
   - git-revision-date-localized:
       enable_creation_date: true
+      # A page that has not been committed yet has the date of the build.
+      fallback_to_build_date: true
 
 # Extensions
 markdown_extensions:
@@ -117,12 +119,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Contributing:
-      - Open Source Checklist: getting-started/open-source-checklist.md
-      - Repository Naming: getting-started/repository-naming.md
-      - Documentation Setup: getting-started/documentation-setup.md
-      - Legal Sync: getting-started/legal-sync.md
       - Branch Naming: getting-started/branch-naming.md
-      - Branch Rules: getting-started/branch-rules.md
       - Commit Conventions: getting-started/commit-conventions.md
 
 # Copyright
