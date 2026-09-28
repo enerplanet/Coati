@@ -1,12 +1,11 @@
 [build-system]
-requires = ["hatchling>=1.27"]
+requires = ["hatchling>=1.27", "hatch-fancy-pypi-readme>=24.1"]
 build-backend = "hatchling.build"
 
 [project]
 name = "enerplanet-coati"
-dynamic = ["version"]
+dynamic = ["version", "readme"]
 description = "Convert netCDF and HDF5 result files of Calliope, PyPSA and AdOpT-NET0 to JSON"
-readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -94,6 +93,20 @@ coati = "coati.cli:main"
 
 [tool.hatch.version]
 path = "src/coati/_version.py"
+
+# The description on PyPI is the readme from its title on, with links that lead to GitHub.
+# PyPI shows neither the banner, which GitHub chooses by the colour scheme of the viewer,
+# nor what a link that is relative to the repository points to.
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+start-at = "# Coati"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '\]\((?!https?://|#)([^)\s]+)\)'
+replacement = '](https://github.com/enerplanet/Coati/blob/main/\1)'
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/coati"]

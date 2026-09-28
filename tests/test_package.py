@@ -150,6 +150,9 @@ def test_the_documentation_is_built_with_what_the_extra_names(project: dict[str,
 #: An image of a page in Markdown: what it shows, without a title.
 IMAGE = re.compile(r"!\[[^\]]*\]\(([^)\s]+)\)")
 
+#: A link of a page in Markdown that leads neither to a site nor to a place on the page.
+RELATIVE = re.compile(r"\]\((?!https?://|#)([^)\s]+)\)")
+
 LOGOS = ROOT / "docs" / "assets" / "logos"
 
 
@@ -195,6 +198,19 @@ def test_the_vector_images_run_nothing_and_load_nothing() -> None:
         text = image.read_text(encoding="utf-8").lower()
         for unwanted in ("<script", "<foreignobject", "<image", "href=", "onload=", "onclick="):
             assert unwanted not in text, f"{image.name} holds {unwanted}"
+
+
+def test_the_description_on_pypi_has_no_banner_and_no_links_into_the_repository() -> None:
+    # PyPI shows neither images of the repository nor what a relative link points to.
+    try:
+        description = metadata.metadata("enerplanet-coati").get_payload()
+    except metadata.PackageNotFoundError:
+        pytest.skip("the package is not installed")
+    assert description.startswith("# Coati\n")
+    assert RELATIVE.findall(description) == []
+    assert all(target.startswith("https://") for target in IMAGE.findall(description))
+    readme = read("README.md")
+    assert len(description.splitlines()) == len(readme[readme.index("# Coati") :].splitlines())
 
 
 # -- what is said about the frameworks --------------------------------------------------------

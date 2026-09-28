@@ -63,6 +63,11 @@ publisher with these settings creates it on the first upload. The
 environment `pypi` of the repository can require a review, so that a
 release is published only after a maintainer has approved it.
 
+The description of the project on PyPI is the readme from its title on. The
+banner above the title is left out, because GitHub chooses it by the colour
+scheme of the viewer and PyPI would show both, and the links that are
+relative to the repository lead to GitHub. `pyproject.toml` says how.
+
 ## Checking a release before it is made
 
 ```console
