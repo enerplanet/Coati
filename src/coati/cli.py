@@ -352,11 +352,27 @@ class _output:  # noqa: N801 - used as a function
         self._name = name
 
     def __enter__(self) -> str | IO[str]:
-        return sys.stdout if self._name == _STDOUT else self._name
+        return _stdout() if self._name == _STDOUT else self._name
 
     def __exit__(self, *error: object) -> None:
         if self._name == _STDOUT and error[0] is None:
             _flush_stdout()
+
+
+def _stdout() -> IO[str]:
+    """Return the standard output, set to write UTF-8 and lines that end alike.
+
+    JSON is UTF-8, whatever the platform prefers for its streams. On Windows
+    that is the code page of the system: a document that is redirected into a
+    file would be no JSON, and one with a character that the code page lacks
+    could not be written at all.
+    """
+    stream = sys.stdout
+    reconfigure = getattr(stream, "reconfigure", None)
+    if reconfigure is not None:
+        with contextlib.suppress(OSError, ValueError, LookupError):
+            reconfigure(encoding="utf-8", newline="\n")
+    return stream
 
 
 def _flush_stdout() -> None:
@@ -389,9 +405,9 @@ def _add_inspect(commands: Any) -> None:
 def _inspect(options: argparse.Namespace) -> None:
     summary = api.inspect(options.source)
     if options.json:
-        jsonio.dump(summary, sys.stdout)
+        jsonio.dump(summary, _stdout())
     else:
-        sys.stdout.write(_render_summary(summary))
+        _stdout().write(_render_summary(summary))
     _flush_stdout()
 
 
@@ -471,9 +487,9 @@ def _frameworks(options: argparse.Namespace) -> None:
         for family in frameworks.FAMILIES
     ]
     if options.json:
-        jsonio.dump(listed, sys.stdout)
+        jsonio.dump(listed, _stdout())
     else:
-        sys.stdout.write(_render_frameworks(listed))
+        _stdout().write(_render_frameworks(listed))
     _flush_stdout()
 
 
@@ -509,7 +525,7 @@ def _add_schema(commands: Any) -> None:
 
 def _schema(options: argparse.Namespace) -> None:
     schema = resources.files("coati.schemas").joinpath(_SCHEMAS[options.document])
-    sys.stdout.write(schema.read_text(encoding="utf-8"))
+    _stdout().write(schema.read_text(encoding="utf-8"))
     _flush_stdout()
 
 

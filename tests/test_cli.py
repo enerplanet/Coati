@@ -145,11 +145,30 @@ def test_rounding(run, tmp_path: Path) -> None:
 
 
 def test_characters_outside_ascii(run, tmp_path: Path) -> None:
-    source = files.calliope07(tmp_path / "größe.nc")
+    # The file is named by Python: on Windows, the netCDF library names it in another encoding.
+    source = files.calliope07(tmp_path / "model.nc").rename(tmp_path / "größe.nc")
     assert '"name": "größe.nc"' in run(source, "-").out
     escaped = run(source, "-", "--ascii").out
     assert escaped.isascii()
     assert json.loads(escaped)["metadata"]["source"]["name"] == "größe.nc"
+
+
+@pytest.mark.parametrize("command", [[], ["dump"], ["inspect"], ["inspect", "--json"]])
+def test_the_standard_output_is_utf_8_whatever_the_platform_prefers(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, command: list[str]
+) -> None:
+    # As on Windows: the stream has the code page of the system and its ends of lines.
+    source = files.calliope07(tmp_path / "model.nc").rename(tmp_path / "模型.nc")
+    written = io.BytesIO()
+    stream = io.TextIOWrapper(written, encoding="cp1252", newline="\r\n")
+    monkeypatch.setattr(sys, "stdout", stream)
+    output = [] if command[:1] == ["inspect"] else ["-"]
+    assert main([*command, str(source), *output]) == EXIT_OK
+    stream.flush()
+    text = written.getvalue().decode("utf-8")
+    assert "模型.nc" in text
+    assert "\r" not in text
+    assert text.endswith("\n")
 
 
 def test_numbers_that_are_not_finite(run, tmp_path: Path) -> None:

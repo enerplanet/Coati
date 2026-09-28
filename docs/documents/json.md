@@ -2,6 +2,9 @@
 
 Coati writes JSON as [RFC 8259](https://www.rfc-editor.org/rfc/rfc8259)
 defines it, in UTF-8 and with a newline at the end. Any parser reads it.
+This holds for a file and for the standard output, and on every platform:
+on Windows, too, a document that is redirected into a file is UTF-8 and its
+lines end with a line feed.
 
 ## Numbers that are not finite
 
