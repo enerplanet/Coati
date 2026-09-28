@@ -25,6 +25,18 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     )
 
 
+@pytest.fixture(autouse=True)
+def plain_messages(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep the messages of the command plain, whatever the environment asks for.
+
+    From Python 3.14 on, the command line colours its help and its messages
+    if the environment asks for colours, as that of CI does.
+    """
+    monkeypatch.setenv("NO_COLOR", "1")
+    for name in ("FORCE_COLOR", "PYTHON_COLORS"):
+        monkeypatch.delenv(name, raising=False)
+
+
 @pytest.fixture(scope="session")
 def data_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """The files of ``tests/data``, unpacked into a directory of their own."""
