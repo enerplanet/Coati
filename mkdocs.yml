@@ -70,6 +70,26 @@ plugins:
       enable_creation_date: true
       # A page that has not been committed yet has the date of the build.
       fallback_to_build_date: true
+  - mkdocstrings:
+      handlers:
+        python:
+          # The reference is made from the sources; the package need not be installed.
+          paths: [src]
+          options:
+            docstring_style: google
+            docstring_section_style: list
+            filters: ["!^_"]
+            heading_level: 2
+            members_order: source
+            merge_init_into_class: true
+            separate_signature: true
+            show_root_full_path: false
+            show_root_heading: true
+            show_signature_annotations: true
+            show_source: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            signature_crossrefs: true
 
 # Extensions
 markdown_extensions:
@@ -118,6 +138,30 @@ markdown_extensions:
 # Page tree
 nav:
   - Home: index.md
+  - Usage:
+      - Installation: usage/installation.md
+      - Quickstart: usage/quickstart.md
+      - Command line: usage/cli.md
+      - Python package: usage/python.md
+  - Frameworks:
+      - Overview: frameworks/overview.md
+      - Calliope: frameworks/calliope.md
+      - PyPSA: frameworks/pypsa.md
+      - AdOpT-NET0: frameworks/adopt-net0.md
+  - Documents:
+      - Results document: documents/results.md
+      - Dataset document: documents/dataset.md
+      - JSON: documents/json.md
+  - Reference:
+      - Functions: reference/functions.md
+      - Options and results: reference/options.md
+      - Frameworks: reference/frameworks.md
+      - Files: reference/files.md
+      - Errors: reference/errors.md
+  - Development:
+      - Architecture: development/architecture.md
+      - Testing: development/testing.md
+      - Releasing: development/releasing.md
   - Contributing:
       - Branch Naming: getting-started/branch-naming.md
       - Commit Conventions: getting-started/commit-conventions.md
