@@ -12,13 +12,13 @@
         <meta name="author" content="BigGeoData & Spatial AI, Technische Hochschule Deggendorf">
       
       
-        <link rel="canonical" href="https://enerplanet.github.io/Coati/getting-started/branch-naming/">
+        <link rel="canonical" href="https://enerplanet.github.io/Coati/usage/cli/">
       
       
-        <link rel="prev" href="../../development/releasing/">
+        <link rel="prev" href="../quickstart/">
       
       
-        <link rel="next" href="../commit-conventions/">
+        <link rel="next" href="../python/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Branch Naming - Coati</title>
+        <title>Command line - Coati</title>
       
     
     
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#branch-naming-convention" class="md-skip">
+        <a href="#command-line" class="md-skip">
           Skip to content
         </a>
       
@@ -117,7 +117,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Branch Naming
+              Command line
             
           </span>
         </div>
@@ -256,11 +256,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../usage/installation/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../installation/" class="md-tabs__link">
           
   
   
@@ -366,13 +368,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../getting-started/branch-naming/" class="md-tabs__link">
           
   
   
@@ -469,41 +469,44 @@
       
   
   
-  
-  
     
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-        
-      
-    
-    
-      
-        
-        
-      
-    
-    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
-      
-        
   
   
   
-    <a href="../../usage/installation/" class="md-nav__link">
+    
+    
       
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
   
   
   <span class="md-ellipsis">
@@ -517,12 +520,269 @@
   
   
 
-      
-        <span class="md-nav__icon md-icon"></span>
-      
-    </a>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Usage
   
 
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Arguments
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#convert" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        convert
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dump" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dump
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#json-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JSON options
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inspect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        inspect
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frameworks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        frameworks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        schema
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#messages-and-exit-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Messages and exit status
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python package
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -782,40 +1042,37 @@
       
   
   
+  
+  
     
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
   
   
   
-    
-    
+    <a href="../../getting-started/branch-naming/" class="md-nav__link">
       
-        
-      
-        
-      
-    
-    
-    
-      
-        
-        
-      
-      
-        
-      
-    
-    
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
-            
   
   
   <span class="md-ellipsis">
@@ -829,213 +1086,12 @@
   
   
 
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_7">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Contributing
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
   
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Branch Naming
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Branch Naming
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#format" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Format
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#types" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Types
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#rules" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Rules
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#exempt-branches" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Exempt branches
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Examples
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#invalid-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Invalid examples
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#github-auto-generated-branch-names" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GitHub auto-generated branch names
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#fixing-a-failed-branch-name-check" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fixing a failed branch name check
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../commit-conventions/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Commit Conventions
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
       
     </li>
   
@@ -1084,10 +1140,10 @@
     
     
       <li class="md-path__item">
-        <a href="./" class="md-path__link">
+        <a href="../installation/" class="md-path__link">
           
   <span class="md-ellipsis">
-    Contributing
+    Usage
   </span>
 
         </a>
@@ -1106,7 +1162,7 @@
 
 
   
-    <a href="https://github.com/enerplanet/Coati/edit/main/docs/getting-started/branch-naming.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/enerplanet/Coati/edit/main/docs/usage/cli.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1115,145 +1171,266 @@
     
       
     
-    <a href="https://github.com/enerplanet/Coati/raw/main/docs/getting-started/branch-naming.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/enerplanet/Coati/raw/main/docs/usage/cli.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
     </a>
   
 
 
-<h1 id="branch-naming-convention">Branch Naming Convention<a class="headerlink" href="#branch-naming-convention" title="Permanent link">&para;</a></h1>
-<p>All repositories follow the <a href="https://conventional-branch.github.io/">Conventional Branch</a> specification, extended with additional types to mirror the commit convention.</p>
-<p>Branch names are automatically validated when a pull request is opened. A PR cannot be merged until the branch name passes the check.</p>
-<h2 id="format">Format<a class="headerlink" href="#format" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>&lt;type&gt;/&lt;description&gt;
+<h1 id="command-line">Command line<a class="headerlink" href="#command-line" title="Permanent link">&para;</a></h1>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>coati [convert] SOURCE OUTPUT [FRAMEWORK]   write the results of a model as JSON
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>coati dump SOURCE OUTPUT                    write everything a file holds as JSON
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>coati inspect SOURCE                        summarise a file
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>coati frameworks                            list what is supported
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>coati schema {results,dataset}              print the JSON Schema of a document
 </span></code></pre></div>
-<h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
+<p><code>convert</code> is what <code>coati</code> does if no command is named: <code>coati a.nc a.json</code> and
+<code>coati convert a.nc a.json</code> are the same. Options and arguments may come in
+any order. <code>coati COMMAND --help</code> describes a command.</p>
+<h2 id="arguments">Arguments<a class="headerlink" href="#arguments" title="Permanent link">&para;</a></h2>
+<dl>
+<dt><code>SOURCE</code></dt>
+<dd>
+<p>The file of the model. It may also be a directory that holds exactly one
+data file, at any depth. AdOpT-NET0 writes its results into a folder
+whose name it makes up from the time of the run; with a directory as the
+source, a pipeline can name the folder that it knows:</p>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="gp">$ </span>coati<span class="w"> </span>run/results<span class="w"> </span>results.json<span class="w"> </span>adopt-net0-v0-1-10
+</span></code></pre></div>
+<p>A directory that holds several data files is refused, and the message
+lists them.</p>
+</dd>
+<dt><code>OUTPUT</code></dt>
+<dd>The JSON file to write, or <code>-</code> for the standard output. A file is written
+next to its place and moved there once the document is complete: a
+conversion that fails leaves an existing file as it was, and a reader
+never sees half a document. The directory of the file must exist.</dd>
+<dt><code>FRAMEWORK</code></dt>
+<dd>The framework and version that wrote the file, such as
+<code>calliope-v0-6-10</code>, <code>pypsa-v1-2-4</code> or <code>adopt-net0-v0-1-10</code>. It may also
+be given as the option <code>-f</code> or <code>--framework</code>. Without it, or with <code>auto</code>,
+the framework and the version are taken from the file. See
+<a href="../../frameworks/overview/">Frameworks</a>.</dd>
+</dl>
+<h2 id="convert">convert<a class="headerlink" href="#convert" title="Permanent link">&para;</a></h2>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="gp">$ </span>coati<span class="w"> </span>results.nc<span class="w"> </span>results.json<span class="w"> </span>calliope-v0-7-0
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="gp">$ </span>coati<span class="w"> </span>results.nc<span class="w"> </span>results.json<span class="w"> </span>--framework<span class="w"> </span>calliope-v0-7-0<span class="w"> </span>--decimals<span class="w"> </span><span class="m">3</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="gp">$ </span>coati<span class="w"> </span>optimization_results.h5<span class="w"> </span>results.json<span class="w"> </span>adopt-net0-v0-1-10<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">      </span>--time-start<span class="w"> </span><span class="m">2025</span>-01-01T00:00<span class="w"> </span>--time-step<span class="w"> </span>1h
+</span></code></pre></div>
+<p>Writes the <a href="../../documents/results/">results document</a>.</p>
 <table>
 <thead>
 <tr>
-<th>Type</th>
-<th>Purpose</th>
+<th>Option</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>feat/</code> or <code>feature/</code></td>
-<td>New feature</td>
+<td><code>-f</code>, <code>--framework FRAMEWORK</code></td>
+<td>the same as the argument <code>FRAMEWORK</code></td>
 </tr>
 <tr>
-<td><code>fix/</code> or <code>bugfix/</code></td>
-<td>Bug fix</td>
+<td><code>--no-labels</code></td>
+<td>leave out the display names and colours of the technologies</td>
 </tr>
 <tr>
-<td><code>hotfix/</code></td>
-<td>Urgent production fix (branches off <code>main</code>)</td>
+<td><code>--period NAME</code></td>
+<td>the investment period to report, for a file of AdOpT-NET0 with several; the first if omitted</td>
 </tr>
 <tr>
-<td><code>release/</code></td>
-<td>Release preparation</td>
+<td><code>--time-start TIME</code></td>
+<td>the first time of a model whose file records no times, such as <code>2025-01-01T00:00</code>; needs <code>--time-step</code></td>
 </tr>
 <tr>
-<td><code>chore/</code></td>
-<td>Tooling, dependencies, CI changes</td>
-</tr>
-<tr>
-<td><code>docs/</code></td>
-<td>Documentation only</td>
-</tr>
-<tr>
-<td><code>refactor/</code></td>
-<td>Code restructuring, no behaviour change</td>
-</tr>
-<tr>
-<td><code>test/</code></td>
-<td>Tests only</td>
-</tr>
-<tr>
-<td><code>style/</code></td>
-<td>Formatting, whitespace — no logic changes</td>
-</tr>
-<tr>
-<td><code>perf/</code></td>
-<td>Performance improvements</td>
+<td><code>--time-step DURATION</code></td>
+<td>the distance between two times, such as <code>1h</code>, <code>15min</code> or <code>1d</code>; needs <code>--time-start</code></td>
 </tr>
 </tbody>
 </table>
-<h2 id="rules">Rules<a class="headerlink" href="#rules" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Lowercase only</strong> — no uppercase letters</li>
-<li><strong>Hyphens as separators</strong> — no underscores, no spaces</li>
-<li><strong>No consecutive hyphens or dots</strong> — <code>--</code> and <code>..</code> are not allowed</li>
-<li><strong>No leading or trailing hyphens or dots</strong></li>
-<li><strong>Dots only for version numbers</strong> — e.g. <code>release/v1.2.0</code></li>
-<li><strong>Ticket numbers are allowed</strong> — e.g. <code>feat/issue-123-login-page</code></li>
-</ul>
-<h2 id="exempt-branches">Exempt branches<a class="headerlink" href="#exempt-branches" title="Permanent link">&para;</a></h2>
-<p>The following branches are exempt from naming rules:</p>
-<p><code>main</code>, <code>master</code>, <code>dev</code>, <code>develop</code>, <code>staging</code></p>
-<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>feat/add-geospatial-query
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>fix/token-expiry-validation
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>hotfix/critical-data-loss
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>docs/update-api-reference
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>chore/upgrade-dependencies
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>release/v2.1.0
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>refactor/simplify-coordinate-transform
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>test/add-export-unit-tests
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>feat/issue-42-user-authentication
+<dl>
+<dt><code>--no-labels</code></dt>
+<dd>A file of Calliope holds a name and a colour for each technology, which
+the document reports as <code>display_name</code> and <code>color</code>. A program that has
+names and colours of its own, and gives those of the document
+precedence, leaves them out with this option.</dd>
+<dt><code>--time-start</code>, <code>--time-step</code></dt>
+<dd>The files of AdOpT-NET0 record no times, nor do those of a PyPSA network
+whose snapshots are numbers. The <code>timestamps</code> of the document are then
+the positions <code>0, 1, 2, ...</code>. With a start and a step they are instants.
+The times that a file records have precedence.</dd>
+</dl>
+<h2 id="dump">dump<a class="headerlink" href="#dump" title="Permanent link">&para;</a></h2>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="gp">$ </span>coati<span class="w"> </span>dump<span class="w"> </span>results.nc<span class="w"> </span>dataset.json
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="gp">$ </span>coati<span class="w"> </span>dump<span class="w"> </span>results.nc<span class="w"> </span>structure.json<span class="w"> </span>--no-data
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="gp">$ </span>coati<span class="w"> </span>dump<span class="w"> </span>results.nc<span class="w"> </span>flows.json<span class="w"> </span>--variable<span class="w"> </span><span class="s1">'/results/flow_*'</span><span class="w"> </span>--variable<span class="w"> </span>timesteps
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="gp">$ </span>coati<span class="w"> </span>dump<span class="w"> </span>results.nc<span class="w"> </span>attributes.json<span class="w"> </span>--no-data<span class="w"> </span>--decode-text
 </span></code></pre></div>
-<h2 id="invalid-examples">Invalid examples<a class="headerlink" href="#invalid-examples" title="Permanent link">&para;</a></h2>
+<p>Writes the <a href="../../documents/dataset/">dataset document</a>. The file may be any
+netCDF or HDF5 file; a framework is neither named nor needed.</p>
 <table>
 <thead>
 <tr>
-<th>Branch name</th>
-<th>Problem</th>
+<th>Option</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>Feature/AddLogin</code></td>
-<td>Uppercase letters</td>
+<td><code>--no-data</code></td>
+<td>describe the variables without their values</td>
 </tr>
 <tr>
-<td><code>fix/header_bug</code></td>
-<td>Underscore — use <code>fix/header-bug</code></td>
+<td><code>--raw</code></td>
+<td>write the values as stored: do not interpret times, missing values and the like according to the CF conventions</td>
 </tr>
 <tr>
-<td><code>new-feature</code></td>
-<td>Missing type prefix</td>
+<td><code>--decode-text</code></td>
+<td>write an attribute that holds a JSON or YAML document as that document; YAML needs PyYAML</td>
 </tr>
 <tr>
-<td><code>feat/new--login</code></td>
-<td>Consecutive hyphens</td>
+<td><code>--max-elements N</code></td>
+<td>leave out the values of a variable with more than <code>N</code> elements</td>
 </tr>
 <tr>
-<td><code>fix/</code></td>
-<td>Empty description</td>
+<td><code>--variable PATTERN</code></td>
+<td>write only the variables whose path or name matches the pattern; may be given several times</td>
 </tr>
 </tbody>
 </table>
-<h2 id="github-auto-generated-branch-names">GitHub auto-generated branch names<a class="headerlink" href="#github-auto-generated-branch-names" title="Permanent link">&para;</a></h2>
-<p>When you create a branch directly from a GitHub issue using the <strong>"Create a branch"</strong> button, GitHub generates a name like <code>123-fix-login-bug</code>. This format has no type prefix and will fail the check.</p>
-<p>Rename it before opening a PR:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>git<span class="w"> </span>fetch<span class="w"> </span>origin
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>git<span class="w"> </span>checkout<span class="w"> </span><span class="m">123</span>-fix-login-bug
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>git<span class="w"> </span>branch<span class="w"> </span>-m<span class="w"> </span><span class="m">123</span>-fix-login-bug<span class="w"> </span>fix/123-login-bug
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>-u<span class="w"> </span>fix/123-login-bug
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>--delete<span class="w"> </span><span class="m">123</span>-fix-login-bug
+<p>A pattern is one of the shell: <code>*</code> stands for any text, <code>?</code> for one
+character. It is compared with the path of a variable, such as
+<code>/results/flow_cap</code>, and with its name, <code>flow_cap</code>. Quote it, so that the
+shell does not take it for the name of a file.</p>
+<p>The values of a variable are read when the variable is written. The memory
+that a dump needs is that of the largest variable, not that of the file.</p>
+<h2 id="json-options">JSON options<a class="headerlink" href="#json-options" title="Permanent link">&para;</a></h2>
+<p><code>convert</code> and <code>dump</code> share the options that decide how the JSON is written;
+see <a href="../../documents/json/">JSON</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--indent N</code></td>
+<td>spaces per nesting level; 2 if omitted</td>
+</tr>
+<tr>
+<td><code>--compact</code></td>
+<td>write the JSON without any whitespace</td>
+</tr>
+<tr>
+<td><code>--decimals N</code></td>
+<td>round numbers to <code>N</code> decimal places; written in full if omitted</td>
+</tr>
+<tr>
+<td><code>--non-finite {null,string,error}</code></td>
+<td>what becomes of <code>NaN</code> and the infinities: <code>null</code>, the strings <code>NaN</code>, <code>Infinity</code> and <code>-Infinity</code>, or an error; <code>null</code> if omitted</td>
+</tr>
+<tr>
+<td><code>--sort-keys</code></td>
+<td>write the keys in sorted order</td>
+</tr>
+<tr>
+<td><code>--ascii</code></td>
+<td>escape every character outside ASCII</td>
+</tr>
+<tr>
+<td><code>-q</code>, <code>--quiet</code></td>
+<td>do not write warnings to the standard error</td>
+</tr>
+</tbody>
+</table>
+<h2 id="inspect">inspect<a class="headerlink" href="#inspect" title="Permanent link">&para;</a></h2>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="gp">$ </span>coati<span class="w"> </span>inspect<span class="w"> </span>optimization_results.h5
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="go">file:      optimization_results.h5</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="go">format:    HDF5</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="go">size:      112.4 kB</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="go">framework: AdOpT-NET0 version not recorded (adopt-net0-v0-1)</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="go">...</span>
 </span></code></pre></div>
-<h2 id="fixing-a-failed-branch-name-check">Fixing a failed branch name check<a class="headerlink" href="#fixing-a-failed-branch-name-check" title="Permanent link">&para;</a></h2>
-<p>The branch name check only runs when the PR is <strong>opened</strong> or <strong>reopened</strong>. To fix a failing branch name you need to rename the branch and update the PR.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Rename the branch locally</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>git<span class="w"> </span>branch<span class="w"> </span>-m<span class="w"> </span>old-branch-name<span class="w"> </span>feat/correct-branch-name
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Push the renamed branch and update remote tracking</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>-u<span class="w"> </span>feat/correct-branch-name
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># Delete the old branch from remote</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>--delete<span class="w"> </span>old-branch-name
+<p>Shows the format of a file, the framework that wrote it and the groups with
+their attributes, dimensions and variables. The values are not read, so the
+command is fast for a file of any size. <code>--json</code> writes the summary as JSON.</p>
+<p>The line <code>framework</code> names the identifier with the most detail that the file
+allows. <code>version not recorded</code> says that the file does not state the version
+that wrote it; name the version when converting, and the document states it.</p>
+<h2 id="frameworks">frameworks<a class="headerlink" href="#frameworks" title="Permanent link">&para;</a></h2>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="gp">$ </span>coati<span class="w"> </span>frameworks
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="go">IDENTIFIER       FRAMEWORK   VERSIONS            TESTED WITH        FORMATS</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="go">calliope-v0-6    Calliope    0.6.x               0.6.10             netCDF-4</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="go">calliope-v0-7    Calliope    0.7.x               0.7.0.dev7, 0.7.0  netCDF-4</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="go">pypsa-v0         PyPSA       0.25 and later 0.x  0.25.2, 0.35.2     netCDF-4, HDF5</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="go">pypsa-v1         PyPSA       1.x                 1.2.4, 1.3.0       netCDF-4, HDF5</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="go">adopt-net0-v0-1  AdOpT-NET0  0.1.x               0.1.10             HDF5</span>
 </span></code></pre></div>
-<p>Then update the PR base branch on GitHub if needed, or close and reopen the PR from the renamed branch.</p>
+<p>Lists the families of versions that Coati reads. <code>--json</code> writes the list as
+JSON, for a program that wants to know what it may pass on.</p>
+<h2 id="schema">schema<a class="headerlink" href="#schema" title="Permanent link">&para;</a></h2>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="gp">$ </span>coati<span class="w"> </span>schema<span class="w"> </span>results<span class="w"> </span>&gt;<span class="w"> </span>results.schema.json
+</span></code></pre></div>
+<p>Prints the <a href="https://json-schema.org/">JSON Schema</a> of the results document or
+of the dataset document, the one that the installed version writes.</p>
+<h2 id="messages-and-exit-status">Messages and exit status<a class="headerlink" href="#messages-and-exit-status" title="Permanent link">&para;</a></h2>
+<p>The command is silent on success. Messages go to the standard error and
+start with <code>coati:</code>; the standard output holds nothing but a document that
+was asked for with <code>-</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>success</td>
+</tr>
+<tr>
+<td>1</td>
+<td>the conversion failed: the file cannot be read, the framework does not match, a value cannot be written</td>
+</tr>
+<tr>
+<td>2</td>
+<td>the command line is wrong</td>
+</tr>
+<tr>
+<td>130</td>
+<td>interrupted from the keyboard</td>
+</tr>
+<tr>
+<td>141</td>
+<td>the reader of the standard output left before the document was complete</td>
+</tr>
+</tbody>
+</table>
+<p>A warning does not change the status. It says what a reader of the document
+should know about its making, and is part of the document as well, under
+<code>warnings</code>:</p>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="gp">$ </span>coati<span class="w"> </span>spores.nc<span class="w"> </span>results.json<span class="w"> </span>calliope-v0-7-0
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="go">coati: warning: spores.nc: the file holds 3 solutions of the SPORES mode; the</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="go">document reports the first, details.spores lists the cost, the capacities and</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="go">the generation of each</span>
+</span></code></pre></div>
+<p>(The message is one line; it is broken here to fit the page.)</p>
+<p>An error names the file and what is wrong with it:</p>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="gp">$ </span>coati<span class="w"> </span>network.nc<span class="w"> </span>results.json<span class="w"> </span>calliope-v0-7-0
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="go">coati: network.nc: the file was written by PyPSA 1.2.4, not by Calliope 0.7.0</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="gp">$ </span>coati<span class="w"> </span>results.nc<span class="w"> </span>results.json<span class="w"> </span>calliope-v6-10
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="go">coati: results.nc: the file has the layout of Calliope 0.7.x, which differs</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="go">from that of Calliope 0.6.10</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="gp">$ </span>coati<span class="w"> </span>results.json<span class="w"> </span>out.json
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="go">coati: results.json: not a netCDF or HDF5 file; it looks like JSON</span>
+</span></code></pre></div>
 
 
 
@@ -1276,7 +1453,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 27, 2026 19:01:52 UTC">September 27, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 28, 2026 09:52:51 UTC">September 28, 2026</span>
   </span>
 
     
@@ -1286,7 +1463,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 27, 2026 19:01:52 UTC">September 27, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 28, 2026 09:52:51 UTC">September 28, 2026</span>
   </span>
 
     
@@ -1321,7 +1498,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../../development/releasing/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Releasing">
+          <a href="../quickstart/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Quickstart">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1331,20 +1508,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Releasing
+                Quickstart
               </div>
             </div>
           </a>
         
         
           
-          <a href="../commit-conventions/" class="md-footer__link md-footer__link--next" aria-label="Next: Commit Conventions">
+          <a href="../python/" class="md-footer__link md-footer__link--next" aria-label="Next: Python package">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Commit Conventions
+                Python package
               </div>
             </div>
             <div class="md-footer__button md-icon">

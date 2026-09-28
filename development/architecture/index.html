@@ -6,19 +6,19 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Template repository for open source projects in the THD-Spatial-AI GitHub organisation">
+        <meta name="description" content="Converts the netCDF and HDF5 result files of Calliope, PyPSA and AdOpT-NET0 to JSON">
       
       
-        <meta name="author" content="THD-Spatial-AI">
+        <meta name="author" content="BigGeoData & Spatial AI, Technische Hochschule Deggendorf">
       
       
-        <link rel="canonical" href="https://THD-Spatial-AI.github.io/gitHub-template/getting-started/documentation-setup/">
+        <link rel="canonical" href="https://enerplanet.github.io/Coati/development/architecture/">
       
       
-        <link rel="prev" href="../repository-naming/">
+        <link rel="prev" href="../../reference/errors/">
       
       
-        <link rel="next" href="../legal-sync/">
+        <link rel="next" href="../testing/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Documentation Setup - THD-Spatial-AI GitHub Template</title>
+        <title>Architecture - Coati</title>
       
     
     
@@ -54,6 +54,8 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -80,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mkdocs-setup" class="md-skip">
+        <a href="#architecture" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +98,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="THD-Spatial-AI GitHub Template" class="md-header__button md-logo" aria-label="THD-Spatial-AI GitHub Template" data-md-component="logo">
+    <a href="../.." title="Coati" class="md-header__button md-logo" aria-label="Coati" data-md-component="logo">
       
   <img src="../../assets/logos/spatialai-mark-blue-dark.svg" alt="logo">
 
@@ -109,13 +111,13 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            THD-Spatial-AI GitHub Template
+            Coati
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Documentation Setup
+              Architecture
             
           </span>
         </div>
@@ -212,13 +214,13 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/THD-Spatial-AI/gitHub-template" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/enerplanet/Coati" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
-    THD-Spatial/GitHub-Template
+    enerplanet/Coati
   </div>
 </a>
       </div>
@@ -254,13 +256,123 @@
   
   
   
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../usage/installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Usage
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../frameworks/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Frameworks
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../documents/results/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Documents
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/functions/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
     
   
   
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../open-source-checklist/" class="md-tabs__link">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/branch-naming/" class="md-tabs__link">
           
   
   
@@ -304,22 +416,22 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="THD-Spatial-AI GitHub Template" class="md-nav__button md-logo" aria-label="THD-Spatial-AI GitHub Template" data-md-component="logo">
+    <a href="../.." title="Coati" class="md-nav__button md-logo" aria-label="Coati" data-md-component="logo">
       
   <img src="../../assets/logos/spatialai-mark-blue-dark.svg" alt="logo">
 
     </a>
-    THD-Spatial-AI GitHub Template
+    Coati
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/THD-Spatial-AI/gitHub-template" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/enerplanet/Coati" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
-    THD-Spatial/GitHub-Template
+    enerplanet/Coati
   </div>
 </a>
     </div>
@@ -357,8 +469,6 @@
       
   
   
-    
-  
   
   
     
@@ -371,6 +481,252 @@
         
       
         
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../usage/installation/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../frameworks/overview/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frameworks
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../documents/results/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documents
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../reference/functions/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
       
         
       
@@ -396,17 +752,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
     
   
-    Contributing
+    Development
   
 
     
@@ -417,72 +773,16 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_2">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Contributing
+    Development
   
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../open-source-checklist/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Open Source Checklist
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../repository-naming/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Repository Naming
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -507,7 +807,7 @@
   <span class="md-ellipsis">
     
   
-    Documentation Setup
+    Architecture
   
 
     
@@ -525,7 +825,7 @@
   <span class="md-ellipsis">
     
   
-    Documentation Setup
+    Architecture
   
 
     
@@ -551,10 +851,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#run-documentation-locally" class="md-nav__link">
+  <a href="#modules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run documentation locally
+        Modules
       
     </span>
   </a>
@@ -562,22 +862,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#hosting-documentation-with-github-pages" class="md-nav__link">
+  <a href="#decisions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Hosting documentation with GitHub Pages
+        Decisions
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Hosting documentation with GitHub Pages">
+    <nav class="md-nav" aria-label="Decisions">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#typical-deployment-flow" class="md-nav__link">
+  <a href="#no-framework-no-xarray" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Typical deployment flow
+        No framework, no xarray
       
     </span>
   </a>
@@ -585,10 +885,65 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#configuration-notes" class="md-nav__link">
+  <a href="#one-tree-for-every-format" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configuration notes
+        One tree for every format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-family-decides-not-the-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The family decides, not the version
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#an-identifier-is-a-claim" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        An identifier is a claim
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-document-says-what-the-framework-says" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The document says what the framework says
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strict-json-written-in-pieces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Strict JSON, written in pieces
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#files-cannot-be-trusted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files cannot be trusted
       
     </span>
   </a>
@@ -601,38 +956,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#git-lfs-for-large-files" class="md-nav__link">
+  <a href="#adding-a-framework" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Git LFS for large files
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Git LFS for large files">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Basic setup
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#attribution" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Attribution
+        Adding a framework
       
     </span>
   </a>
@@ -655,14 +982,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../legal-sync/" class="md-nav__link">
+      <a href="../testing/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Legal Sync
+    Testing
   
 
     
@@ -683,70 +1010,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../branch-naming/" class="md-nav__link">
+      <a href="../releasing/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Branch Naming
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../branch-rules/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Branch Rules
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../commit-conventions/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Commit Conventions
+    Releasing
   
 
     
@@ -762,6 +1033,65 @@
             
           </ul>
         </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../getting-started/branch-naming/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
       
     </li>
   
@@ -810,10 +1140,10 @@
     
     
       <li class="md-path__item">
-        <a href="../open-source-checklist/" class="md-path__link">
+        <a href="./" class="md-path__link">
           
   <span class="md-ellipsis">
-    Contributing
+    Development
   </span>
 
         </a>
@@ -832,7 +1162,7 @@
 
 
   
-    <a href="https://github.com/THD-Spatial-AI/gitHub-template/edit/main/docs/getting-started/documentation-setup.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/enerplanet/Coati/edit/main/docs/development/architecture.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -841,121 +1171,195 @@
     
       
     
-    <a href="https://github.com/THD-Spatial-AI/gitHub-template/raw/main/docs/getting-started/documentation-setup.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/enerplanet/Coati/raw/main/docs/development/architecture.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
     </a>
   
 
 
-<h1 id="mkdocs-setup">MkDocs Setup<a class="headerlink" href="#mkdocs-setup" title="Permanent link">&para;</a></h1>
-<p>This template uses <a href="https://www.mkdocs.org/">MkDocs</a> with the <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a> theme for project documentation.</p>
-<p>Documentation source files are located in the <code>docs/</code> directory.</p>
-<hr />
-<h2 id="run-documentation-locally">Run documentation locally<a class="headerlink" href="#run-documentation-locally" title="Permanent link">&para;</a></h2>
+<h1 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h1>
+<p>Coati turns a file into a document in three steps, each the business of one
+part of the package:</p>
+<pre class="mermaid"><code>flowchart LR
+    file([netCDF or HDF5 file]) --&gt; readers
+    subgraph coati
+        readers[readers&lt;br&gt;&lt;small&gt;one per format&lt;/small&gt;] --&gt; model[model&lt;br&gt;&lt;small&gt;groups, dimensions,&lt;br&gt;variables&lt;/small&gt;]
+        model --&gt; results[results&lt;br&gt;&lt;small&gt;one extractor&lt;br&gt;per family&lt;/small&gt;]
+        model --&gt; dataset[dataset&lt;br&gt;&lt;small&gt;everything&lt;br&gt;a file holds&lt;/small&gt;]
+        frameworks[frameworks&lt;br&gt;&lt;small&gt;identifiers,&lt;br&gt;recognition&lt;/small&gt;] --&gt; results
+        results --&gt; jsonio[jsonio&lt;br&gt;&lt;small&gt;strict JSON&lt;/small&gt;]
+        dataset --&gt; jsonio
+    end
+    jsonio --&gt; document([JSON document])</code></pre>
 <ol>
-<li>
-<p>Install dependencies:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>docs/requirements.txt
-</span></code></pre></div>
-</li>
-<li>
-<p>Start the local docs server:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mkdocs<span class="w"> </span>serve
-</span></code></pre></div>
-</li>
-<li>
-<p>Open in your browser:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>http://localhost:8000/
-</span></code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The port may vary based on configuration.</p>
-</div>
-</li>
+<li>A <strong>reader</strong> opens the file and describes it as a tree of groups,
+   dimensions and variables, the same tree for every format.</li>
+<li>An <strong>extractor</strong> reads from the tree what a model says, in the layout of
+   one framework, and fills the results. The dataset document needs no
+   extractor: it is the tree.</li>
+<li>The <strong>writer</strong> writes the document as JSON.</li>
 </ol>
-<hr />
-<h2 id="hosting-documentation-with-github-pages">Hosting documentation with GitHub Pages<a class="headerlink" href="#hosting-documentation-with-github-pages" title="Permanent link">&para;</a></h2>
-<p>This repository deploys documentation to <strong>GitHub Pages</strong> using a GitHub Actions workflow.</p>
-<ul>
-<li><strong>Workflow file:</strong> <code>.github/workflows/docs.yml</code></li>
-</ul>
-<p>The workflow builds the MkDocs site and publishes it automatically when changes are pushed to the configured branch (for example, <code>main</code>).</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>If your repository is <strong>private</strong>, the workflow will fail without GitHub Pro or Enterprise. In that case, disable the workflow temporarily until you are ready to make the repository public. Go to the <strong>Actions</strong> tab, select the workflow, and click <strong>Disable workflow</strong> in the right sidebar.</p>
-<p><img alt="disable workflow screenshot" src="../../assets/getting-started/disable-workflow.png" /></p>
-</div>
-<h3 id="typical-deployment-flow">Typical deployment flow<a class="headerlink" href="#typical-deployment-flow" title="Permanent link">&para;</a></h3>
-<ol>
-<li>Update documentation files in <code>docs/</code> (and/or <code>mkdocs.yml</code>)</li>
-<li>Commit and push changes to the default branch</li>
-<li>GitHub Actions runs the docs workflow</li>
-<li>The site is deployed to GitHub Pages automatically</li>
-</ol>
-<h3 id="configuration-notes">Configuration notes<a class="headerlink" href="#configuration-notes" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Make sure <strong>GitHub Pages</strong> is enabled in repository settings</li>
-<li>The Pages source should be set to <strong>GitHub Actions</strong></li>
-<li>
-<p>If using a project repository site, the published URL is typically:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>https://&lt;org-name&gt;.github.io/&lt;repo-name&gt;/
-</span></code></pre></div>
-</li>
-</ul>
-<hr />
-<h2 id="git-lfs-for-large-files">Git LFS for large files<a class="headerlink" href="#git-lfs-for-large-files" title="Permanent link">&para;</a></h2>
-<p>If your repository contains large files (datasets, binaries, media, generated assets), use Git LFS to keep the repository manageable.</p>
-<div class="admonition info">
-<p class="admonition-title">Info</p>
-<p>For full documentation, see <a href="https://git-lfs.com/">Git LFS</a>.</p>
-</div>
-<h3 id="basic-setup">Basic setup<a class="headerlink" href="#basic-setup" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>git<span class="w"> </span>lfs<span class="w"> </span>install
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>git<span class="w"> </span>lfs<span class="w"> </span>track<span class="w"> </span><span class="s2">"*.psd"</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>git<span class="w"> </span>lfs<span class="w"> </span>track<span class="w"> </span><span class="s2">"*.zip"</span>
-</span></code></pre></div>
-<p>Then commit <code>.gitattributes</code> and your files as usual.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you publish releases and want Git LFS files included in release archives, enable:</p>
-<p><strong>Settings → Archives → Include Git LFS objects in archives</strong></p>
-<p><img alt="GitHub release archives setting" src="../../assets/getting-started/archives_setting_screenshot.png" /></p>
-</div>
-<hr />
-<h2 id="attribution">Attribution<a class="headerlink" href="#attribution" title="Permanent link">&para;</a></h2>
-<p>If your project uses third-party components, assets, or generated code that require attribution (e.g. UI components from Figma, design systems, libraries under Apache 2.0, BSD, or CC BY licenses), include an <code>ATTRIBUTIONS.md</code> file in the repository root.</p>
-<p>At minimum, the attribution file should include:</p>
+<h2 id="modules">Modules<a class="headerlink" href="#modules" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Field</th>
-<th>Description</th>
+<th>Module</th>
+<th>Owns</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Component / asset name</td>
-<td>What you are using</td>
+<td><code>coati.api</code></td>
+<td>what Coati does, as functions; the only module that opens and closes files</td>
 </tr>
 <tr>
-<td>Source platform or author</td>
-<td>Where it came from</td>
+<td><code>coati.cli</code></td>
+<td>the command line: arguments, messages, exit status</td>
 </tr>
 <tr>
-<td>License type</td>
-<td>Under what terms</td>
+<td><code>coati.readers</code></td>
+<td>the choice of the reader by the first bytes of a file</td>
 </tr>
 <tr>
-<td>Link to original source</td>
-<td>URL to the original</td>
+<td><code>coati.readers.hdf5</code></td>
+<td>netCDF-4 and HDF5, on top of h5py</td>
+</tr>
+<tr>
+<td><code>coati.readers.classic</code></td>
+<td>the classic netCDF formats, read from the bytes</td>
+</tr>
+<tr>
+<td><code>coati.readers.pytables</code></td>
+<td>the tables that pandas writes into HDF5 files, and their pickles</td>
+</tr>
+<tr>
+<td><code>coati.model</code></td>
+<td>the tree: <code>Dataset</code>, <code>Group</code>, <code>Variable</code>, <code>Dimension</code></td>
+</tr>
+<tr>
+<td><code>coati.cf</code></td>
+<td>the interpretation of stored values: times, missing values, packed numbers</td>
+</tr>
+<tr>
+<td><code>coati.masked</code></td>
+<td>arrays in which values may be missing</td>
+</tr>
+<tr>
+<td><code>coati.labeled</code></td>
+<td>arrays with names for their axes and labels for their positions</td>
+</tr>
+<tr>
+<td><code>coati.yamltext</code></td>
+<td>the few values that the results need from the YAML of Calliope</td>
+</tr>
+<tr>
+<td><code>coati.frameworks</code></td>
+<td>the framework identifiers, the families and the recognition of a file</td>
+</tr>
+<tr>
+<td><code>coati.results</code></td>
+<td>the extractors, one module for each family of layouts</td>
+</tr>
+<tr>
+<td><code>coati.results.document</code></td>
+<td>the results and their document</td>
+</tr>
+<tr>
+<td><code>coati.dataset</code></td>
+<td>the dataset document</td>
+</tr>
+<tr>
+<td><code>coati.jsonio</code></td>
+<td>strict JSON for documents that hold NumPy data</td>
+</tr>
+<tr>
+<td><code>coati.schemas</code></td>
+<td>the JSON Schemas of the documents</td>
+</tr>
+<tr>
+<td><code>coati.errors</code></td>
+<td>the errors</td>
 </tr>
 </tbody>
 </table>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>If a third-party asset's license requires attribution, you are legally required to include it. Do not remove attribution notices from generated or imported code.</p>
-</div>
+<p>The modules depend on each other in one direction, from the top of the
+table to the bottom of the diagram: <code>api</code> knows everything, a reader knows
+the model and the errors, <code>jsonio</code> knows nothing of files.</p>
+<h2 id="decisions">Decisions<a class="headerlink" href="#decisions" title="Permanent link">&para;</a></h2>
+<h3 id="no-framework-no-xarray">No framework, no xarray<a class="headerlink" href="#no-framework-no-xarray" title="Permanent link">&para;</a></h3>
+<p>Coati reads the files of three frameworks that cannot be installed
+together in every combination of versions: Calliope 0.6 needs a Python that
+is older than the one PyPSA 1.x supports. A converter that needed the
+framework to read its file would have to be installed once for each. Coati
+reads the files themselves.</p>
+<p>It does so with h5py and NumPy alone. xarray would read the netCDF files
+and pandas the tables of PyPSA, but both are large, change their behaviour
+between versions, and interpret on their own what they read. The part of
+them that Coati needs is small: dimensions and their scales for netCDF-4,
+the table format of PyTables for PyPSA, the conventions of CF for times and
+missing values. The tests compare what Coati reads with what the netCDF
+library, xarray and SciPy read, for every variable of every test file.</p>
+<h3 id="one-tree-for-every-format">One tree for every format<a class="headerlink" href="#one-tree-for-every-format" title="Permanent link">&para;</a></h3>
+<p>The readers describe a file as the data model of netCDF has it, which is
+the richest of the formats: groups that hold dimensions, variables and
+attributes. An HDF5 file that is no netCDF fits in as a file without
+dimensions. The extractors and the dataset document do not know which
+format they read.</p>
+<p>A reader reads the structure of a file when it opens the file and the
+values of a variable when they are asked for. <code>coati inspect</code> reads no
+values at all, and <code>coati dump</code> those of one variable at a time.</p>
+<h3 id="the-family-decides-not-the-version">The family decides, not the version<a class="headerlink" href="#the-family-decides-not-the-version" title="Permanent link">&para;</a></h3>
+<p>An extractor belongs to a family of versions that write the same layout,
+not to a version. A new version of a framework that writes its files as
+the versions before it did is read without a change to Coati; one that
+changes the layout starts a new family, and the old families keep reading
+what they read. The version that a caller names is nevertheless checked
+and reported: it is part of what a document says about its origin.</p>
+<h3 id="an-identifier-is-a-claim">An identifier is a claim<a class="headerlink" href="#an-identifier-is-a-claim" title="Permanent link">&para;</a></h3>
+<p>The framework that a caller names is compared with what is found in the
+file, and a file of another framework or family is refused. The
+alternative, to read the file as what it is and to note the difference,
+would hide a mix-up of files in a pipeline behind a document that looks
+right.</p>
+<h3 id="the-document-says-what-the-framework-says">The document says what the framework says<a class="headerlink" href="#the-document-says-what-the-framework-says" title="Permanent link">&para;</a></h3>
+<p>An extractor does not compute what a framework could have computed; it
+reports what the file holds, in the terms of the document. Where a
+framework has its own definition of a quantity, that definition holds: the
+costs of PyPSA are those of <code>n.statistics</code>, the weights of the classes of
+cost of Calliope are those of its objective.</p>
+<p>Where the frameworks differ, the document has one convention and the page
+of the framework names the difference. A connection between two locations
+has its capacity at both and its cost shared by both, whether the framework
+writes it once, as PyPSA, twice, as AdOpT-NET0, or so, as Calliope.</p>
+<h3 id="strict-json-written-in-pieces">Strict JSON, written in pieces<a class="headerlink" href="#strict-json-written-in-pieces" title="Permanent link">&para;</a></h3>
+<p>The writer is not the encoder of the standard library with a hook for
+NumPy. That encoder writes <code>NaN</code> and infinities, which are no JSON, and
+needs the whole document as objects of Python, which for an array of a
+million numbers is a list of a million objects. The writer of Coati walks
+the document itself, applies the policy for numbers that are not finite to
+every number, and hands arrays to the encoder of the standard library in
+pieces of bounded size, as lists of numbers that are known to be finite.</p>
+<p>A part of a document may be an object that is asked for its content when
+the writer reaches it. The dataset document uses this to read the values of
+a variable when the variable is written.</p>
+<h3 id="files-cannot-be-trusted">Files cannot be trusted<a class="headerlink" href="#files-cannot-be-trusted" title="Permanent link">&para;</a></h3>
+<p>A file may come from anywhere. The readers check what they read against
+the size of the file, refuse pickles that name a class or a function, and
+do not follow links into other files. See the
+<a href="https://github.com/enerplanet/Coati/blob/main/SECURITY.md">security policy</a>.</p>
+<h2 id="adding-a-framework">Adding a framework<a class="headerlink" href="#adding-a-framework" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Describe the framework in <code>coati.frameworks</code>: a family with its
+   versions, and a function that recognises its files.</li>
+<li>Write an extractor in <code>coati.results</code> that fills a <code>Results</code> from a
+   <code>Dataset</code>, and register it for the family in <code>coati/results/__init__.py</code>.</li>
+<li>Write a model of the framework in <code>tests/models</code> that has every kind of
+   technology, with the facts that the framework states about it, and make
+   its files; see <a href="../testing/">Testing</a>.</li>
+<li>Describe how each key follows from a file on a page under
+   <code>docs/frameworks/</code>.</li>
+</ol>
 
 
 
@@ -978,7 +1382,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 27, 2026 19:01:52 UTC">September 27, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 28, 2026 09:52:51 UTC">September 28, 2026</span>
   </span>
 
     
@@ -988,7 +1392,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 27, 2026 19:01:52 UTC">September 27, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 28, 2026 09:52:51 UTC">September 28, 2026</span>
   </span>
 
     
@@ -1023,7 +1427,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../repository-naming/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Repository Naming">
+          <a href="../../reference/errors/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Errors">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1033,20 +1437,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Repository Naming
+                Errors
               </div>
             </div>
           </a>
         
         
           
-          <a href="../legal-sync/" class="md-footer__link md-footer__link--next" aria-label="Next: Legal Sync">
+          <a href="../testing/" class="md-footer__link md-footer__link--next" aria-label="Next: Testing">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Legal Sync
+                Testing
               </div>
             </div>
             <div class="md-footer__button md-icon">

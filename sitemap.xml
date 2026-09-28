@@ -1,35 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://THD-Spatial-AI.github.io/gitHub-template/</loc>
-         <lastmod>2026-09-27</lastmod>
+         <loc>https://enerplanet.github.io/Coati/</loc>
+         <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://THD-Spatial-AI.github.io/gitHub-template/getting-started/branch-naming/</loc>
-         <lastmod>2026-09-27</lastmod>
+         <loc>https://enerplanet.github.io/Coati/development/architecture/</loc>
+         <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://THD-Spatial-AI.github.io/gitHub-template/getting-started/branch-rules/</loc>
-         <lastmod>2026-09-27</lastmod>
+         <loc>https://enerplanet.github.io/Coati/development/releasing/</loc>
+         <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://THD-Spatial-AI.github.io/gitHub-template/getting-started/commit-conventions/</loc>
-         <lastmod>2026-09-27</lastmod>
+         <loc>https://enerplanet.github.io/Coati/development/testing/</loc>
+         <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://THD-Spatial-AI.github.io/gitHub-template/getting-started/documentation-setup/</loc>
-         <lastmod>2026-09-27</lastmod>
+         <loc>https://enerplanet.github.io/Coati/documents/dataset/</loc>
+         <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://THD-Spatial-AI.github.io/gitHub-template/getting-started/legal-sync/</loc>
-         <lastmod>2026-09-27</lastmod>
+         <loc>https://enerplanet.github.io/Coati/documents/json/</loc>
+         <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://THD-Spatial-AI.github.io/gitHub-template/getting-started/open-source-checklist/</loc>
-         <lastmod>2026-09-27</lastmod>
+         <loc>https://enerplanet.github.io/Coati/documents/results/</loc>
+         <lastmod>2026-09-28</lastmod>
     </url>
     <url>
-         <loc>https://THD-Spatial-AI.github.io/gitHub-template/getting-started/repository-naming/</loc>
-         <lastmod>2026-09-27</lastmod>
+         <loc>https://enerplanet.github.io/Coati/frameworks/adopt-net0/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/frameworks/calliope/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/frameworks/overview/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/frameworks/pypsa/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/getting-started/branch-naming/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/getting-started/commit-conventions/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/reference/errors/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/reference/files/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/reference/frameworks/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/reference/functions/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/reference/options/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/usage/cli/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/usage/installation/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/usage/python/</loc>
+         <lastmod>2026-09-28</lastmod>
+    </url>
+    <url>
+         <loc>https://enerplanet.github.io/Coati/usage/quickstart/</loc>
+         <lastmod>2026-09-28</lastmod>
     </url>
 </urlset>
