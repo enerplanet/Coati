@@ -75,6 +75,9 @@ def sniff(path: Path) -> str:
 
 
 def _head(path: Path) -> bytes:
+    # Asked first: what opening a directory fails with differs between the platforms.
+    if path.is_dir():
+        raise SourceError(f"{path}: is a directory, not a file")
     try:
         with path.open("rb") as stream:
             return stream.read(len(_HDF5_SIGNATURE))
