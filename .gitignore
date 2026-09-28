@@ -1,8 +1,31 @@
-# Add files and directories to ignore in Git
-# You can find some language specific templates at https://github.com/github/gitignore
+# Build output
+build/
+dist/
+*.egg-info/
 
-site/
-.venv/
+# Bytecode and caches
 __pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# Coverage
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Virtual environments; the environment's .env.dev and .env.test are settings files
+.venv/
 venv/
+.env
+
+# Editors and tooling
 .vscode/
+.idea/
+*.swp
+
+# MkDocs site
+site/
