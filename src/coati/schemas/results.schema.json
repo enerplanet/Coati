@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://enerplanet.github.io/Coati/schemas/results-1.0.schema.json",
+  "title": "Coati results document",
+  "description": "What a solved energy system model says, in the same terms for Calliope, PyPSA and AdOpT-NET0. Locations, technologies and carriers are joined into keys with '::', as in 'region1::ccgt::power'.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "framework",
+    "framework_version",
+    "model_name",
+    "solver",
+    "success",
+    "termination_condition",
+    "objective",
+    "timestamps",
+    "capacities",
+    "generation",
+    "dispatch",
+    "demand_timeseries",
+    "transmission_flow",
+    "costs_by_tech",
+    "costs_by_location",
+    "tech_metadata",
+    "tech_parents",
+    "warnings",
+    "metadata"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "description": "The version of the layout of this document.",
+      "const": "1.0"
+    },
+    "framework": {
+      "description": "The framework that wrote the file.",
+      "enum": ["calliope", "pypsa", "adopt-net0"]
+    },
+    "framework_version": {
+      "description": "The version of the framework, as the file states it or as the caller named it; null if neither is known.",
+      "type": ["string", "null"]
+    },
+    "model_name": {
+      "description": "The name of the model; null if the file records none.",
+      "type": ["string", "null"]
+    },
+    "solver": {
+      "description": "The solver; null if the file does not record it.",
+      "type": ["string", "null"]
+    },
+    "success": {
+      "description": "Whether the model has a solution.",
+      "type": "boolean"
+    },
+    "termination_condition": {
+      "description": "How the solver ended, in the words of the framework, or 'not_solved' or 'unknown'.",
+      "type": "string"
+    },
+    "objective": {
+      "description": "The cost of the system; null if the model has no solution.",
+      "$ref": "#/$defs/quantity"
+    },
+    "objective_function_value": {
+      "description": "The value of the objective function, which may include penalties and weights that are no cost.",
+      "$ref": "#/$defs/quantity"
+    },
+    "timestamps": {
+      "description": "The times of the time series: ISO 8601 text, or the positions if the file records no times.",
+      "type": "array",
+      "items": {"type": ["string", "integer", "number", "null"]}
+    },
+    "weights": {
+      "description": "How much each time counts towards a total, in the order of 'timestamps'. Present if the times count differently; the totals of the document are weighted with it, the time series are not.",
+      "$ref": "#/$defs/series"
+    },
+    "periods": {
+      "description": "The investment period of each time, for a model with several.",
+      "type": "array",
+      "items": {"type": ["string", "integer", "number", "null"]}
+    },
+    "scenarios": {
+      "description": "The probability of each scenario of a stochastic model, whose expectation the document reports.",
+      "type": "object",
+      "additionalProperties": {"type": "number"}
+    },
+    "capacities": {
+      "description": "The capacity of each technology at each location, by 'location::technology'.",
+      "$ref": "#/$defs/quantities"
+    },
+    "storage_capacities": {
+      "description": "The capacity of each store to hold energy, by 'location::technology'.",
+      "$ref": "#/$defs/quantities"
+    },
+    "generation": {
+      "description": "What each technology puts out over the modelled time, by 'location::technology::carrier'.",
+      "$ref": "#/$defs/quantities"
+    },
+    "dispatch": {
+      "description": "What each technology puts out at each time, all locations and carriers together, by technology. Technologies of demand and transmission and technologies that put out nothing are left out.",
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/series"}
+    },
+    "demand_timeseries": {
+      "description": "The demand at each time, all locations together; empty if the model has no demand.",
+      "$ref": "#/$defs/series"
+    },
+    "demand_by_location": {
+      "description": "The demand over the modelled time at each location.",
+      "$ref": "#/$defs/quantities"
+    },
+    "unmet_demand_timeseries": {
+      "description": "The demand that is not met at each time. Present only if some demand is not met.",
+      "$ref": "#/$defs/series"
+    },
+    "unmet_demand_by_location": {
+      "description": "The demand that is not met over the modelled time, at each location.",
+      "$ref": "#/$defs/quantities"
+    },
+    "total_unmet_demand": {
+      "description": "The demand that is not met, all times and locations together.",
+      "$ref": "#/$defs/quantity"
+    },
+    "transmission_flow": {
+      "description": "The exchange between each pair of locations, by 'a::b' where a precedes b in the order of their names.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["from", "to", "timeseries"],
+        "additionalProperties": false,
+        "properties": {
+          "from": {"description": "The location whose name comes first.", "type": "string"},
+          "to": {"description": "The location whose name comes second.", "type": "string"},
+          "timeseries": {
+            "description": "The net flow that arrives at 'to' from 'from' at each time, negative in the opposite direction.",
+            "$ref": "#/$defs/series"
+          }
+        }
+      }
+    },
+    "imports_by_location": {
+      "description": "What each location takes in through transmission over the modelled time.",
+      "$ref": "#/$defs/quantities"
+    },
+    "exports_by_location": {
+      "description": "What each location gives away through transmission over the modelled time.",
+      "$ref": "#/$defs/quantities"
+    },
+    "costs_by_tech": {
+      "description": "The cost of each technology, all locations together. Lists the technologies whose cost is greater than zero; 'costs_by_location' has every entry.",
+      "$ref": "#/$defs/quantities"
+    },
+    "costs_by_location": {
+      "description": "The cost of each technology at each location, by location and technology.",
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/quantities"}
+    },
+    "tech_metadata": {
+      "description": "The kind of each technology and what it puts out.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["parent", "carrier_out"],
+        "additionalProperties": false,
+        "properties": {
+          "parent": {
+            "description": "The kind of the technology: supply, demand, storage, conversion, transmission, or a kind of the framework such as supply_plus.",
+            "type": "string"
+          },
+          "carrier_out": {
+            "description": "The carrier the technology puts out, the primary one if it has several; empty if it puts out none.",
+            "type": "string"
+          },
+          "display_name": {
+            "description": "The name of the technology for people to read, if the file has one.",
+            "type": "string"
+          },
+          "color": {
+            "description": "The colour of the technology in figures, if the file has one.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tech_parents": {
+      "description": "The kind of each technology; the same as 'parent' in 'tech_metadata'.",
+      "type": "object",
+      "additionalProperties": {"type": "string"}
+    },
+    "coordinates": {
+      "description": "The latitude and the longitude of each location, in this order.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {"$ref": "#/$defs/quantity"}
+      }
+    },
+    "details": {
+      "description": "What else the file says, in the terms of the framework. The keys depend on the framework.",
+      "type": "object"
+    },
+    "warnings": {
+      "description": "What a reader of the document should know about its making.",
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "metadata": {
+      "description": "How the document was made.",
+      "type": "object",
+      "required": ["generator", "generator_version", "framework_id", "framework_family", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "generator": {"description": "The program that wrote the document.", "const": "coati"},
+        "generator_version": {"description": "The version of the program.", "type": "string"},
+        "framework_id": {
+          "description": "The framework identifier with the most detail known, such as 'calliope-v0-7-0'.",
+          "type": "string"
+        },
+        "framework_family": {
+          "description": "The family of versions whose layout the file has, such as 'calliope-v0-7'.",
+          "type": ["string", "null"]
+        },
+        "source": {"$ref": "#/$defs/source"}
+      }
+    }
+  },
+  "$defs": {
+    "quantity": {
+      "description": "A number. A number that is not finite is null or, if the document was written with the non-finite policy 'string', one of the strings.",
+      "oneOf": [
+        {"type": "number"},
+        {"type": "null"},
+        {"enum": ["NaN", "Infinity", "-Infinity"]}
+      ]
+    },
+    "quantities": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/quantity"}
+    },
+    "series": {
+      "description": "One number for each time, in the order of 'timestamps'.",
+      "type": "array",
+      "items": {"$ref": "#/$defs/quantity"}
+    },
+    "source": {
+      "description": "The file the document was made from.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {"description": "The name of the file, without its directory.", "type": "string"},
+        "format": {
+          "description": "The format of the file.",
+          "enum": [
+            "netcdf4",
+            "hdf5",
+            "netcdf3-classic",
+            "netcdf3-64bit-offset",
+            "netcdf3-64bit-data"
+          ]
+        },
+        "size": {"description": "The size of the file in bytes.", "type": "integer", "minimum": 0}
+      }
+    }
+  }
+}
