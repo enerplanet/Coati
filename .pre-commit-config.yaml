@@ -1,0 +1,43 @@
+# Checks that run before a commit is made: `pip install pre-commit && pre-commit install`.
+# The versions of ruff and mypy are those that the environment of the project has; the
+# hooks run them from there, so that a commit is checked as CI checks it.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=200"]
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+        # mkdocs.yml names Python objects with tags of its own.
+        args: ["--unsafe"]
+      - id: end-of-file-fixer
+        exclude: ^tests/data/
+      - id: trailing-whitespace
+        exclude: ^tests/data/
+
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: ruff format
+        entry: ruff format
+        language: system
+        types: [python]
+      - id: ruff-check
+        name: ruff check
+        entry: ruff check --fix --exit-non-zero-on-fix
+        language: system
+        types: [python]
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        pass_filenames: false
+        files: ^src/
+      - id: commit-message
+        name: commit message
+        # The script reads lines of a hash and a subject, as the workflow passes them.
+        entry: bash -c 'printf "0000000 %s\n" "$(head -n 1 "$1")" | python .github/scripts/lint_commits.py' --
+        language: system
+        stages: [commit-msg]
