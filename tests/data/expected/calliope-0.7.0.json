@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "framework": "calliope",
+  "framework_version": null,
+  "model_name": "Coati test model",
+  "solver": "cbc",
+  "success": true,
+  "termination_condition": "optimal",
+  "objective": 15721.256650421,
+  "objective_function_value": 15721.256650421,
+  "timestamps": ["2005-01-01T00:00:00", "2005-01-01T01:00:00", "2005-01-01T02:00:00", "2005-01-01T03:00:00", "2005-01-01T04:00:00", "2005-01-01T05:00:00", "2005-01-01T06:00:00", "2005-01-01T07:00:00", "2005-01-01T08:00:00", "2005-01-01T09:00:00", "2005-01-01T10:00:00", "2005-01-01T11:00:00", "2005-01-01T12:00:00", "2005-01-01T13:00:00", "2005-01-01T14:00:00", "2005-01-01T15:00:00", "2005-01-01T16:00:00", "2005-01-01T17:00:00", "2005-01-01T18:00:00", "2005-01-01T19:00:00", "2005-01-01T20:00:00", "2005-01-01T21:00:00", "2005-01-01T22:00:00", "2005-01-01T23:00:00"],
+  "capacities": {
+    "north::line": 136.3509,
+    "north::pv": 136.3509,
+    "south::battery": 100.0,
+    "south::boiler": 11.111111,
+    "south::demand_heat": 10.0,
+    "south::demand_power": 80.0,
+    "south::gas": 30.194566,
+    "south::line": 136.3509
+  },
+  "storage_capacities": {
+    "south::battery": 400.0
+  },
+  "generation": {
+    "north::line::power": 0.0,
+    "north::pv::power": 1382.449528,
+    "south::battery::power": 380.000001,
+    "south::boiler::heat": 240.0,
+    "south::gas::power": 392.91874278,
+    "south::line::power": 1354.80052
+  },
+  "dispatch": {
+    "battery": [20.916545, 21.598028, 23.596037, 26.774409, 30.916545, 35.740164, 40.916545, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 40.916545, 35.740164, 30.916545, 26.774409, 23.596037, 21.598028],
+    "boiler": [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0],
+    "gas": [30.194566, 30.194566, 30.194566, 30.194566, 30.194566, 30.194566, 30.194566, 0.19469239, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.19469239, 30.194566, 30.194566, 30.194566, 30.194566, 30.194566, 30.194566],
+    "pv": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 77.645714, 136.3509, 136.3509, 136.3509, 136.3509, 136.3509, 136.3509, 136.3509, 136.3509, 136.3509, 77.645714, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  },
+  "demand_timeseries": [50.0, 50.681483, 52.679492, 55.857864, 60.0, 64.823619, 70.0, 75.176381, 80.0, 84.142136, 87.320508, 89.318517, 90.0, 89.318517, 87.320508, 84.142136, 80.0, 75.176381, 70.0, 64.823619, 60.0, 55.857864, 52.679492, 50.681483],
+  "demand_by_location": {
+    "south": 1680.0
+  },
+  "transmission_flow": {
+    "north::south": {
+      "from": "north",
+      "to": "south",
+      "timeseries": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 76.0928, 133.62388, 133.62388, 133.62388, 133.62388, 133.62388, 133.62388, 133.62388, 133.62388, 133.62388, 76.0928, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    }
+  },
+  "imports_by_location": {
+    "south": 1354.80052
+  },
+  "exports_by_location": {
+    "north": 1354.80052
+  },
+  "costs_by_tech": {
+    "line": 0.152801788,
+    "pv": 3.292387023,
+    "battery": 0.720404257,
+    "boiler": 0.067937073,
+    "gas": 15717.023120279
+  },
+  "costs_by_location": {
+    "north": {
+      "line": 0.076400894,
+      "pv": 3.292387023
+    },
+    "south": {
+      "battery": 0.720404257,
+      "boiler": 0.067937073,
+      "gas": 15717.023120279,
+      "line": 0.076400894
+    }
+  },
+  "tech_metadata": {
+    "battery": {
+      "parent": "storage",
+      "carrier_out": "power",
+      "display_name": "Battery",
+      "color": "#3B61E3"
+    },
+    "boiler": {
+      "parent": "conversion",
+      "carrier_out": "heat",
+      "display_name": "Electric boiler",
+      "color": "#8E2999"
+    },
+    "demand_heat": {
+      "parent": "demand",
+      "carrier_out": "",
+      "display_name": "Heat demand",
+      "color": "#660507"
+    },
+    "demand_power": {
+      "parent": "demand",
+      "carrier_out": "",
+      "display_name": "Power demand",
+      "color": "#072486"
+    },
+    "gas": {
+      "parent": "supply",
+      "carrier_out": "power",
+      "display_name": "Gas turbine",
+      "color": "#E4AB97"
+    },
+    "line": {
+      "parent": "transmission",
+      "carrier_out": "power",
+      "display_name": "Power line",
+      "color": "#8465A9"
+    },
+    "pv": {
+      "parent": "supply",
+      "carrier_out": "power",
+      "display_name": "Solar photovoltaics",
+      "color": "#F9D956"
+    }
+  },
+  "tech_parents": {
+    "battery": "storage",
+    "boiler": "conversion",
+    "demand_heat": "demand",
+    "demand_power": "demand",
+    "gas": "supply",
+    "line": "transmission",
+    "pv": "supply"
+  },
+  "coordinates": {
+    "north": [49.0, 11.0],
+    "south": [48.0, 12.0]
+  },
+  "details": {
+    "mode": "base"
+  },
+  "warnings": [],
+  "metadata": {
+    "generator": "coati",
+    "framework_id": "calliope-v0-7",
+    "framework_family": "calliope-v0-7",
+    "source": {
+      "name": "calliope-0.7.0.nc",
+      "format": "netcdf4",
+      "size": 460016
+    }
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "framework": "adopt-net0",
+  "framework_version": null,
+  "model_name": "coati",
+  "solver": null,
+  "success": true,
+  "termination_condition": "optimal",
+  "objective": 3294400.74642359,
+  "objective_function_value": 3294400.74642359,
+  "timestamps": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47],
+  "capacities": {
+    "north::Photovoltaic": 40.296853108,
+    "north::WindTurbine_Onshore_1500": 0.0,
+    "south::Storage_Battery": 24.608598922,
+    "south::Storage_Battery_existing": 5.0,
+    "north::electricitySimple:south": 60.225830045,
+    "south::electricitySimple:north": 60.225830045
+  },
+  "storage_capacities": {
+    "south::Storage_Battery": 24.608598922,
+    "south::Storage_Battery_existing": 5.0
+  },
+  "generation": {
+    "north::Photovoltaic::electricity": 308.794785364,
+    "north::WindTurbine_Onshore_1500::electricity": 0.0,
+    "south::Storage_Battery::electricity": 78.733984824,
+    "south::Storage_Battery_existing::electricity": 9.438289989,
+    "north::import_electricity::electricity": 1619.445991239,
+    "south::electricitySimple:north::electricity": 1928.224579381,
+    "north::electricitySimple:south::electricity": 0.0
+  },
+  "dispatch": {
+    "Photovoltaic": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.490983565, 8.462339153, 15.514288446, 21.236441588, 24.621377249, 25.225830045, 22.969206271, 18.214177605, 11.726384254, 4.916216079, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.490983565, 8.462339153, 15.514288446, 21.236441588, 24.621377249, 25.225830045, 22.969206271, 18.214177605, 11.766681107, 4.916216079, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    "Storage_Battery": [0.0, 0.0, 0.0, 0.0, 0.0, 1.118008323, 5.000294, 7.382579677, 4.038025931, 0.092737591, 0.0, 0.0, 0.0, 0.0, 0.0, 3.269101302, 6.084119217, 7.382579677, 5.000294, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.118008323, 5.000294, 7.191864593, 4.038025931, 0.092737591, 0.0, 0.0, 0.0, 0.0, 0.0, 3.84031345, 6.084119217, 7.382579677, 3.500294, 1.118008323, 0.0, 0.0, 0.0, 0.0],
+    "Storage_Battery_existing": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.009028959, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.611508663, 1.5, 1.5, 0.0, 1.118008323, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.199744043, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.5, 1.5, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0],
+    "import_electricity": [30.93577602, 34.393981192, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 32.500273002, 29.393645189, 27.009845826, 26.192340815, 30.211057086, 34.393981192, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 32.500273002, 29.393645189, 27.009845826, 25.511326901]
+  },
+  "demand_timeseries": [25.0, 25.511112606, 27.009618943, 29.393398282, 32.5, 36.117714323, 40.0, 43.882285677, 47.5, 50.606601718, 52.990381057, 54.488887394, 55.0, 54.488887394, 52.990381057, 50.606601718, 47.5, 43.882285677, 40.0, 36.117714323, 32.5, 29.393398282, 27.009618943, 25.511112606, 25.0, 25.511112606, 27.009618943, 29.393398282, 32.5, 36.117714323, 40.0, 43.882285677, 47.5, 50.606601718, 52.990381057, 54.488887394, 55.0, 54.488887394, 52.990381057, 50.606601718, 47.5, 43.882285677, 40.0, 36.117714323, 32.5, 29.393398282, 27.009618943, 25.511112606],
+  "demand_by_location": {
+    "south": 1920.0
+  },
+  "transmission_flow": {
+    "north::south": {
+      "from": "north",
+      "to": "south",
+      "timeseries": [30.93551616, 34.393692282, 34.999706, 34.999706, 34.999706, 34.999706, 34.999706, 36.490677041, 43.461974069, 50.513864126, 56.235969202, 59.620876429, 60.225324148, 57.96871933, 53.213730606, 46.725991753, 39.915880783, 34.999706, 34.999706, 34.999706, 32.5, 29.393398282, 27.009618943, 26.192120799, 30.210803313, 34.393692282, 34.999706, 34.999706, 34.999706, 34.999706, 34.999706, 36.490677041, 43.461974069, 50.513864126, 56.235969202, 59.620876429, 60.225324148, 57.96871933, 53.213730606, 46.766288267, 39.915880783, 34.999706, 34.999706, 34.999706, 32.5, 29.393398282, 27.009618943, 25.511112606]
+    }
+  },
+  "imports_by_location": {
+    "south": 1928.224579381
+  },
+  "exports_by_location": {
+    "north": 1928.224579381
+  },
+  "costs_by_tech": {
+    "Photovoltaic": 570204.952585779,
+    "import_electricity": 129555.679299127,
+    "electricitySimple:south": 0.030793291,
+    "Storage_Battery": 2494640.052952104,
+    "Storage_Battery_existing": 100000.0,
+    "electricitySimple:north": 0.030793291
+  },
+  "costs_by_location": {
+    "north": {
+      "Photovoltaic": 570204.952585779,
+      "WindTurbine_Onshore_1500": 0.0,
+      "import_electricity": 129555.679299127,
+      "electricitySimple:south": 0.030793291
+    },
+    "south": {
+      "Storage_Battery": 2494640.052952104,
+      "Storage_Battery_existing": 100000.0,
+      "electricitySimple:north": 0.030793291
+    }
+  },
+  "tech_metadata": {
+    "Photovoltaic": {
+      "parent": "supply",
+      "carrier_out": "electricity"
+    },
+    "WindTurbine_Onshore_1500": {
+      "parent": "supply",
+      "carrier_out": "electricity"
+    },
+    "Storage_Battery": {
+      "parent": "storage",
+      "carrier_out": "electricity"
+    },
+    "Storage_Battery_existing": {
+      "parent": "storage",
+      "carrier_out": "electricity"
+    },
+    "import_electricity": {
+      "parent": "supply",
+      "carrier_out": "electricity"
+    },
+    "electricitySimple": {
+      "parent": "transmission",
+      "carrier_out": "electricity"
+    },
+    "electricitySimple:south": {
+      "parent": "transmission",
+      "carrier_out": "electricity"
+    },
+    "electricitySimple:north": {
+      "parent": "transmission",
+      "carrier_out": "electricity"
+    }
+  },
+  "tech_parents": {
+    "Photovoltaic": "supply",
+    "WindTurbine_Onshore_1500": "supply",
+    "Storage_Battery": "storage",
+    "Storage_Battery_existing": "storage",
+    "import_electricity": "supply",
+    "electricitySimple": "transmission",
+    "electricitySimple:south": "transmission",
+    "electricitySimple:north": "transmission"
+  },
+  "details": {
+    "summary": {
+      "absolute gap": 0.0,
+      "carbon_cost": 0.0,
+      "carbon_revenue": 0.0,
+      "carrier_emissions_neg": 0.0,
+      "carrier_emissions_pos": 485.833797372,
+      "case": "coati",
+      "cost_capex_netws": 0.061586581,
+      "cost_capex_tecs": 2567442.80894023,
+      "cost_exports": 0.0,
+      "cost_imports": 129555.679299127,
+      "cost_netws": 0.061586581,
+      "cost_opex_netws": 0.0,
+      "cost_opex_tecs": 597402.196597649,
+      "cost_tecs": 3164845.00553788,
+      "emissions_neg": 0.0,
+      "emissions_net": 485.833797372,
+      "emissions_pos": 485.833797372,
+      "lb": 3294400.74642359,
+      "network_emissions_pos": 0.0,
+      "objective": "costs",
+      "solver_status": "optimal",
+      "technology_emissions_neg": 0.0,
+      "technology_emissions_pos": 0.0,
+      "time_stage": 1.0,
+      "time_total": 0.0,
+      "total_cost": 3294400.74642359,
+      "total_npv": 3294400.74642359,
+      "ub": 3294400.74642359,
+      "violation_cost": 0.0
+    }
+  },
+  "warnings": [],
+  "metadata": {
+    "generator": "coati",
+    "framework_id": "adopt-net0-v0-1",
+    "framework_family": "adopt-net0-v0-1",
+    "source": {
+      "name": "adopt-net0-0.1.10.h5",
+      "format": "hdf5",
+      "size": 112384
+    }
+  }
+}

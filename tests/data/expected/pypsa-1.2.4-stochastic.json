@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "framework": "pypsa",
+  "framework_version": "1.2.4",
+  "model_name": "coati-stochastic",
+  "solver": null,
+  "success": true,
+  "termination_condition": "optimal",
+  "objective": 18900.0,
+  "objective_function_value": 18900.0,
+  "timestamps": ["2025-03-01T00:00:00", "2025-03-01T01:00:00", "2025-03-01T02:00:00", "2025-03-01T03:00:00"],
+  "scenarios": {
+    "high": 0.25,
+    "low": 0.75
+  },
+  "capacities": {
+    "hub::gas": 300.0,
+    "hub::pv": 0.0
+  },
+  "generation": {
+    "hub::gas::electricity": 420.0,
+    "hub::pv::electricity": 0.0
+  },
+  "dispatch": {
+    "gas": [100.0, 120.0, 110.0, 90.0]
+  },
+  "demand_timeseries": [100.0, 120.0, 110.0, 90.0],
+  "demand_by_location": {
+    "hub": 420.0
+  },
+  "transmission_flow": {},
+  "costs_by_tech": {
+    "gas": 18900.0
+  },
+  "costs_by_location": {
+    "hub": {
+      "gas": 18900.0,
+      "pv": 0.0
+    }
+  },
+  "tech_metadata": {
+    "gas": {
+      "parent": "supply",
+      "carrier_out": "electricity"
+    },
+    "pv": {
+      "parent": "supply",
+      "carrier_out": "electricity"
+    },
+    "demand": {
+      "parent": "demand",
+      "carrier_out": ""
+    }
+  },
+  "tech_parents": {
+    "gas": "supply",
+    "pv": "supply",
+    "demand": "demand"
+  },
+  "details": {
+    "objective_constant": 0.0
+  },
+  "warnings": ["the network has 2 scenarios; the document reports the expectation"],
+  "metadata": {
+    "generator": "coati",
+    "framework_id": "pypsa-v1-2-4",
+    "framework_family": "pypsa-v1",
+    "source": {
+      "name": "pypsa-1.2.4-stochastic.nc",
+      "format": "netcdf4",
+      "size": 73963
+    }
+  }
+}

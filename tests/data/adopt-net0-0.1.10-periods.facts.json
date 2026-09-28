@@ -1,0 +1,14 @@
+{
+ "objective_function_value": 30021814.7826504,
+ "details": {
+  "periods": [
+   "period1",
+   "period2"
+  ],
+  "period": "period1"
+ },
+ "_demand_of_periods": {
+  "period1": 1920.0,
+  "period2": 3840.0
+ }
+}
