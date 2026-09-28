@@ -1,194 +1,130 @@
 # Contributing
 
-Thank you for taking the time to contribute to **[PROJECT_NAME]**.
+Thank you for taking the time to contribute to **Coati**.
 
-This project welcomes contributions such as bug reports, feature requests, documentation improvements, code changes, and general feedback.
-
-Please read this guide before opening an issue or submitting a pull request.
+This project welcomes bug reports, feature requests, documentation
+improvements, code changes and support for further versions of the
+frameworks. Please read this guide before opening an issue or submitting a
+pull request.
 
 ## Code of Conduct
 
-By participating in this project, you agree to follow the rules and expectations described in the [Code of Conduct](CODE_OF_CONDUCT.md).
+By participating in this project, you agree to follow the rules and
+expectations described in the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Ways to Contribute
+## Reporting bugs and requesting changes
 
-You can contribute in different ways, including:
+Use the issue tracker for bug reports, feature requests and documentation
+issues: <https://github.com/enerplanet/Coati/issues>.
 
-- Reporting bugs
-- Requesting features or improvements
-- Improving documentation
-- Fixing issues
-- Reviewing pull requests
-- Asking and answering questions
+When reporting a bug, please include:
 
-## Before You Start
+- the framework and its version, and how the file was written
+  (`model.to_netcdf`, `n.export_to_netcdf`, `n.export_to_hdf5`, ...)
+- the command or the call, and the full message it ends with
+- the output of `coati inspect FILE`, which describes the file without its
+  values
+- what you expected and what the document says instead; if a number is
+  wrong, the number that the framework itself reports for it
+- the Coati version (`coati --version`) and the Python version
 
-Before creating a new issue or pull request, please:
+A file that reproduces the problem helps most. Make it as small as you can
+and remove what is confidential; `tests/models` has small models of every
+framework to start from.
 
-- Read the `README.md` to understand the project purpose and setup
-- Check existing issues and pull requests to avoid duplicates
-- Make sure your idea/request is relevant to the project scope
-- Use the issue templates (if available)
+## Development workflow
 
-## Reporting Bugs and Requesting Changes
-
-Use the project issue tracker for bug reports, feature requests, and documentation issues.
-
-- **Issue tracker:** [INSERT_ISSUE_TRACKER_URL]
-- **Discussions / Questions (optional):** [INSERT_DISCUSSION_URL_OR_REMOVE]
-
-When reporting an issue, please include:
-
-- What you expected to happen
-- What actually happened
-- Steps to reproduce the issue
-- Screenshots/logs/error messages (if applicable)
-- Environment details (OS, browser, version, etc., if relevant)
-
-## Development Workflow
-
-The exact setup steps may differ by project. Please check the `README.md` and project documentation for installation and development instructions.
-
-### 1) Fork and clone the repository (if applicable)
-
-If you do not have direct write access, fork the repository first, then clone your fork:
+Python 3.10 or newer and `make` are needed.
 
 ```bash
-git clone [REPOSITORY_URL]
-cd [REPOSITORY_DIRECTORY]
+git clone https://github.com/enerplanet/Coati.git
+cd Coati
+python -m venv .venv && . .venv/bin/activate
+make install     # the package in editable mode, with everything for development
+make test        # the test suite
+make check       # lint, types and tests with coverage, what CI runs
 ```
 
-If you have direct write access, clone the main repository instead.
-
-### 2) Create a branch for your change
-
-Create a dedicated branch for your bugfix, feature, or documentation update:
+Without a local toolchain, the same targets run in the container described
+in [environment/README.md](environment/README.md):
 
 ```bash
-git checkout -b type/short-description
+make -C environment build            # one-time image build
+make -C environment check ENV=test   # tests with coverage, lint and types
 ```
 
-Examples:
+`pre-commit install --hook-type pre-commit --hook-type commit-msg` runs the
+checks before every commit.
 
-- `fix/login-validation`
-- `feat/export-yaml`
-- `docs/readme-setup`
+### Branches and commits
 
-### 3) Make your changes
+Create a branch named `<type>/<description>` (see
+[Branch Naming](docs/getting-started/branch-naming.md)) and write commit
+messages in the Conventional Commits format (see
+[Commit Conventions](docs/getting-started/commit-conventions.md)), for
+example:
 
-Keep changes focused and small where possible. If your change is large, consider splitting it into multiple pull requests.
-
-### 4) Test your changes (if applicable)
-
-Before submitting a pull request:
-
-- Run relevant tests
-- Check linting/formatting tools (if used)
-- Verify the project still builds/runs locally
-- Update documentation if your change affects usage or behaviour
-
-### 5) Commit your changes
-
-Use clear commit messages that explain what changed.
-
-```bash
-git add .
-git commit -m "Short summary of the change"
+```
+feat(pypsa): report the shadow prices of the buses
+fix(reader): read attributes that are arrays of texts
+docs(calliope): explain the weights of the classes of cost
 ```
 
-For larger changes, include a more descriptive commit message when needed.
+Both are checked automatically on pull requests. Keep the history linear:
+rebase on `main` instead of merging it into your branch.
 
-### 6) Push your branch
+### Changing how results are extracted
 
-```bash
-git push -u origin <your-branch-name>
-```
+- The test of an extractor is what the framework says. A number of the
+  results document must equal the number that the framework reports for its
+  own model, through its own interface. `tests/models` holds a model of each
+  framework with the *facts* about it, `tests/test_real_files.py` compares
+  the documents with them, and `tests/frameworks` does so with the versions
+  of the frameworks that are installed.
+- Every rule of an extractor has a test on a file that is made for it, small
+  enough to check by hand (`tests/support/files.py`,
+  `tests/test_results_*.py`). Add a case for new behaviour, for what a file
+  may lack and for the message that a file that cannot be read produces.
+- The meaning of a key is the same for every framework. If a framework has
+  no such quantity, the key is left out; it is not filled with something
+  similar. What holds for one framework alone belongs under `details`.
+- A change of what a document says is visible in `tests/data/expected`.
+  After a deliberate change:
 
-### 7) Open a pull request
+  ```bash
+  make expected-update            # rewrite tests/data/expected/*.json
+  git diff tests/data/expected    # review every changed line
+  ```
 
-Create a pull request against the appropriate branch (usually `main` unless the project uses a different workflow).
+- Update the page of the framework under `docs/frameworks/`, the schema under
+  `src/coati/schemas/` if a key is added, and the changelog. A change of the
+  layout of a document raises its `schema_version`; the
+  [architecture page](docs/development/architecture.md) describes which
+  module owns what.
 
-In your pull request description, include:
+### Supporting a new version of a framework
 
-- What changed
-- Why it changed
-- Any screenshots (for UI changes)
-- Testing notes
-- Related issue(s), if applicable (e.g. `Closes #123`)
+1. Install the version in an environment of its own and run
+   `make test-frameworks`. If the tests pass, the version writes its files as
+   the versions before it did.
+2. Make its files with `python -m models.fixtures` (see
+   `tests/data/README.md`), add them to `FILES` in
+   `tests/test_real_files.py` and to the versions that the family lists as
+   tested in `src/coati/frameworks.py`.
+3. If the layout of the files has changed, the version starts a new family
+   with an extractor of its own; the existing families keep reading the
+   files they read.
 
-## Pull Request Checklist
+## Pull request checklist
 
-Before submitting a pull request, check:
+- [ ] `make check` passes
+- [ ] new behaviour is tested, against the framework where it concerns results
+- [ ] documentation and `CHANGELOG.md` are updated
+- [ ] commit messages follow the convention and the branch is rebased on `main`
+- [ ] no credentials or private data in examples or test data
 
-- [ ] The change is relevant and scoped appropriately
-- [ ] I tested my changes (if applicable)
-- [ ] I updated documentation (if applicable)
-- [ ] I followed the project coding/style conventions (if applicable)
-- [ ] I checked for sensitive information (keys, credentials, private data)
-- [ ] I linked related issues (if applicable)
+## Licensing of contributions
 
-## Commit Message Guidance (Recommended)
-
-Keep commit messages clear and specific.
-
-Good examples:
-
-- `Fix CSV upload validation for empty headers`
-- `Add YAML export button to model builder`
-- `Update installation steps in README`
-
-Avoid vague messages such as:
-
-- `fix`
-- `changes`
-- `update stuff`
-
-## Documentation Contributions
-
-Documentation improvements are welcome and valuable.
-
-If you are updating docs:
-
-- Keep wording clear and practical
-- Prefer short examples where useful
-- Check links and commands
-- Match the style used in existing documentation
-
-## Project-Specific Notes (Template Placeholder)
-
-Replace or remove this section in project repositories.
-
-Examples of what may go here:
-
-- Setup links (Windows/Linux/Docker)
-- Testing commands (`npm test`, `pytest`, `go test ./...`)
-- Branching strategy
-- Review/approval rules
-- CI requirements
-- Changelog policy
-
-## Licensing of Contributions
-
-By contributing to this project, you confirm that:
-
-- your contribution is your own work (or you have the right to submit it), and
-- you agree that your contribution will be licensed under the same license as this repository.
-
-## Need Help?
-
-If you are unsure where to start, open an issue or discussion and ask. Maintainers can help point you in the right direction.
-
----
-
-## Maintainer Note (Template)
-
-> [!CAUTION]
-> This file is a template. Replace placeholders such as:
-
-- `[PROJECT_NAME]`
-- `[INSERT_ISSUE_TRACKER_URL]`
-- `[INSERT_DISCUSSION_URL_OR_REMOVE]`
-- `[REPOSITORY_URL]`
-- `[REPOSITORY_DIRECTORY]`
-
-Remove sections that do not apply to your project.
+By contributing to this project, you confirm that your contribution is your
+own work (or that you have the right to submit it), and you agree that it will
+be licensed under the same [MIT license](LICENSE) as the repository.
