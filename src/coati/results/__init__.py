@@ -1,7 +1,4 @@
-"""Results documents: one extractor for each family of frameworks.
-
-The extractors register here by the identifier of their family.
-"""
+"""Results documents: one extractor for each family of frameworks."""
 
 from __future__ import annotations
 
@@ -11,6 +8,7 @@ from typing import Final
 from coati.errors import FrameworkError
 from coati.frameworks import Framework
 from coati.model import Dataset
+from coati.results import calliope07
 from coati.results.document import SCHEMA_VERSION, Results, Transmission
 from coati.results.options import ExtractOptions
 
@@ -18,7 +16,9 @@ __all__ = ["SCHEMA_VERSION", "ExtractOptions", "Results", "Transmission", "extra
 
 _Extractor = Callable[[Dataset, Framework, ExtractOptions], Results]
 
-_EXTRACTORS: Final[dict[str, _Extractor]] = {}
+_EXTRACTORS: Final[dict[str, _Extractor]] = {
+    "calliope-v0-7": calliope07.extract,
+}
 
 
 def extract_results(
