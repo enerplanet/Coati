@@ -1,0 +1,13 @@
+# Keep the actions of the workflows up to date. The dependencies of the
+# package are ranges, and CI tests the newest and the oldest versions of them.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]

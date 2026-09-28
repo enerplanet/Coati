@@ -10,29 +10,31 @@ assignees: ''
 **Describe the bug**
 A clear and concise description of what the bug is.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**To reproduce**
+The command or the call, and the full message it ends with:
+
+```console
+$ coati results.nc results.json calliope-v0-7-0
+```
+
+**The file**
+The framework and its version, how the file was written, and the output of
+`coati inspect FILE`:
+
+```
+```
+
+Attach a file that reproduces the problem if you can, as small as possible
+and without confidential values.
 
 **Expected behavior**
-A clear and concise description of what you expected to happen.
+What you expected the document to say. If a number is wrong, the number that
+the framework itself reports for it and how you got it.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
-
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
-
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+**Environment**
+ - Coati version: [`coati --version`]
+ - Python version: [e.g. 3.12]
+ - OS: [e.g. Ubuntu 24.04]
 
 **Additional context**
 Add any other context about the problem here.

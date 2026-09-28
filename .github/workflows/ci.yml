@@ -1,0 +1,163 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: "1"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install ".[lint,test]"
+      - name: Lint
+        run: ruff check --output-format=github .
+      - name: Format
+        run: ruff format --check .
+      - name: Types
+        run: mypy
+
+  test:
+    name: test (${{ matrix.os }}, Python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        include:
+          - os: macos-latest
+            python: "3.13"
+          - os: windows-latest
+            python: "3.13"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          allow-prereleases: true
+          cache: pip
+      - name: Install the package as a user would, with what the tests need
+        run: pip install ".[test]"
+      - name: Test with coverage
+        run: python -m pytest --cov --cov-report=term-missing --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
+        with:
+          name: coverage
+          path: coverage.xml
+
+  oldest:
+    name: test (oldest dependencies)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install the oldest versions that the package allows
+        run: |
+          uv venv --python 3.10
+          uv pip install --resolution lowest-direct ".[test]"
+      - name: Test
+        run: .venv/bin/python -m pytest
+
+  frameworks:
+    name: frameworks (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: PyPSA
+            packages: pypsa
+            python: "3.13"
+          - name: Calliope
+            packages: calliope
+            python: "3.12"
+          - name: AdOpT-NET0
+            # AdOpT-NET0 0.1 uses an interface of tsam that version 3 has removed.
+            packages: adopt-net0 "tsam<3"
+            python: "3.12"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - name: Install the solvers
+        run: sudo apt-get update && sudo apt-get install --yes --no-install-recommends coinor-cbc glpk-utils
+      - name: Install the framework and the package
+        run: pip install ${{ matrix.packages }} ".[test]"
+      - name: Solve the models and convert what the framework writes
+        run: python -m pytest -m frameworks tests/frameworks -rs
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install build twine check-wheel-contents
+      - name: Build the source distribution and the wheel
+        run: python -m build
+      - name: Check the distributions
+        run: |
+          twine check --strict dist/*
+          check-wheel-contents dist/*.whl
+      - name: Install the wheel and run the command
+        run: |
+          python -m venv /tmp/installed
+          /tmp/installed/bin/pip install dist/*.whl
+          cd /tmp
+          /tmp/installed/bin/coati --version
+          /tmp/installed/bin/coati frameworks
+          /tmp/installed/bin/coati schema results > /dev/null
+          /tmp/installed/bin/python -c "import coati, importlib.resources as r; assert r.files('coati').joinpath('py.typed').is_file()"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  environment:
+    name: environment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the environment image
+        run: make -C environment build ENV=test
+      - name: Tests, lint and types inside the image
+        run: make -C environment check ENV=test
+
+  docs:
+    name: docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install ".[docs]"
+      - name: Build the documentation; a warning is an error
+        run: mkdocs build --strict

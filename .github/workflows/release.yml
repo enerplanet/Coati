@@ -1,0 +1,77 @@
+name: Release
+
+# Publishes a version to PyPI when its tag is pushed: v0.1.0 for the version
+# 0.1.0, v0.1.0-alpha or v0.1.0a0 for the version that Python writes 0.1.0a0.
+# PyPI trusts this workflow through a trusted publisher that is configured for
+# the project there (workflow release.yml, environment pypi), so that no token
+# is stored in the repository.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install build twine packaging
+      - name: The tag must name the version of the package
+        run: |
+          python - <<'PY'
+          import os
+          import runpy
+
+          from packaging.version import Version
+
+          version = runpy.run_path("src/coati/_version.py")["__version__"]
+          tag = os.environ["GITHUB_REF_NAME"]
+          if Version(tag.removeprefix("v")) != Version(version):
+              raise SystemExit(f"::error::the tag {tag} does not name the version {version}")
+          PY
+      - run: python -m build
+      - run: twine check --strict dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    name: publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/enerplanet-coati/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  release:
+    name: release on GitHub
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Create the release with the distributions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --generate-notes
