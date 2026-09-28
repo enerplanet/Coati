@@ -8,7 +8,7 @@ from typing import Final
 from coati.errors import FrameworkError
 from coati.frameworks import Framework
 from coati.model import Dataset
-from coati.results import calliope07
+from coati.results import calliope06, calliope07
 from coati.results.document import SCHEMA_VERSION, Results, Transmission
 from coati.results.options import ExtractOptions
 
@@ -17,6 +17,7 @@ __all__ = ["SCHEMA_VERSION", "ExtractOptions", "Results", "Transmission", "extra
 _Extractor = Callable[[Dataset, Framework, ExtractOptions], Results]
 
 _EXTRACTORS: Final[dict[str, _Extractor]] = {
+    "calliope-v0-6": calliope06.extract,
     "calliope-v0-7": calliope07.extract,
 }
 
