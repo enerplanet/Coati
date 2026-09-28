@@ -1,0 +1,21 @@
+# Build context for environment/Dockerfile, which copies only what the
+# installation of the dependencies needs; everything else reaches the
+# container through the bind mount. Keep the context small.
+.git
+.github
+.idea
+.vscode
+.venv
+venv
+**/__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.hypothesis
+build
+dist
+site
+htmlcov
+.coverage
+coverage.xml
+tests/data

@@ -1,0 +1,69 @@
+# Development and test environment for Coati: the package, the coati command
+# and the documentation site.
+#
+# Per-environment settings (image tag, version of Python, test target, docs
+# port) come from an env file:
+#   docker compose --env-file environment/.env.dev  -f environment/docker-compose.yml run --rm test
+#   docker compose --env-file environment/.env.test -f environment/docker-compose.yml run --rm test
+# or via the Makefile:  make -C environment test ENV=dev   /   ENV=test
+#
+# The repo root is bind-mounted into /src so edits are picked up without a
+# rebuild; only the dependencies are baked into the image. The containers run
+# as the user of the host (HOST_UID and HOST_GID, which the Makefile sets), so
+# that what they write into the checkout belongs to that user.
+#
+# The project name comes from COMPOSE_PROJECT_NAME in the env files (portable
+# across compose v1 and v2, unlike the top-level `name:` key). Every service
+# shares the same image and mounts, defined once below.
+
+x-environment: &environment
+  image: ${IMAGE_TAG:-coati-env:latest}
+  build:
+    context: ..
+    dockerfile: environment/Dockerfile
+    args:
+      PYTHON_VERSION: ${PYTHON_VERSION:-3.12}
+  working_dir: /src
+  user: "${HOST_UID:-0}:${HOST_GID:-0}"
+  environment:
+    # Options every run of pytest applies (an empty value keeps the defaults).
+    - PYTEST_ADDOPTS=${PYTEST_ADDOPTS:-}
+  volumes:
+    - ..:/src
+
+services:
+  # One-shot: run the test suite. TEST_TARGET names the root Makefile target
+  # (test, or cover for the CI settings).
+  test:
+    <<: *environment
+    command: make ${TEST_TARGET:-test}
+
+  # One-shot: ruff and mypy, the checks CI runs.
+  lint:
+    <<: *environment
+    command: make lint typecheck
+
+  # One-shot: build the source distribution and the wheel on the bind mount.
+  build:
+    <<: *environment
+    command: make build
+
+  # The coati command from the working tree; arguments after the service name
+  # are its arguments:  docker compose run --rm coati inspect results.nc
+  coati:
+    <<: *environment
+    entrypoint: ["coati"]
+    command: ["--help"]
+
+  # Long-running: the documentation site with live reload on
+  # http://localhost:${DOCS_PORT}.
+  docs:
+    <<: *environment
+    command: mkdocs serve --dev-addr 0.0.0.0:8000
+    ports:
+      - "${DOCS_PORT:-8000}:8000"
+
+  # Interactive shell with python, coati, pytest, ruff, mypy, mkdocs, make and git on PATH.
+  shell:
+    <<: *environment
+    command: bash
