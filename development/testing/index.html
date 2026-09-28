@@ -1316,7 +1316,7 @@ facts. These tests tell when a new version of a framework writes its files
 differently. They are skipped where a framework or a solver is missing, so
 the test suite runs without them.</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv-pypsa<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>.<span class="w"> </span>.venv-pypsa/bin/activate
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>pypsa<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[test]"</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"pypsa[hdf5]"</span><span class="w"> </span>-e<span class="w"> </span><span class="s2">".[test]"</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="gp">$ </span>make<span class="w"> </span>test-frameworks
 </span></code></pre></div>
 <table>
@@ -1330,7 +1330,7 @@ the test suite runs without them.</p>
 <tbody>
 <tr>
 <td>PyPSA</td>
-<td><code>pip install pypsa</code></td>
+<td><code>pip install "pypsa[hdf5]"</code></td>
 <td>HiGHS, which comes with PyPSA</td>
 </tr>
 <tr>
@@ -1345,9 +1345,10 @@ the test suite runs without them.</p>
 </tr>
 </tbody>
 </table>
-<p>Calliope 0.6 needs a version of Python that Coati does not support, so the
-two cannot be installed together. Its files are tested from <code>tests/data</code>
-alone.</p>
+<p>PyPSA exports to HDF5 with PyTables, which it installs with its extra <code>hdf5</code>
+alone. Calliope 0.6 needs a version of Python that Coati does not support,
+so the two cannot be installed together. Its files are tested from
+<code>tests/data</code> alone.</p>
 <h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
 <p>The tests of the writer and of the readers state properties that hold for
 any input, and <a href="https://hypothesis.works/">Hypothesis</a> looks for an input
@@ -1424,7 +1425,7 @@ write, as far as is known.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 28, 2026 09:52:51 UTC">September 28, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 28, 2026 17:18:16 UTC">September 28, 2026</span>
   </span>
 
     
