@@ -21,8 +21,8 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
           cache: pip
@@ -48,8 +48,8 @@ jobs:
           - os: windows-latest
             python: "3.13"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
           allow-prereleases: true
@@ -58,7 +58,7 @@ jobs:
         run: pip install ".[test]"
       - name: Test with coverage
         run: python -m pytest --cov --cov-report=term-missing --cov-report=xml
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
         with:
           name: coverage
@@ -68,8 +68,8 @@ jobs:
     name: test (oldest dependencies)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
       - name: Install the oldest versions that the package allows
         run: |
           uv venv --python 3.10
@@ -96,8 +96,8 @@ jobs:
             packages: adopt-net0 "tsam<3"
             python: "3.12"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
           cache: pip
@@ -112,8 +112,8 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
           cache: pip
@@ -133,7 +133,7 @@ jobs:
           /tmp/installed/bin/coati frameworks
           /tmp/installed/bin/coati schema results > /dev/null
           /tmp/installed/bin/python -c "import coati, importlib.resources as r; assert r.files('coati').joinpath('py.typed').is_file()"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
@@ -142,7 +142,7 @@ jobs:
     name: environment
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build the environment image
         run: make -C environment build ENV=test
       - name: Tests, lint and types inside the image
@@ -152,10 +152,10 @@ jobs:
     name: docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
           cache: pip
