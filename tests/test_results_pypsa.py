@@ -653,3 +653,231 @@ def test_a_file_without_tables_is_refused(tmp_path: Path) -> None:
     )
     with pytest.raises(ExtractionError, match="holds no tables of a network"):
         coati.results_document(path)
+
+
+# -- power flow -------------------------------------------------------------------------------
+
+
+def power_flow(tmp_path: Path, **changes: object) -> Path:
+    """A network solved by a power flow: a grid feeding a town over a line and a transformer.
+
+    The high-voltage bus holds its voltage, so PyPSA writes no magnitude for
+    it, and no angle, which is zero at the slack. A bus of heat is no part
+    of the electrical network. The transformer has no rating.
+    """
+    return _network(
+        tmp_path,
+        objective=None,
+        buses_i=(("buses_i",), ["hv::electricity", "mv::electricity", "mv::heat"]),
+        buses_carrier=(("buses_i",), ["AC", "AC", "heat"]),
+        sub_networks_i=(("sub_networks_i",), ["0", "1"]),
+        sub_networks_slack_bus=(("sub_networks_i",), ["hv::electricity", "mv::heat"]),
+        buses_t_v_mag_pu_i=(("buses_t_v_mag_pu_i",), ["mv::electricity"]),
+        buses_t_v_mag_pu=(("snapshots", "buses_t_v_mag_pu_i"), [[0.98], [0.97]]),
+        buses_t_v_ang_i=(("buses_t_v_ang_i",), ["mv::electricity"]),
+        buses_t_v_ang=(("snapshots", "buses_t_v_ang_i"), [[-0.05], [-0.06]]),
+        generators_i=(("generators_i",), ["grid", "pv"]),
+        generators_bus=(("generators_i",), ["hv::electricity", "mv::electricity"]),
+        generators_p_nom=(("generators_i",), [100.0, 10.0]),
+        generators_t_p_i=(("generators_t_p_i",), ["grid", "pv"]),
+        generators_t_p=(("snapshots", "generators_t_p_i"), [[7.0, 3.0], [8.5, 1.5]]),
+        generators_t_q_i=(("generators_t_q_i",), ["pv"]),
+        generators_t_q=(("snapshots", "generators_t_q_i"), [[0.5], [-0.5]]),
+        loads_i=(("loads_i",), ["town"]),
+        loads_bus=(("loads_i",), ["mv::electricity"]),
+        loads_t_p_i=(("loads_t_p_i",), ["town"]),
+        loads_t_p=(("snapshots", "loads_t_p_i"), [[10.0], [10.0]]),
+        lines_i=(("lines_i",), ["cable"]),
+        lines_bus0=(("lines_i",), ["hv::electricity"]),
+        lines_bus1=(("lines_i",), ["mv::electricity"]),
+        lines_s_nom=(("lines_i",), [10.0]),
+        lines_t_p0_i=(("lines_t_p0_i",), ["cable"]),
+        lines_t_p0=(("snapshots", "lines_t_p0_i"), [[3.0], [4.0]]),
+        lines_t_p1_i=(("lines_t_p1_i",), ["cable"]),
+        lines_t_p1=(("snapshots", "lines_t_p1_i"), [[-2.9], [-3.9]]),
+        lines_t_q0_i=(("lines_t_q0_i",), ["cable"]),
+        lines_t_q0=(("snapshots", "lines_t_q0_i"), [[4.0], [3.0]]),
+        transformers_i=(("transformers_i",), ["station"]),
+        transformers_bus0=(("transformers_i",), ["hv::electricity"]),
+        transformers_bus1=(("transformers_i",), ["mv::electricity"]),
+        transformers_t_p0_i=(("transformers_t_p0_i",), ["station"]),
+        transformers_t_p0=(("snapshots", "transformers_t_p0_i"), [[4.0], [4.5]]),
+        transformers_t_p1_i=(("transformers_t_p1_i",), ["station"]),
+        transformers_t_p1=(("snapshots", "transformers_t_p1_i"), [[-4.0], [-4.5]]),
+        **changes,
+    )
+
+
+def record(tmp_path: Path, text: str) -> Path:
+    """Write a record of the convergence next to the network, as MEME does."""
+    path = tmp_path / "power_flow" / "convergence.csv"
+    path.parent.mkdir()
+    path.write_text(text, encoding="utf-8")
+    return path
+
+
+def test_a_network_solved_by_a_power_flow(tmp_path: Path) -> None:
+    found = document(power_flow(tmp_path))
+    assert found["success"] is True
+    assert found["termination_condition"] == "unknown"
+    assert found["objective"] is None
+    assert "objective_function_value" not in found
+    assert found["costs_by_location"] == {}
+    assert found["capacities"] == {
+        "hv::grid": 100.0,
+        "mv::pv": 10.0,
+        "hv::cable": 10.0,
+        "mv::cable": 10.0,
+        "hv::station": 0.0,
+        "mv::station": 0.0,
+    }
+    assert found["dispatch"] == {"grid": [7.0, 8.5], "pv": [3.0, 1.5]}
+    assert found["demand_timeseries"] == [10.0, 10.0]
+    assert found["transmission_flow"] == {
+        "hv::mv": {"from": "hv", "to": "mv", "timeseries": [6.9, 8.4]}
+    }
+    assert found["warnings"] == [
+        (
+            "the network holds the solution of a power flow, not of an optimisation: the"
+            " capacities are those given, and the document has no costs; PyPSA does not record"
+            " whether the power flow converged, and no record lies next to the file"
+            " (power_flow/convergence.csv)"
+        )
+    ]
+
+
+def test_what_a_power_flow_finds(tmp_path: Path) -> None:
+    found = document(power_flow(tmp_path))
+    # The voltage of the slack is the default; the bus of heat has none. The loading is the
+    # apparent power at the fuller end over the rating: sqrt(3² + 4²) / 10, sqrt(4² + 3²) / 10.
+    # The transformer has no rating, so its loading is no number.
+    assert found["details"] == {
+        "power_flow": {
+            "slack_buses": ["hv::electricity", "mv::heat"],
+            "voltage_magnitude": {"hv::electricity": [1.0, 1.0], "mv::electricity": [0.98, 0.97]},
+            "voltage_angle": {"hv::electricity": [0.0, 0.0], "mv::electricity": [-0.05, -0.06]},
+            "reactive_power": {"hv::grid": [0.0, 0.0], "mv::pv": [0.5, -0.5]},
+            "branch_loading": {"cable": [0.5, 0.5], "station": [None, None]},
+        }
+    }
+
+
+def test_a_power_flow_without_reactive_results(tmp_path: Path) -> None:
+    path = power_flow(tmp_path)
+    with files.netCDF4.Dataset(path, "a") as dataset:
+        dataset.renameVariable("generators_t_q", "generators_t_q_gone")
+        dataset.renameVariable("lines_t_q0", "lines_t_q0_gone")
+    found = document(path)
+    assert "reactive_power" not in found["details"]["power_flow"]
+    assert found["details"]["power_flow"]["branch_loading"]["cable"] == [0.3, 0.4]
+
+
+def test_a_linear_power_flow_leaves_every_voltage_at_its_nominal_value(tmp_path: Path) -> None:
+    path = power_flow(tmp_path)
+    with files.netCDF4.Dataset(path, "a") as dataset:
+        dataset.renameVariable("buses_t_v_mag_pu", "buses_t_v_mag_pu_gone")
+    found = document(path)
+    assert found["success"] is True
+    assert found["details"]["power_flow"]["voltage_magnitude"] == {
+        "hv::electricity": [1.0, 1.0],
+        "mv::electricity": [1.0, 1.0],
+    }
+
+
+def test_the_convergence_is_taken_from_the_record_next_to_the_file(tmp_path: Path) -> None:
+    record(tmp_path, "snapshot,converged,iterations\n0,True,3\n1,True,2\n")
+    found = document(power_flow(tmp_path))
+    assert found["success"] is True
+    assert found["termination_condition"] == "converged"
+    assert found["details"]["power_flow"]["converged"] == [True, True]
+    assert found["details"]["power_flow"]["iterations"] == [3, 2]
+    assert found["warnings"] == [
+        (
+            "the network holds the solution of a power flow, not of an optimisation: the"
+            " capacities are those given, and the document has no costs"
+        )
+    ]
+
+
+def test_a_record_may_leave_out_the_iterations(tmp_path: Path) -> None:
+    record(tmp_path, "snapshot,converged\n0,true\n1,TRUE\n")
+    found = document(power_flow(tmp_path))
+    assert found["termination_condition"] == "converged"
+    assert found["details"]["power_flow"]["converged"] == [True, True]
+    assert "iterations" not in found["details"]["power_flow"]
+
+
+def test_a_power_flow_that_did_not_converge(tmp_path: Path) -> None:
+    record(tmp_path, "snapshot,converged,iterations\n0,True,3\n1,False,100\n")
+    found = document(power_flow(tmp_path))
+    assert found["success"] is False
+    assert found["termination_condition"] == "not_converged"
+    assert found["details"]["power_flow"]["converged"] == [True, False]
+    assert found["warnings"] == [
+        (
+            "the network holds the solution of a power flow, not of an optimisation: the"
+            " capacities are those given, and the document has no costs; the record next to"
+            " the file says that the power flow did not converge in 1 of 2 snapshots"
+        )
+    ]
+
+
+@pytest.mark.parametrize(
+    ("text", "problem"),
+    [
+        ("snapshot,converged\n0,True\n", "it has 1 rows, the network 2 snapshots"),
+        ("snapshot,solved\n0,True\n1,True\n", "it has no column 'converged'"),
+        (
+            "snapshot,converged\n0,True\n1,maybe\n",
+            "its column 'converged' is not all true or false",
+        ),
+        (b"\xff\xfe", "it cannot be read (UnicodeDecodeError)"),
+    ],
+)
+def test_a_record_that_does_not_fit_the_network_is_not_used(
+    tmp_path: Path, text: str | bytes, problem: str
+) -> None:
+    path = record(tmp_path, "")
+    path.write_bytes(text) if isinstance(text, bytes) else path.write_text(text)
+    found = document(power_flow(tmp_path))
+    assert found["success"] is True
+    assert found["termination_condition"] == "unknown"
+    assert "converged" not in found["details"]["power_flow"]
+    assert found["warnings"][0].endswith(
+        f"the record next to the file (power_flow/convergence.csv) cannot be used: {problem}"
+    )
+
+
+def test_a_record_with_iterations_that_are_no_numbers_keeps_the_convergence(
+    tmp_path: Path,
+) -> None:
+    record(tmp_path, "snapshot,converged,iterations\n0,True,\n1,True,2\n")
+    found = document(power_flow(tmp_path))
+    assert found["termination_condition"] == "converged"
+    assert "iterations" not in found["details"]["power_flow"]
+
+
+def test_a_network_with_a_power_flow_record_but_no_results_is_not_solved(tmp_path: Path) -> None:
+    record(tmp_path, "snapshot,converged\n0,True\n1,True\n")
+    found = document(files.pypsa_netcdf(tmp_path / "network.nc", solved=False))
+    assert found["success"] is False
+    assert found["termination_condition"] == "not_solved"
+    assert "details" not in found
+
+
+def test_a_power_flow_of_one_bus_has_voltages_alone(tmp_path: Path) -> None:
+    path = _network(
+        tmp_path,
+        objective=None,
+        buses_t_p_i=(("buses_t_p_i",), ["hub"]),
+        buses_t_p=(("snapshots", "buses_t_p_i"), [[1.0], [2.0]]),
+    )
+    found = document(path)
+    assert found["success"] is True
+    assert found["termination_condition"] == "unknown"
+    assert found["details"] == {
+        "power_flow": {
+            "voltage_magnitude": {"hub": [1.0, 1.0]},
+            "voltage_angle": {"hub": [0.0, 0.0]},
+        }
+    }

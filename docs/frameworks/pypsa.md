@@ -54,8 +54,8 @@ of the system.
 | `framework_version` | the attribute `network_pypsa_version`; in HDF5 the column `pypsa_version` of the table `network` |
 | `model_name` | the name of the network |
 | `solver` | not recorded by PyPSA: `null` |
-| `termination_condition` | `optimal` if the network has an objective, else `not_solved`; see below |
-| `objective` | the sum of the costs of the document |
+| `termination_condition` | `optimal` if the network has an objective; `converged`, `not_converged` or `unknown` for a [power flow](#power-flow); else `not_solved`; see below |
+| `objective` | the sum of the costs of the document; null for a power flow |
 | `objective_function_value` | the objective of the network, `n.objective` |
 | `timestamps` | the snapshots; instants as ISO 8601 text, anything else as the network names it |
 | `weights` | the weighting `generators` of the snapshots, if the snapshots count differently |
@@ -71,6 +71,7 @@ of the system.
 | `tech_metadata` | the kind as above; `carrier_out` is the carrier of the bus that the component feeds |
 | `coordinates` | `y` and `x` of the buses, if the network has the reference system 4326 |
 | `details.objective_constant` | `n.objective_constant` |
+| `details.power_flow` | what a [power flow](#power-flow) found |
 
 ### Defaults
 
@@ -158,10 +159,73 @@ reported as `optimal`.
 
 ## A network that has not been optimised
 
-A network without an objective has not been optimised. The document reports
-the capacities that were given, `p_nom` in place of `p_nom_opt`, and the
-demand that was set. It has no dispatch and no costs, `success` is `false`,
-and a warning says that the capacities are not decided.
+A network without an objective has not been optimised. If its buses have no
+results either, the document reports the capacities that were given, `p_nom`
+in place of `p_nom_opt`, and the demand that was set. It has no dispatch and
+no costs, `success` is `false`, and a warning says that the capacities are
+not decided.
+
+## Power flow
+
+`n.lpf()` and `n.pf()` solve the electrical network for a dispatch that is
+given, and optimise nothing: they find the voltage of every bus, the flow
+on every line and transformer and the power that the slack takes up. They
+leave no objective behind, and the buses have results: `p`, `v_ang` and,
+for a non-linear power flow, `v_mag_pu` and `q`. Such a network holds the
+solution of a power flow, and its document says so:
+
+- `capacities` are those given, as for a network that has not been
+  optimised; `dispatch`, `generation`, `demand_timeseries` and
+  `transmission_flow` are as solved, the slack carrying the losses.
+- `objective` is null and there are no costs.
+- `details.power_flow` holds what the power flow found:
+
+| Key | Meaning |
+|---|---|
+| `slack_buses` | the slack bus of each sub-network, from the table `sub_networks` |
+| `voltage_magnitude` | the voltage of each bus of alternating current at each snapshot, in per unit, by the name of the bus |
+| `voltage_angle` | its angle, in radians |
+| `reactive_power` | the reactive power that each generator and storage unit supplies at each snapshot, by `location::technology`; present if the network was solved for it, with a non-linear power flow |
+| `branch_loading` | the loading of each line and transformer at each snapshot, by its name: the apparent power at the fuller of its ends over its rating `s_nom`; null where the rating is zero |
+| `converged` | whether the power flow converged at each snapshot, if a record says; see below |
+| `iterations` | the iterations each snapshot took, if the record says |
+
+PyPSA writes a result only where it differs from its default. A bus whose
+voltage stays at 1 per unit, such as a slack bus or every bus of a linear
+power flow, has no series of it in the file, nor has a bus whose angle is
+zero or a unit whose reactive power is; the document fills in the defaults.
+
+**Convergence.** PyPSA does not record whether a power flow converged.
+[MEME](../usage/meme.md), which runs power flows through PyPSA, writes it
+down next to the network, in `power_flow/convergence.csv`: one row for each
+snapshot with a column `converged` and, for the Newton-Raphson method, a
+column `iterations`. If that file lies next to the network, the document
+takes the convergence from it: `success` is whether every snapshot
+converged, `termination_condition` is `converged` or `not_converged`, and
+`details.power_flow` lists `converged` and `iterations`. Without a record,
+`termination_condition` is `unknown`, `success` is `true`, since the file
+holds a solution, and the warning says that the convergence is not recorded.
+A record that does not fit the network, with another number of rows or
+without the column, is not used, and the warning says why.
+
+```json
+{
+  "success": true,
+  "termination_condition": "converged",
+  "objective": null,
+  "details": {
+    "power_flow": {
+      "converged": [true, true, true, true],
+      "iterations": [3, 3, 2, 2],
+      "slack_buses": ["hv::electricity"],
+      "voltage_magnitude": {"hv::electricity": [1.0, 1.0, 1.0, 1.0], "mv1::electricity": [0.98, 0.98, 0.97, 0.99]},
+      "voltage_angle": {"hv::electricity": [0.0, 0.0, 0.0, 0.0], "mv1::electricity": [-0.09, -0.09, -0.09, -0.07]},
+      "reactive_power": {"hv::grid": [2.26, 3.05, 4.19, 4.09], "mv2::pv": [4.24, 4.35, 3.72, 1.48]},
+      "branch_loading": {"l12": [0.47, 0.42, 0.26, 0.06], "trafo": [0.49, 0.51, 0.49, 0.32]}
+    }
+  }
+}
+```
 
 ## Stochastic networks
 
@@ -183,4 +247,6 @@ else, and a file that holds more is refused.
 ## What Coati does not read
 
 - The shadow prices of the buses and of the global constraints.
+- The inputs of a power flow: the set points, the controls and the shunt
+  impedances.
 - Networks that were exported to CSV files.

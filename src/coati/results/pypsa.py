@@ -54,7 +54,9 @@ scenarios, which is also what the objective of the network is.
 PyPSA does not record how the solver ended. A network that has an objective has
 been optimised, and PyPSA assigns a solution only if the solver found the
 optimum, so the termination condition of such a network is reported as
-`optimal`; that of any other as `not_solved`.
+`optimal`. A network without an objective whose buses have results holds the
+solution of a power flow, which `coati.results.pypsa_power_flow` describes;
+any other network is `not_solved`.
 """
 
 from __future__ import annotations
@@ -68,6 +70,7 @@ import numpy as np
 from coati.frameworks import Framework
 from coati.labeled import finite
 from coati.model import Dataset
+from coati.results import pypsa_power_flow
 from coati.results.document import SEPARATOR, Results, join, net_flows
 from coati.results.options import ExtractOptions, synthesize_timestamps
 from coati.results.pypsa_network import Component, Network, read_network
@@ -157,6 +160,7 @@ def extract(dataset: Dataset, framework: Framework, options: ExtractOptions) -> 
     networks = read_network(dataset)
     first = networks[0]
     solved = first.objective is not None
+    flowed = pypsa_power_flow.is_power_flow(first)
     results = Results(framework, "optimal" if solved else "not_solved", solved)
     results.model_name = first.name
     results.objective_function_value = first.objective
@@ -165,7 +169,7 @@ def extract(dataset: Dataset, framework: Framework, options: ExtractOptions) -> 
     results.periods = first.periods
     if first.objective_constant is not None:
         results.details["objective_constant"] = first.objective_constant
-    if not solved:
+    if not solved and not flowed:
         results.warnings.append(
             "the network has no objective: it has not been optimised,"
             " and the capacities are those given, not decided"
@@ -175,6 +179,8 @@ def extract(dataset: Dataset, framework: Framework, options: ExtractOptions) -> 
     results.finish()
     if solved:
         _account(results, first, given, unmet)
+    elif flowed:
+        pypsa_power_flow.describe(results, first, dataset.source, parts[0].reactive())
     return results
 
 
@@ -524,6 +530,34 @@ class _Scenario:
             arriving = np.maximum(-flows[port][:, position], 0.0)
             self._arrive(source, target, arriving)
             self._deliver(technology, target, carrier, arriving)
+
+    def reactive(self) -> dict[str, np.ndarray[Any, Any]]:
+        """Return the reactive power that each technology supplies at each location.
+
+        The generators and the storage units supply it. A network holds it
+        only if it was solved for it, with a non-linear power flow; it then
+        has a series of reactive power somewhere, and a unit that has none
+        supplied nothing.
+        """
+        found: dict[str, np.ndarray[Any, Any]] = {}
+        if not any(
+            name in component.series
+            for component in self._network.components.values()
+            for name in ("q", "q0", "q1")
+        ):
+            return found
+        for table in ("generators", "storage_units"):
+            component = self._network.component(table)
+            supplied = component.flow("q", self._length)
+            for position, (name, bus) in enumerate(
+                zip(component.names, component.texts("bus"), strict=True)
+            ):
+                location, _ = self._place(bus)
+                key = join(location, self._technology(name, location))
+                known = found.get(key)
+                series = supplied[:, position]
+                found[key] = series if known is None else known + series
+        return found
 
     def _branches(self, table: str) -> None:
         branches = self._network.component(table)

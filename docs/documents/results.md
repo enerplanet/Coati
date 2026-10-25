@@ -49,12 +49,18 @@ out where a model has nothing to say: a model without storage has no
 | `solver` | text or null | always | the solver, if the file records it |
 | `success` | true or false | always | whether the model has a solution |
 | `termination_condition` | text | always | how the solver ended, in the words of the framework, or `not_solved` or `unknown` |
-| `objective` | number or null | always | the cost of the system; null if the model has no solution |
+| `objective` | number or null | always | the cost of the system; null if the model has no solution, or if nothing was optimised |
 | `objective_function_value` | number | | the value of the objective function, which may include penalties and weights that are no cost |
 
 `objective` is the sum of the costs that the document lists under
 `costs_by_location`. Where it is not, because the file states costs that
 belong to no technology, a warning says so.
+
+A network of PyPSA that a [power flow](../frameworks/pypsa.md#power-flow)
+solved was not optimised: it has no costs, `objective` is null,
+`termination_condition` is `converged`, `not_converged` or `unknown`, and
+`details.power_flow` holds the voltages and the loading that the power flow
+found.
 
 ### Time
 
@@ -185,7 +191,7 @@ all that the file holds, or that the file is not what it seems:
 - the file holds several solutions of the SPORES mode, or several investment
   periods, of which the document reports one
 - the numbers are the expectation over the scenarios of a stochastic network
-- the network has not been optimised
+- the network has not been optimised, or a power flow solved it
 - the file states a version that was not named, or one that Coati does not
   know
 - the costs do not add up to the objective

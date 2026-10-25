@@ -9,6 +9,17 @@ minor release may change the Python interface and the command line.
 
 ## [Unreleased]
 
+### Added
+
+- PyPSA: the solution of a power flow. A network that `n.pf()` or `n.lpf()`
+  solved has no objective and no costs; its document reports the capacities
+  that were given and the dispatch as solved, and `details.power_flow` holds
+  the slack buses, the voltage of every bus, the reactive power of every
+  generator and storage unit and the loading of every line and transformer.
+  The convergence is taken from `power_flow/convergence.csv` next to the
+  network, as MEME writes it: `termination_condition` is `converged` or
+  `not_converged`, and `unknown` without a record.
+
 ### Changed
 
 - PyPSA: a bus named `north::electricity` carries `electricity` whatever its
