@@ -1349,7 +1349,7 @@ out where a model has nothing to say: a model without storage has no
 <td><code>objective</code></td>
 <td>number or null</td>
 <td>always</td>
-<td>the cost of the system; null if the model has no solution</td>
+<td>the cost of the system; null if the model has no solution, or if nothing was optimised</td>
 </tr>
 <tr>
 <td><code>objective_function_value</code></td>
@@ -1362,6 +1362,11 @@ out where a model has nothing to say: a model without storage has no
 <p><code>objective</code> is the sum of the costs that the document lists under
 <code>costs_by_location</code>. Where it is not, because the file states costs that
 belong to no technology, a warning says so.</p>
+<p>A network of PyPSA that a <a href="../../frameworks/pypsa/#power-flow">power flow</a>
+solved was not optimised: it has no costs, <code>objective</code> is null,
+<code>termination_condition</code> is <code>converged</code>, <code>not_converged</code> or <code>unknown</code>, and
+<code>details.power_flow</code> holds the voltages and the loading that the power flow
+found.</p>
 <h3 id="time">Time<a class="headerlink" href="#time" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -1654,7 +1659,7 @@ all that the file holds, or that the file is not what it seems:</p>
 <li>the file holds several solutions of the SPORES mode, or several investment
   periods, of which the document reports one</li>
 <li>the numbers are the expectation over the scenarios of a stochastic network</li>
-<li>the network has not been optimised</li>
+<li>the network has not been optimised, or a power flow solved it</li>
 <li>the file states a version that was not named, or one that Coati does not
   know</li>
 <li>the costs do not add up to the objective</li>
@@ -1768,7 +1773,7 @@ reads from the results of a model: <code>model_name</code>, <code>solver</code>,
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 25, 2026 12:28:43 UTC">October 25, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 25, 2026 13:19:55 UTC">October 25, 2026</span>
   </span>
 
     

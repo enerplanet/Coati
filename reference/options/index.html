@@ -1976,8 +1976,9 @@ and carriers together.</p>
 
         <p>Derive what follows from the rest: the cost of each technology, and tidy up.</p>
 <p>A technology that puts out nothing at all is dropped from the
-dispatch, and <code>costs_by_tech</code> lists the technologies that cost
-something; <code>costs_by_location</code> keeps every entry.</p>
+dispatch, as is one whose output never reaches <code>INACTIVE</code>, which is
+the noise of a solver; <code>costs_by_tech</code> lists the technologies that
+cost something; <code>costs_by_location</code> keeps every entry.</p>
 
 
     </div>

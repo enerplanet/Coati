@@ -53,11 +53,11 @@
       "type": "boolean"
     },
     "termination_condition": {
-      "description": "How the solver ended, in the words of the framework, or 'not_solved' or 'unknown'.",
+      "description": "How the solver ended, in the words of the framework, or 'not_solved' or 'unknown'; 'converged' or 'not_converged' for a power flow of PyPSA.",
       "type": "string"
     },
     "objective": {
-      "description": "The cost of the system; null if the model has no solution.",
+      "description": "The cost of the system; null if the model has no solution, or if nothing was optimised, as in a power flow.",
       "$ref": "#/$defs/quantity"
     },
     "objective_function_value": {

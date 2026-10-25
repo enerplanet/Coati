@@ -805,6 +805,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#power-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Power flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#stochastic-networks" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1225,8 +1236,10 @@ results document speaks of technologies at locations, so the components are
 translated:</p>
 <p><strong>Location.</strong> The location of a component is that of its bus. A bus that is
 named <code>north::electricity</code> is at the location <code>north</code> and carries
-<code>electricity</code>. Any other bus is its own location, and carries what its
-attribute <code>carrier</code> says, or <code>AC</code> if it says nothing.</p>
+<code>electricity</code>, whatever its attribute <code>carrier</code> says; a further part of the
+name, as in <code>north::electricity::battery</code>, tells the buses of one location
+and one carrier apart. Any other bus is its own location, and carries what
+its attribute <code>carrier</code> says, or <code>AC</code> if it says nothing.</p>
 <p><strong>Technology.</strong> The technology is the name of the component, without the
 location if the name states it as <code>north::pv</code> or as <code>pv@north</code>. Components
 of the same name at several locations are one technology.</p>
@@ -1262,9 +1275,10 @@ of the same name at several locations are one technology.</p>
 </tbody>
 </table>
 <p><strong>Demand that is not met.</strong> A generator stands for demand that the system
-fails to meet if its carrier or its name is <code>load_shedding</code>, <code>load shedding</code>
-or <code>unmet_demand</code>. It is reported as <code>unmet_demand_timeseries</code>, not as a
-technology, and what it costs is no cost of the system.</p>
+fails to meet if its carrier or its name is <code>unmet</code>, <code>unmet_demand</code>,
+<code>load_shedding</code> or <code>load shedding</code>. It is reported as
+<code>unmet_demand_timeseries</code>, not as a technology, and what it costs is no cost
+of the system.</p>
 <h2 id="keys">Keys<a class="headerlink" href="#keys" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1288,11 +1302,11 @@ technology, and what it costs is no cost of the system.</p>
 </tr>
 <tr>
 <td><code>termination_condition</code></td>
-<td><code>optimal</code> if the network has an objective, else <code>not_solved</code>; see below</td>
+<td><code>optimal</code> if the network has an objective; <code>converged</code>, <code>not_converged</code> or <code>unknown</code> for a <a href="#power-flow">power flow</a>; else <code>not_solved</code>; see below</td>
 </tr>
 <tr>
 <td><code>objective</code></td>
-<td>the sum of the costs of the document</td>
+<td>the sum of the costs of the document; null for a power flow</td>
 </tr>
 <tr>
 <td><code>objective_function_value</code></td>
@@ -1354,6 +1368,10 @@ technology, and what it costs is no cost of the system.</p>
 <td><code>details.objective_constant</code></td>
 <td><code>n.objective_constant</code></td>
 </tr>
+<tr>
+<td><code>details.power_flow</code></td>
+<td>what a <a href="#power-flow">power flow</a> found</td>
+</tr>
 </tbody>
 </table>
 <h3 id="defaults">Defaults<a class="headerlink" href="#defaults" title="Permanent link">&para;</a></h3>
@@ -1411,7 +1429,9 @@ operation that PyPSA knows and the network states:</p>
 </table>
 <p>Each is counted from the time series that PyPSA writes for it. PyPSA writes
 a series only where a value differs from the default, so a series that the
-file lacks is zero: a unit that never started up, a store that never spilled.</p>
+file lacks has the default: a unit that never started up, a store that
+never spilled, and a committable unit that was never off, whose <code>status</code>
+defaults to on and which stands by at every snapshot.</p>
 <p>The <code>objective</code> of the document is the sum of these costs, so that the costs
 of the technologies add up to it, as they do for the other frameworks. The
 objective of the network, <code>n.objective</code>, is another number, which the
@@ -1449,10 +1469,96 @@ solver found the optimum; the termination condition of such a network is
 reported as <code>optimal</code>.</p>
 <p><strong>Which solver it was.</strong> <code>solver</code> is <code>null</code>.</p>
 <h2 id="a-network-that-has-not-been-optimised">A network that has not been optimised<a class="headerlink" href="#a-network-that-has-not-been-optimised" title="Permanent link">&para;</a></h2>
-<p>A network without an objective has not been optimised. The document reports
-the capacities that were given, <code>p_nom</code> in place of <code>p_nom_opt</code>, and the
-demand that was set. It has no dispatch and no costs, <code>success</code> is <code>false</code>,
-and a warning says that the capacities are not decided.</p>
+<p>A network without an objective has not been optimised. If its buses have no
+results either, the document reports the capacities that were given, <code>p_nom</code>
+in place of <code>p_nom_opt</code>, and the demand that was set. It has no dispatch and
+no costs, <code>success</code> is <code>false</code>, and a warning says that the capacities are
+not decided.</p>
+<h2 id="power-flow">Power flow<a class="headerlink" href="#power-flow" title="Permanent link">&para;</a></h2>
+<p><code>n.lpf()</code> and <code>n.pf()</code> solve the electrical network for a dispatch that is
+given, and optimise nothing: they find the voltage of every bus, the flow
+on every line and transformer and the power that the slack takes up. They
+leave no objective behind, and the buses have results: <code>p</code>, <code>v_ang</code> and,
+for a non-linear power flow, <code>v_mag_pu</code> and <code>q</code>. Such a network holds the
+solution of a power flow, and its document says so:</p>
+<ul>
+<li><code>capacities</code> are those given, as for a network that has not been
+  optimised; <code>dispatch</code>, <code>generation</code>, <code>demand_timeseries</code> and
+  <code>transmission_flow</code> are as solved, the slack carrying the losses.</li>
+<li><code>objective</code> is null and there are no costs.</li>
+<li><code>details.power_flow</code> holds what the power flow found:</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>slack_buses</code></td>
+<td>the slack bus of each sub-network, from the table <code>sub_networks</code></td>
+</tr>
+<tr>
+<td><code>voltage_magnitude</code></td>
+<td>the voltage of each bus of alternating current at each snapshot, in per unit, by the name of the bus</td>
+</tr>
+<tr>
+<td><code>voltage_angle</code></td>
+<td>its angle, in radians</td>
+</tr>
+<tr>
+<td><code>reactive_power</code></td>
+<td>the reactive power that each generator and storage unit supplies at each snapshot, by <code>location::technology</code>; present if the network was solved for it, with a non-linear power flow</td>
+</tr>
+<tr>
+<td><code>branch_loading</code></td>
+<td>the loading of each line and transformer at each snapshot, by its name: the apparent power at the fuller of its ends over its rating <code>s_nom</code>; null where the rating is zero</td>
+</tr>
+<tr>
+<td><code>converged</code></td>
+<td>whether the power flow converged at each snapshot, if a record says; see below</td>
+</tr>
+<tr>
+<td><code>iterations</code></td>
+<td>the iterations each snapshot took, if the record says</td>
+</tr>
+</tbody>
+</table>
+<p>PyPSA writes a result only where it differs from its default. A bus whose
+voltage stays at 1 per unit, such as a slack bus or every bus of a linear
+power flow, has no series of it in the file, nor has a bus whose angle is
+zero or a unit whose reactive power is; the document fills in the defaults.</p>
+<p><strong>Convergence.</strong> PyPSA does not record whether a power flow converged.
+<a href="../../usage/meme/">MEME</a>, which runs power flows through PyPSA, writes it
+down next to the network, in <code>power_flow/convergence.csv</code>: one row for each
+snapshot with a column <code>converged</code> and, for the Newton-Raphson method, a
+column <code>iterations</code>. If that file lies next to the network, the document
+takes the convergence from it: <code>success</code> is whether every snapshot
+converged, <code>termination_condition</code> is <code>converged</code> or <code>not_converged</code>, and
+<code>details.power_flow</code> lists <code>converged</code> and <code>iterations</code>. Without a record,
+<code>termination_condition</code> is <code>unknown</code>, <code>success</code> is <code>true</code>, since the file
+holds a solution, and the warning says that the convergence is not recorded.
+A record that does not fit the network, with another number of rows or
+without the column, is not used, and the warning says why.</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">"success"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">"termination_condition"</span><span class="p">:</span><span class="w"> </span><span class="s2">"converged"</span><span class="p">,</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">"objective"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">"details"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nt">"power_flow"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">      </span><span class="nt">"converged"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">],</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">      </span><span class="nt">"iterations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">      </span><span class="nt">"slack_buses"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"hv::electricity"</span><span class="p">],</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">      </span><span class="nt">"voltage_magnitude"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"hv::electricity"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span><span class="w"> </span><span class="nt">"mv1::electricity"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.98</span><span class="p">,</span><span class="w"> </span><span class="mf">0.98</span><span class="p">,</span><span class="w"> </span><span class="mf">0.97</span><span class="p">,</span><span class="w"> </span><span class="mf">0.99</span><span class="p">]},</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">      </span><span class="nt">"voltage_angle"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"hv::electricity"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span><span class="w"> </span><span class="nt">"mv1::electricity"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">-0.09</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.09</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.09</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.07</span><span class="p">]},</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">      </span><span class="nt">"reactive_power"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"hv::grid"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">2.26</span><span class="p">,</span><span class="w"> </span><span class="mf">3.05</span><span class="p">,</span><span class="w"> </span><span class="mf">4.19</span><span class="p">,</span><span class="w"> </span><span class="mf">4.09</span><span class="p">],</span><span class="w"> </span><span class="nt">"mv2::pv"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">4.24</span><span class="p">,</span><span class="w"> </span><span class="mf">4.35</span><span class="p">,</span><span class="w"> </span><span class="mf">3.72</span><span class="p">,</span><span class="w"> </span><span class="mf">1.48</span><span class="p">]},</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">      </span><span class="nt">"branch_loading"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"l12"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.47</span><span class="p">,</span><span class="w"> </span><span class="mf">0.42</span><span class="p">,</span><span class="w"> </span><span class="mf">0.26</span><span class="p">,</span><span class="w"> </span><span class="mf">0.06</span><span class="p">],</span><span class="w"> </span><span class="nt">"trafo"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.49</span><span class="p">,</span><span class="w"> </span><span class="mf">0.51</span><span class="p">,</span><span class="w"> </span><span class="mf">0.49</span><span class="p">,</span><span class="w"> </span><span class="mf">0.32</span><span class="p">]}</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="p">}</span>
+</span></code></pre></div>
 <h2 id="stochastic-networks">Stochastic networks<a class="headerlink" href="#stochastic-networks" title="Permanent link">&para;</a></h2>
 <p>A stochastic network holds one set of results for each scenario. The
 document reports their expectation, the sum weighted with the probabilities
@@ -1469,6 +1575,8 @@ else, and a file that holds more is refused.</p>
 <h2 id="what-coati-does-not-read">What Coati does not read<a class="headerlink" href="#what-coati-does-not-read" title="Permanent link">&para;</a></h2>
 <ul>
 <li>The shadow prices of the buses and of the global constraints.</li>
+<li>The inputs of a power flow: the set points, the controls and the shunt
+  impedances.</li>
 <li>Networks that were exported to CSV files.</li>
 </ul>
 
@@ -1493,7 +1601,7 @@ else, and a file that holds more is refused.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 25, 2026 12:28:42 UTC">October 25, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 25, 2026 13:19:55 UTC">October 25, 2026</span>
   </span>
 
     
