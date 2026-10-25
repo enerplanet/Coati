@@ -31,6 +31,10 @@ minor release may change the Python interface and the command line.
   capacity factors and levelised costs, the total levelised cost, the total
   generation and the use of the sources (0.7) or the resources (0.6), and the
   supply that was not used (0.7).
+- The facts next to every file under `tests/data` state the new keys; they
+  were written anew with the framework that made each file, PyPSA 0.25.2,
+  0.35.2, 1.2.4 and 1.3.0, Calliope 0.6.8, 0.6.10, 0.7.0.dev7 and 0.7.0 and
+  AdOpT-NET0 0.1.10, and say what they said before of the keys of 1.0.
 
 ## [0.2.0-alpha] - 2026-10-25
 

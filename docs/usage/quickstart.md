@@ -19,7 +19,7 @@ The command is silent if all went well. `results.json` holds the
 
 ```json
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "framework": "calliope",
   "framework_version": "0.7.0",
   "model_name": "Coati test model",

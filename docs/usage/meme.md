@@ -112,4 +112,5 @@ every target that accepts it, and every document is compared with what the
 framework itself says about the solved model, as the
 [tests](../development/testing.md#the-runs-of-meme) describe. For MEME
 0.2.0-alpha the documents of all 197 result files agree, the seven power
-flows among them.
+flows among them, in every key of the document: the prices, the levels of
+the stores, the two parts of the costs and the emissions included.

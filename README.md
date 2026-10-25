@@ -13,9 +13,11 @@ Coati converts the result files of energy system models to JSON. It reads the
 netCDF and HDF5 files that [Calliope](https://www.callio.pe/),
 [PyPSA](https://pypsa.org/) and
 [AdOpT-NET0](https://adopt-net0.readthedocs.io/) write, and writes what a
-solved model says, in the same terms for every framework. It is a Python
-package with a command line tool, depends on h5py and NumPy alone, and needs
-none of the frameworks.
+solved model says, in the same terms for every framework: capacities,
+generation and dispatch, the levels of the stores, demand, the exchange
+between locations, prices, costs told fixed from variable, and emissions. It
+is a Python package with a command line tool, depends on h5py and NumPy
+alone, and needs none of the frameworks.
 
 **Documentation:** [enerplanet.github.io/Coati](https://enerplanet.github.io/Coati)
 
@@ -32,7 +34,7 @@ framework that wrote the file, named with its version: `calliope-v0-6-10`,
 
 ```json
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "framework": "calliope",
   "framework_version": "0.7.0",
   "success": true,
@@ -40,14 +42,19 @@ framework that wrote the file, named with its version: `calliope-v0-6-10`,
   "objective": 15721.26,
   "timestamps": ["2005-01-01T00:00:00", "2005-01-01T01:00:00"],
   "capacities": {"north::pv": 136.35, "south::battery": 100.0},
+  "storage_levels": {"south::battery": [60.0, 12.3]},
   "generation": {"north::pv::power": 1382.45},
   "dispatch": {"pv": [0.0, 77.65]},
   "demand_timeseries": [50.0, 50.68],
   "transmission_flow": {
     "north::south": {"from": "north", "to": "south", "timeseries": [0.0, 76.09]}
   },
+  "prices": {"south::power": [31.5, 31.5]},
   "costs_by_tech": {"pv": 3.29, "gas": 15717.02},
   "costs_by_location": {"north": {"pv": 3.29}, "south": {"gas": 15717.02}},
+  "fixed_costs_by_location": {"north": {"pv": 3.29}, "south": {"gas": 2100.0}},
+  "variable_costs_by_location": {"north": {"pv": 0.0}, "south": {"gas": 13617.02}},
+  "emissions_by_location": {"north::pv": 0.0, "south::gas": 1037.7},
   "tech_metadata": {"pv": {"parent": "supply", "carrier_out": "power"}}
 }
 ```
