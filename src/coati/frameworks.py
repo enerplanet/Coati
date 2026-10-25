@@ -103,7 +103,7 @@ FAMILIES: Final[tuple[Family, ...]] = (
         title="Calliope",
         series=(0, 6),
         since=(0, 6),
-        tested=("0.6.10",),
+        tested=("0.6.8", "0.6.10"),
         formats=("netcdf4",),
         layout="one group; sets that join location, technology and carrier",
     ),

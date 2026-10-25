@@ -478,7 +478,7 @@ def test_frameworks_as_json(run) -> None:
         "framework": "calliope",
         "title": "Calliope",
         "versions": "0.6.x",
-        "tested": ["0.6.10"],
+        "tested": ["0.6.8", "0.6.10"],
         "formats": ["netcdf4"],
         "layout": "one group; sets that join location, technology and carrier",
     }

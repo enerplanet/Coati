@@ -31,6 +31,8 @@ FILES = {
     "adopt-net0-0.1.10.h5": ("adopt-net0-v0-1", None),
     "adopt-net0-0.1.10-periods.h5": ("adopt-net0-v0-1", None),
     "adopt-net0-0.1.10-typical-days.h5": ("adopt-net0-v0-1", None),
+    "calliope-0.6.8.nc": ("calliope-v0-6-8", "0.6.8"),
+    "calliope-0.6.8-spores.nc": ("calliope-v0-6-8", "0.6.8"),
     "calliope-0.6.10.nc": ("calliope-v0-6-10", "0.6.10"),
     "calliope-0.6.10-spores.nc": ("calliope-v0-6-10", "0.6.10"),
     "calliope-0.7.0.dev7.nc": ("calliope-v0-7-0-dev7", "0.7.0.dev7"),
@@ -234,7 +236,7 @@ def test_the_preview_of_calliope_says_what_the_release_says(data_dir: Path, prev
     assert differences(found, release) == []
 
 
-@pytest.mark.parametrize("version", ["0.6.10", "0.7.0.dev7", "0.7.0"])
+@pytest.mark.parametrize("version", ["0.6.8", "0.6.10", "0.7.0.dev7", "0.7.0"])
 def test_the_solutions_of_the_spores_mode(data_dir: Path, version: str) -> None:
     # The model looks for two alternatives that cost at most a fifth more than the optimum.
     found = document_of(data_dir / f"calliope-{version}-spores.nc")

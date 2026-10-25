@@ -58,7 +58,7 @@ it comes from.
 
 | Framework | Versions |
 |---|---|
-| Calliope | 0.6.10, 0.7.0.dev7, 0.7.0; each with a run in the SPORES mode |
+| Calliope | 0.6.8, 0.6.10, 0.7.0.dev7, 0.7.0; each with a run in the SPORES mode |
 | PyPSA | 0.25.2, 0.35.2, 1.2.4, 1.3.0; each as netCDF and as HDF5 |
 | AdOpT-NET0 | 0.1.10; also with typical days and with two investment periods |
 

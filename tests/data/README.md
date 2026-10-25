@@ -10,6 +10,8 @@ supply, demand, storage, conversion and transmission.
 | `adopt-net0-0.1.10.h5` | AdOpT-NET0 0.1.10 | the model, 48 hours |
 | `adopt-net0-0.1.10-typical-days.h5` | AdOpT-NET0 0.1.10 | six days, for which two typical days stand (method 1) |
 | `adopt-net0-0.1.10-periods.h5` | AdOpT-NET0 0.1.10 | two investment periods |
+| `calliope-0.6.8.nc` | Calliope 0.6.8 | the model, 24 hours |
+| `calliope-0.6.8-spores.nc` | Calliope 0.6.8 | the optimum and two SPORES |
 | `calliope-0.6.10.nc` | Calliope 0.6.10 | the model, 24 hours |
 | `calliope-0.6.10-spores.nc` | Calliope 0.6.10 | the optimum and two SPORES |
 | `calliope-0.7.0.dev7.nc` | Calliope 0.7.0.dev7 | the model, 24 hours |
@@ -76,7 +78,7 @@ Coati and run on Python 3.9, which Calliope 0.6 requires.
 | PyPSA | `pip install "pypsa[hdf5]==1.2.4"` | HiGHS, which comes with PyPSA |
 | PyPSA 0.25 | `pip install pypsa==0.25.2 linopy==0.2.6 highspy "numpy<2" "pandas<2.1" "xarray<2023.13"` | HiGHS |
 | Calliope 0.7 | `pip install calliope==0.7.0` | CBC |
-| Calliope 0.6 | `pip install calliope==0.6.10` on Python 3.9 | CBC |
+| Calliope 0.6 | `pip install calliope==0.6.10` on Python 3.9, or `calliope==0.6.8` on Python 3.8 | CBC |
 | AdOpT-NET0 | `pip install adopt-net0==0.1.10 "tsam<3"` | GLPK |
 
 A solver finds the same optimum every time, but where several solutions cost

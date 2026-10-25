@@ -68,7 +68,7 @@ a framework, or with `auto`, Coati takes it from the file.
 
 | Identifier | Framework | Versions | Tested with | Formats |
 |---|---|---|---|---|
-| `calliope-v0-6` | Calliope | 0.6.x | 0.6.10 | netCDF-4 |
+| `calliope-v0-6` | Calliope | 0.6.x | 0.6.8, 0.6.10 | netCDF-4 |
 | `calliope-v0-7` | Calliope | 0.7.x | 0.7.0.dev7, 0.7.0 | netCDF-4 |
 | `pypsa-v0` | PyPSA | 0.25 and later 0.x | 0.25.2, 0.35.2 | netCDF-4, HDF5 |
 | `pypsa-v1` | PyPSA | 1.x | 1.2.4, 1.3.0 | netCDF-4, HDF5 |

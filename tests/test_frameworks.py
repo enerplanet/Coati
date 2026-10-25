@@ -114,7 +114,7 @@ def test_auto_names_nothing(identifier: str) -> None:
         ("calliope-vx", "'x' is not a version"),
         ("calliope-v0-6-10-final", "'0-6-10-final' is not a version"),
         ("calliope-v0-dev1-6", "'0-dev1-6' is not a version"),
-        ("", "is not a framework identifier; expected for example calliope-v0-6-10"),
+        ("", "is not a framework identifier; expected for example calliope-v0-6-8"),
         ("v1-2", "is not a framework identifier"),
         ("calliope-", "is not a framework identifier"),
         ("-v0-6", "is not a framework identifier"),
