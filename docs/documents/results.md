@@ -238,6 +238,11 @@ schema is strict: it knows every key of the document and refuses any other
 at the top, so that a key that is misspelt does not go unnoticed. `details`
 may hold anything.
 
+The schema is also published at the address that its `$id` names,
+<https://enerplanet.github.io/Coati/schemas/results-1.0.schema.json>, and
+the schema of the dataset document at
+<https://enerplanet.github.io/Coati/schemas/dataset-1.0.schema.json>.
+
 ```python
 import json
 from importlib import resources

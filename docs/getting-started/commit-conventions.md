@@ -1,8 +1,9 @@
 # Commit Message Conventions
 
-All repositories in the `THD-Spatial-AI` and `enerplanet` organizations follow the [Conventional Commits](https://www.conventionalcommits.org/) specification, originally adopted by the EU Commission component library.
-
-Commit messages are automatically validated on every pull request. A PR cannot be merged until all commit messages pass the check.
+Coati follows the [Conventional Commits](https://www.conventionalcommits.org/)
+specification. Commit messages are validated on every pull request by
+`.github/scripts/lint_commits.py`; a PR cannot be merged until all commit
+messages pass the check.
 
 ## Format
 
@@ -14,7 +15,8 @@ Commit messages are automatically validated on every pull request. A PR cannot b
 <footer>
 ```
 
-Only the first line is required. Body and footer are optional.
+Only the first line is required. The body explains why the change is made;
+`Closes #N` in the footer links the issue.
 
 ## Types
 

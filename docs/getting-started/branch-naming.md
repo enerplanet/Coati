@@ -1,8 +1,11 @@
 # Branch Naming Convention
 
-All repositories follow the [Conventional Branch](https://conventional-branch.github.io/) specification, extended with additional types to mirror the commit convention.
+Coati follows the [Conventional Branch](https://conventionalbranch.org/)
+specification, extended with additional types to mirror the commit convention.
 
-Branch names are automatically validated when a pull request is opened. A PR cannot be merged until the branch name passes the check.
+Branch names are validated by `.github/scripts/lint_branch.py` when a pull
+request is opened. A PR cannot be merged until the branch name passes the
+check.
 
 ## Format
 
@@ -31,7 +34,7 @@ Branch names are automatically validated when a pull request is opened. A PR can
 - **Hyphens as separators** — no underscores, no spaces
 - **No consecutive hyphens or dots** — `--` and `..` are not allowed
 - **No leading or trailing hyphens or dots**
-- **Dots only for version numbers** — e.g. `release/v1.2.0`
+- **Dots only for version numbers** — e.g. `release/0.1.0-alpha`
 - **Ticket numbers are allowed** — e.g. `feat/issue-123-login-page`
 
 ## Exempt branches

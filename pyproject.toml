@@ -117,6 +117,7 @@ include = [
     "/tests",
     "/docs",
     "/mkdocs.yml",
+    "/mkdocs_hooks.py",
     "/CHANGELOG.md",
     "/CITATION.cff",
     "/ATTRIBUTIONS.md",

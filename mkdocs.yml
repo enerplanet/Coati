@@ -62,6 +62,10 @@ theme:
     text: Roboto
     code: Roboto Mono
 
+# Hooks: the JSON Schemas of the documents are published under schemas/ (see mkdocs_hooks.py)
+hooks:
+  - mkdocs_hooks.py
+
 # Plugins
 plugins:
   - search:
