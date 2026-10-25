@@ -11,10 +11,10 @@ installs is `coati`, and so is the command:
 
 ```console
 $ coati --version
-coati 0.1.0a0
+coati 0.2.0a0
 ```
 
-`0.1.0a0` is how Python writes the version `0.1.0-alpha`. pip installs an
+`0.2.0a0` is how Python writes the version `0.2.0-alpha`. pip installs an
 alpha version if there is no other; once there are releases, `--pre` asks
 for the versions before a release.
 

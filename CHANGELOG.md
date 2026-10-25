@@ -9,6 +9,8 @@ minor release may change the Python interface and the command line.
 
 ## [Unreleased]
 
+## [0.2.0-alpha] - 2026-10-25
+
 Coati reads every result file that
 [MEME](https://github.com/enerplanet/meme) 0.2.0-alpha produces, the power
 flows among them: every scenario and example of MEME 0.2.0-alpha, run on
@@ -104,5 +106,6 @@ document that agrees with what the framework itself reports for the file.
   compose services for the tests, the checks, the docs server, the `coati`
   command and a shell, selected with `ENV=dev|test`.
 
-[Unreleased]: https://github.com/enerplanet/Coati/compare/v0.1.0-alpha...HEAD
+[Unreleased]: https://github.com/enerplanet/Coati/compare/v0.2.0-alpha...HEAD
+[0.2.0-alpha]: https://github.com/enerplanet/Coati/releases/tag/v0.2.0-alpha
 [0.1.0-alpha]: https://github.com/enerplanet/Coati/releases/tag/v0.1.0-alpha

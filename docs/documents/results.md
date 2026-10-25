@@ -201,7 +201,7 @@ all that the file holds, or that the file is not what it seems:
 {
   "metadata": {
     "generator": "coati",
-    "generator_version": "0.1.0a0",
+    "generator_version": "0.2.0a0",
     "framework_id": "calliope-v0-7-0",
     "framework_family": "calliope-v0-7",
     "source": {"name": "results.nc", "format": "netcdf4", "size": 460016}
