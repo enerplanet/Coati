@@ -43,10 +43,14 @@ It has neither dimensions nor attributes, and it records no times.
 | `timestamps` | the positions `0, 1, 2, ...`; instants with `--time-start` and `--time-step` |
 | `capacities` | `size` of a technology, times its `rated_power` if it has one; `size` of an arc |
 | `storage_capacities` | `size` of a technology that has a `storage_level` |
+| `storage_levels` | `storage_level` of a technology |
 | `generation`, `dispatch` | the datasets `<carrier>_output` of a technology |
 | `demand_timeseries`, `demand_by_location` | `demand` of the energy balances |
 | `transmission_flow` | `flow` less `losses` of the arcs |
 | `costs_by_location` | `capex_tot`, `opex_fixed_tot` and `opex_variable` of a technology; `capex`, `opex_fixed` and `opex_variable` of an arc; what is bought and sold at its price |
+| `fixed_costs_by_location` | `capex_tot` and `opex_fixed_tot` of a technology; `capex` and `opex_fixed` of an arc |
+| `variable_costs_by_location` | `opex_variable` of a technology or an arc; what is bought at its price, less what is sold |
+| `emissions_by_location` | `emissions_pos` less `emissions_neg` of a technology over the modelled time |
 | `tech_metadata` | the kind follows from what a technology does; see below |
 | `details.summary` | every figure of `summary` |
 | `details.exported` | what each node sells, by `node::carrier` |
@@ -178,8 +182,8 @@ has no solution.
 
 ## What Coati does not read
 
-- The emissions of the technologies and of the networks; `details.summary`
-  has their totals.
+- The emissions of the networks and of what is imported; `details.summary`
+  has their totals, `emissions_net` among them.
 - The results of a Pareto front or of a Monte Carlo run as a whole.
   AdOpT-NET0 writes a folder for each of their points; each is a file that
   Coati reads.

@@ -444,3 +444,42 @@ def test_typical_days_that_point_beyond_the_series(tmp_path: Path) -> None:
     with h5py.File(path, "a") as file:
         file["k_means_specs/period1/sequence"][...] = [1, 2, 3, 4]
     assert document(path)["timestamps"] == [0, 1, 2]
+
+
+# -- what else the file says ------------------------------------------------------------------
+
+
+def test_the_costs_are_told_fixed_from_variable(solved: dict) -> None:
+    # The investment and the fixed operation of a technology or an arc are fixed; its variable
+    # operation, what is bought and what is sold are variable.
+    assert solved["fixed_costs_by_location"] == {
+        "a": {"Wind": 66.0, "import_power": 0.0, "cable:b": 5.0},
+        "b": {"Battery": 30.0, "export_power": 0.0, "cable:a": 5.0},
+    }
+    assert solved["variable_costs_by_location"] == {
+        "a": {"Wind": 4.0, "import_power": 130.0, "cable:b": 1.0},
+        "b": {"Battery": 0.0, "export_power": -1.0, "cable:a": 0.0},
+    }
+    for location, costs in solved["costs_by_location"].items():
+        for technology, cost in costs.items():
+            assert cost == pytest.approx(
+                solved["fixed_costs_by_location"][location][technology]
+                + solved["variable_costs_by_location"][location][technology]
+            )
+
+
+def test_storage_levels(solved: dict) -> None:
+    assert solved["storage_levels"] == {"b::Battery": [1.0, 0.0, 0.0]}
+
+
+def test_emissions_are_what_is_emitted_less_what_is_taken_up(solved: dict) -> None:
+    assert solved["emissions_by_location"] == {"a::Wind": pytest.approx(1.0 - 0.1)}
+    assert solved["total_emissions"] == pytest.approx(0.9)
+
+
+def test_typical_days_scale_the_levels_and_the_emissions(tmp_path: Path) -> None:
+    # The three times of the file stand for four, the second of them twice.
+    path = files.adopt_net0(tmp_path / "optimization_results.h5", typical_days=1)
+    found = document(path)
+    assert found["storage_levels"] == {"b::Battery": [1.0, 0.0, 0.0, 0.0]}
+    assert found["emissions_by_location"] == {"a::Wind": pytest.approx(0.5 + 0.4 + 0.4 + 0.1 - 0.1)}

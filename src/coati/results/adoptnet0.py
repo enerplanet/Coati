@@ -64,7 +64,7 @@ from coati.errors import ExtractionError
 from coati.frameworks import Framework
 from coati.labeled import finite, numbers_of, texts_of
 from coati.model import Dataset, Group, Variable
-from coati.results.document import INACTIVE, Results, join, net_flows, succeeded
+from coati.results.document import FIXED, INACTIVE, VARIABLE, Results, join, net_flows, succeeded
 from coati.results.options import ExtractOptions, synthesize_timestamps
 
 __all__ = ["extract"]
@@ -338,8 +338,9 @@ class _Extractor:
             results.capacities[key] = _number(sized, "capacity_discharge", size)
         else:
             results.capacities[key] = size * _number(sized, "rated_power", 1.0)
-        cost = _number(sized, "capex_tot") + _number(sized, "opex_fixed_tot")
-        results.add_cost(node, name, cost + weight * _number(sized, "opex_variable"))
+        fixed = _number(sized, "capex_tot") + _number(sized, "opex_fixed_tot")
+        results.add_cost(node, name, fixed, FIXED)
+        results.add_cost(node, name, weight * _number(sized, "opex_variable"), VARIABLE)
         for carrier, flow in outputs.items():
             series = self._over_time(flow)
             results.generation[join(node, name, carrier)] = float(series.sum())
@@ -347,9 +348,25 @@ class _Extractor:
                 results.add_dispatch(name, series)
         for flow in inputs.values():
             self._over_time(flow)
+        level = self._series(running, "storage_level")
+        if level is not None:
+            results.add_storage_level(key, self._over_time(level))
+        self._emissions(node, name, running)
         results.tech_metadata.setdefault(
             name, {"parent": kind, "carrier_out": next(iter(outputs), "")}
         )
+
+    def _emissions(self, node: str, name: str, running: Group | None) -> None:
+        """Record what a technology emits over the modelled time, less what it takes up."""
+        emitted = self._series(running, "emissions_pos")
+        absorbed = self._series(running, "emissions_neg")
+        if emitted is None and absorbed is None:
+            return
+        total = 0.0
+        for series, sign in ((emitted, 1.0), (absorbed, -1.0)):
+            if series is not None:
+                total += sign * float(self._over_time(series).sum())
+        self._results.add_emissions(node, name, total)
 
     def _flows(
         self, running: Group | None
@@ -393,7 +410,7 @@ class _Extractor:
             price = self._series(flows, f"{name}_price")
             price = self._over_time(price) if price is not None else None
             if price is not None and price.shape == series.shape:
-                results.add_cost(node, technology, sign * float((series * price).sum()))
+                results.add_cost(node, technology, sign * float((series * price).sum()), VARIABLE)
             results.tech_metadata.setdefault(
                 technology, {"parent": kind, "carrier_out": carrier if kind == _SUPPLY else ""}
             )
@@ -447,8 +464,10 @@ class _Extractor:
         if twin is not None and np.allclose(twin, (size, cost)):
             cost /= 2  # the two directions of one connection share what it costs
         flow = self._series(running, "flow")
-        running_cost = self._weight(flow) * _number(sized, "opex_variable")
-        results.add_cost(origin, technology, cost + running_cost)
+        results.add_cost(origin, technology, cost, FIXED)
+        results.add_cost(
+            origin, technology, self._weight(flow) * _number(sized, "opex_variable"), VARIABLE
+        )
         if flow is None:
             return
         losses = self._series(running, "losses")

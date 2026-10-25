@@ -21,6 +21,10 @@
     "south::Storage_Battery": 24.608598922,
     "south::Storage_Battery_existing": 5.0
   },
+  "storage_levels": {
+    "south::Storage_Battery": [5.698095513, 12.779673907, 18.997377808, 22.920435839, 24.608598922, 23.419398319, 18.187339338, 10.478964835, 6.262208859, 6.159344992, 9.268950266, 14.18639079, 19.188515581, 22.509965724, 22.701871325, 19.273855597, 12.916957557, 5.213853437, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.56237118, 10.646085299, 16.865922788, 22.231112274, 24.608598922, 23.419398319, 18.187339338, 10.677626381, 6.460671743, 6.357609414, 9.467016423, 14.38425888, 19.386185804, 22.707438276, 22.899146405, 18.875920748, 12.519420642, 4.816714059, 1.165757761, 0.0, 0.0, 0.0, 0.0, 0.0],
+    "south::Storage_Battery_existing": [0.0, 1.44, 2.87856, 4.31568144, 5.0, 4.995, 4.990005, 4.975609829, 4.970634219, 4.965663585, 4.960697921, 4.955737224, 4.950781486, 4.945830705, 4.940884874, 4.298955799, 2.732156843, 1.166924686, 1.165757761, 0.0, 0.0, 0.0, 0.0, 0.653767866, 2.093114098, 3.531020984, 4.967489963, 4.962522473, 4.957559951, 4.952602391, 4.947649788, 4.734635427, 4.729900791, 4.725170891, 4.72044572, 4.715725274, 4.711009549, 4.706298539, 4.701592241, 4.696890648, 3.129693758, 1.564064064, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  },
   "generation": {
     "north::Photovoltaic::electricity": 308.794785364,
     "north::WindTurbine_Onshore_1500::electricity": 0.0,
@@ -74,6 +78,39 @@
       "electricitySimple:north": 0.030793291
     }
   },
+  "fixed_costs_by_location": {
+    "north": {
+      "Photovoltaic": 564974.734423984,
+      "WindTurbine_Onshore_1500": 0.0,
+      "electricitySimple:south": 0.030793291,
+      "import_electricity": 0.0
+    },
+    "south": {
+      "Storage_Battery": 2494640.052952104,
+      "Storage_Battery_existing": 100000.0,
+      "electricitySimple:north": 0.030793291
+    }
+  },
+  "variable_costs_by_location": {
+    "north": {
+      "Photovoltaic": 5230.218161795,
+      "WindTurbine_Onshore_1500": 0.0,
+      "import_electricity": 129555.679299127,
+      "electricitySimple:south": 0.0
+    },
+    "south": {
+      "Storage_Battery": 0.0,
+      "Storage_Battery_existing": 0.0,
+      "electricitySimple:north": 0.0
+    }
+  },
+  "emissions_by_location": {
+    "north::Photovoltaic": 0.0,
+    "north::WindTurbine_Onshore_1500": 0.0,
+    "south::Storage_Battery": 0.0,
+    "south::Storage_Battery_existing": 0.0
+  },
+  "total_emissions": 0.0,
   "tech_metadata": {
     "Photovoltaic": {
       "parent": "supply",

@@ -238,6 +238,31 @@ def facts(results: Path) -> dict[str, Any]:
     found["transmission_flow"] = {
         "north::south": [there - back for there, back in zip(southward, northward, strict=True)]
     }
+    levels: dict[str, list[float]] = {}
+    emitted: dict[str, float] = {}
+    fixed: dict[str, dict[str, float]] = {}
+    variable: dict[str, dict[str, float]] = {}
+    for (node, technology, name), values in operation.items():
+        key = f"{node}::{technology}"
+        if name == "storage_level":
+            levels[key] = [float(value) for value in values]
+        elif name in ("emissions_pos", "emissions_neg"):
+            sign = 1.0 if name == "emissions_pos" else -1.0
+            emitted[key] = emitted.get(key, 0.0) + sign * float(sum(float(v) for v in values))
+    for node, technology, name in design:
+        if name == "size":
+            fixed.setdefault(node, {})[technology] = _single(
+                design[node, technology, "capex_tot"]
+            ) + _single(design[node, technology, "opex_fixed_tot"])
+            variable.setdefault(node, {})[technology] = _single(
+                design[node, technology, "opex_variable"]
+            )
+    fixed.setdefault("north", {})["import_electricity"] = 0.0
+    variable.setdefault("north", {})["import_electricity"] = float(summary["cost_imports"])
+    found["storage_levels"] = levels
+    if emitted:
+        found["emissions_by_location"] = emitted
+        found["total_emissions"] = sum(emitted.values())
     # The network works in both directions: AdOpT-NET0 sizes both arcs alike and charges
     # the connection once. The document lets each of the two arcs bear half of the cost.
     for origin, destination in (("north", "south"), ("south", "north")):
@@ -245,6 +270,10 @@ def facts(results: Path) -> dict[str, Any]:
             networks[f"{origin}{destination}", "size"]
         )
         found["costs"][f"{NETWORK}:{destination}"] = float(summary["cost_netws"]) / 2
+        fixed.setdefault(origin, {})[f"{NETWORK}:{destination}"] = float(summary["cost_netws"]) / 2
+        variable.setdefault(origin, {})[f"{NETWORK}:{destination}"] = 0.0
+    found["fixed_costs_by_location"] = fixed
+    found["variable_costs_by_location"] = variable
     _check_summary(found, summary)
     return found
 

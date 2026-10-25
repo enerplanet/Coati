@@ -696,6 +696,8 @@ def _adopt_period(
     operation = file.require_group(f"{names['operation']}/technology_operation/{period}")
     operation.create_dataset("a/Wind/power_output", data=np.array([3.0, 2, 1]) * factor)
     operation.create_dataset("a/Wind/cap_factor", data=[0.5, 0.4, 0.2])
+    operation.create_dataset("a/Wind/emissions_pos", data=np.array([0.5, 0.4, 0.1]) * factor)
+    operation.create_dataset("a/Wind/emissions_neg", data=np.array([0.1, 0.0, 0.0]) * factor)
     operation.create_dataset("b/Battery/power_input", data=np.array([1.0, 0, 0]) * factor)
     operation.create_dataset("b/Battery/power_output", data=np.array([-0.0, 1, 0]) * factor)
     operation.create_dataset("b/Battery/storage_level", data=np.array([1.0, 0, 0]) * factor)
