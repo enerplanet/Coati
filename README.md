@@ -78,8 +78,8 @@ An identifier names a family, as in the table, or a version of it:
 `calliope-v0-7-0`. The leading zero of a version may be left out,
 `calliope-v6-10` is Calliope 0.6.10. The results are tested against what each
 framework says about its own model: the SPORES and the operate mode of
-Calliope, stochastic networks and several investment periods of PyPSA,
-typical days and several investment periods of AdOpT-NET0.
+Calliope, stochastic networks, several investment periods and power flows of
+PyPSA, typical days and several investment periods of AdOpT-NET0.
 
 ## Installation
 

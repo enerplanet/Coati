@@ -118,10 +118,12 @@ file is converted. For each, the document is validated against the schema,
 and its numbers are compared with what the framework reports for the file
 through its own interface: the tables and `n.statistics` of PyPSA, the
 `results` and `inputs` of Calliope, and the datasets that AdOpT-NET0 reads
-from its file. For MEME 0.1.0-alpha that is 54 payloads, 133 jobs and 172
-result files of four versions of the frameworks; the notes of the release
-state the outcome. The scripts of this check live outside the repository,
-because they need MEME and its environment.
+from its file; for a power flow, with the tables that MEME writes next to
+the network from the solved network in memory. For MEME 0.2.0-alpha that is
+70 payloads, 158 jobs and 197 result files of four versions of the
+frameworks; the notes of the release state the outcome. The scripts of this
+check live outside the repository, because they need MEME and its
+environment.
 
 ### Properties
 

@@ -9,7 +9,7 @@ solved the model.
 ## The targets of MEME and the identifiers of Coati
 
 MEME names a framework and a version as a *target*; Coati names them with a
-framework identifier. For MEME 0.1.0-alpha:
+framework identifier. For MEME 0.2.0-alpha:
 
 | MEME target | Framework | Identifier for Coati | Result file |
 |---|---|---|---|
@@ -34,9 +34,11 @@ configuration, a `results.json` with the state of every run, and under
 ```text
 files/
   run_0/
-    input/      what MEME wrote for the framework
-    output/     what the framework wrote: results.nc, network.nc, ...
-  run_1/        the next run of a sweep
+    input/        what MEME wrote for the framework
+    output/       what the framework wrote: results.nc, network.nc, ...
+      results/    PyPSA, an optimisation: tables of the results as CSV, summary.json
+      power_flow/ PyPSA, a power flow: tables of the results as CSV, convergence.csv, summary.json
+  run_1/          the next run of a sweep
 ```
 
 A job that ran several targets at once has one such tree per target. The
@@ -44,7 +46,16 @@ result file of a run is what Coati converts:
 
 ```console
 $ coati files/run_0/output/results.nc results.json calliope-v0-7-0
+$ coati files/run_0/output/network.nc results.json pypsa-v1-2-4
 ```
+
+The tables that MEME writes beside `network.nc` hold nothing that the
+network does not, with one exception: whether a power flow converged, which
+PyPSA does not record. Coati reads that from `power_flow/convergence.csv`
+when it lies next to the network, as the page of
+[PyPSA](../frameworks/pypsa.md#power-flow) describes. The folders do not
+get in the way of naming `output/` in place of the file: Coati looks for the
+one data file in it.
 
 For AdOpT-NET0, which writes its results into a folder named after the time
 of the run, name the folder above the file: Coati takes the one data file it
@@ -76,12 +87,29 @@ file that is wanted.
 | `plan`, `operate` | the results; in the operate mode of Calliope the capacities are the parameters that were given |
 | `alternatives` | Calliope: the first of the SPORES, the others under `details.spores`, with a warning; PyPSA: see above |
 | `stochastic` (PyPSA) | the expectation over the scenarios, `scenarios` with their probabilities, and a warning |
+| `power_flow` (PyPSA) | the dispatch as solved, no costs, and under `details.power_flow` the voltages, the reactive power, the loading of the branches and the convergence; `success` says whether every snapshot converged |
 | a sweep | one run and one document per point; `config.json` of the bundle names the assignments |
 | `time_aggregation` with typical days | AdOpT-NET0: the series of the whole time; Calliope 0.6: the clustered days, with `weights` |
 | `time_aggregation` with `resample` | Calliope: one time for each resampled step, with the flows of the whole step |
+
+### What the models of MEME look like in a document
+
+MEME names the buses of PyPSA `node::carrier`, so a location of the
+document is a node of the model and a carrier is what the payload calls it.
+A few constructs of MEME take a form of their own:
+
+| MEME emits | In the document |
+|---|---|
+| an energy-sized storage: a Store on a bus `node::carrier::name`, a charger and a discharger as links | three technologies: the store, with its `storage_capacities`, and the two links as conversions, `name_charge` and `name_discharge`, with their capacities and costs |
+| `allow_unmet_demand`: a generator `node::carrier::unmet` with the carrier `unmet` | demand that is not met, under `unmet_demand_timeseries`; its cost under `details.cost_of_unmet_demand`, no cost of the system |
+| `copperplate`: a hub bus `copperplate::carrier` joined to every node by a free link | a location `copperplate`, with the links as transmission to it |
+| a priced line under `network.model: linear_power_flow` | a technology of transmission at both of its ends, each bearing half of its cost |
+| `capacity.per_unit`, modules | the capacity that was built, a multiple of the module |
+| `model.periods`, investment periods | `periods` with the period of each time; the costs are not reconciled with the objective |
 
 Before a release of Coati, every scenario and example of MEME is run on
 every target that accepts it, and every document is compared with what the
 framework itself says about the solved model, as the
 [tests](../development/testing.md#the-runs-of-meme) describe. For MEME
-0.1.0-alpha the documents of all 172 result files agree.
+0.2.0-alpha the documents of all 197 result files agree, the seven power
+flows among them.

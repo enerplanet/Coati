@@ -9,6 +9,12 @@ minor release may change the Python interface and the command line.
 
 ## [Unreleased]
 
+Coati reads every result file that
+[MEME](https://github.com/enerplanet/meme) 0.2.0-alpha produces, the power
+flows among them: every scenario and example of MEME 0.2.0-alpha, run on
+every target that accepts it, gives a document that agrees with what the
+framework itself reports for the file.
+
 ### Added
 
 - PyPSA: the solution of a power flow. A network that `n.pf()` or `n.lpf()`
@@ -19,6 +25,9 @@ minor release may change the Python interface and the command line.
   The convergence is taken from `power_flow/convergence.csv` next to the
   network, as MEME writes it: `termination_condition` is `converged` or
   `not_converged`, and `unknown` without a record.
+- The page *With MEME* describes the bundles of MEME 0.2.0-alpha, the mode
+  `power_flow` and how an energy-sized storage, a copperplate, demand that is
+  not met and a priced line of MEME appear in a document.
 - The file `pypsa-1.2.4-power-flow.nc` under `tests/data`, an electrical
   network that PyPSA 1.2.4 solved by a power flow, with the facts of PyPSA.
 
