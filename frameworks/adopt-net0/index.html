@@ -1287,6 +1287,10 @@ model:</p>
 <td><code>size</code> of a technology that has a <code>storage_level</code></td>
 </tr>
 <tr>
+<td><code>storage_levels</code></td>
+<td><code>storage_level</code> of a technology</td>
+</tr>
+<tr>
 <td><code>generation</code>, <code>dispatch</code></td>
 <td>the datasets <code>&lt;carrier&gt;_output</code> of a technology</td>
 </tr>
@@ -1301,6 +1305,18 @@ model:</p>
 <tr>
 <td><code>costs_by_location</code></td>
 <td><code>capex_tot</code>, <code>opex_fixed_tot</code> and <code>opex_variable</code> of a technology; <code>capex</code>, <code>opex_fixed</code> and <code>opex_variable</code> of an arc; what is bought and sold at its price</td>
+</tr>
+<tr>
+<td><code>fixed_costs_by_location</code></td>
+<td><code>capex_tot</code> and <code>opex_fixed_tot</code> of a technology; <code>capex</code> and <code>opex_fixed</code> of an arc</td>
+</tr>
+<tr>
+<td><code>variable_costs_by_location</code></td>
+<td><code>opex_variable</code> of a technology or an arc; what is bought at its price, less what is sold</td>
+</tr>
+<tr>
+<td><code>emissions_by_location</code></td>
+<td><code>emissions_pos</code> less <code>emissions_neg</code> of a technology over the modelled time</td>
 </tr>
 <tr>
 <td><code>tech_metadata</code></td>
@@ -1454,8 +1470,8 @@ nothing about the model, and is left out of the document.</p>
 has no solution.</p>
 <h2 id="what-coati-does-not-read">What Coati does not read<a class="headerlink" href="#what-coati-does-not-read" title="Permanent link">&para;</a></h2>
 <ul>
-<li>The emissions of the technologies and of the networks; <code>details.summary</code>
-  has their totals.</li>
+<li>The emissions of the networks and of what is imported; <code>details.summary</code>
+  has their totals, <code>emissions_net</code> among them.</li>
 <li>The results of a Pareto front or of a Monte Carlo run as a whole.
   AdOpT-NET0 writes a folder for each of their points; each is a file that
   Coati reads.</li>
@@ -1482,7 +1498,7 @@ has no solution.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 28, 2026 09:52:51 UTC">September 28, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 25, 2026 19:33:46 UTC">October 25, 2026</span>
   </span>
 
     

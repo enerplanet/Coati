@@ -783,6 +783,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#prices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#emissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Emissions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#curtailment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Curtailment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-the-file-does-not-say" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1337,12 +1370,20 @@ of the system.</p>
 <td><code>e_nom_opt</code> of a store; <code>p_nom_opt</code> times <code>max_hours</code> of a storage unit</td>
 </tr>
 <tr>
+<td><code>storage_levels</code></td>
+<td><code>state_of_charge</code> of a storage unit, <code>e</code> of a store, for a network that was optimised; zero where PyPSA writes none</td>
+</tr>
+<tr>
 <td><code>generation</code></td>
 <td>the output of each component over the snapshots, weighted with the weighting <code>generators</code></td>
 </tr>
 <tr>
 <td><code>dispatch</code></td>
 <td>the output at each snapshot: <code>p</code> of a generator, what a storage unit or a store gives off, what arrives at the outputs of a link</td>
+</tr>
+<tr>
+<td><code>curtailment</code></td>
+<td>for a generator whose <code>p_max_pu</code> varies with time: <code>p_max_pu</code> times <code>p_nom_opt</code> less <code>p</code>, where that is positive, weighted with the weighting <code>generators</code>; see below</td>
 </tr>
 <tr>
 <td><code>demand_timeseries</code>, <code>demand_by_location</code></td>
@@ -1353,8 +1394,24 @@ of the system.</p>
 <td>what arrives at either end of the lines, transformers and links of transmission</td>
 </tr>
 <tr>
+<td><code>prices</code></td>
+<td><code>marginal_price</code> of the buses; see below</td>
+</tr>
+<tr>
 <td><code>costs_by_location</code></td>
 <td><code>capital_cost</code> times the capacity, <code>marginal_cost</code> times the dispatch, weighted with the weighting <code>objective</code>, and the other costs of operation that the network states</td>
+</tr>
+<tr>
+<td><code>fixed_costs_by_location</code></td>
+<td><code>capital_cost</code> times the capacity, the annualised investment and the fixed costs of operation together, as PyPSA keeps them</td>
+</tr>
+<tr>
+<td><code>variable_costs_by_location</code></td>
+<td>the costs of operation: <code>marginal_cost</code> times the dispatch and the other costs of operation</td>
+</tr>
+<tr>
+<td><code>emissions_by_location</code></td>
+<td>what each generator burns, times what its carrier emits per unit; see below</td>
 </tr>
 <tr>
 <td><code>tech_metadata</code></td>
@@ -1367,6 +1424,10 @@ of the system.</p>
 <tr>
 <td><code>details.objective_constant</code></td>
 <td><code>n.objective_constant</code></td>
+</tr>
+<tr>
+<td><code>details.global_constraints</code></td>
+<td>the global constraints of the network, such as a limit on emissions; see below</td>
 </tr>
 <tr>
 <td><code>details.power_flow</code></td>
@@ -1462,6 +1523,60 @@ of the document is what the system costs, and
 <code>objective_function_value</code> what PyPSA has recorded.</p>
 <p>The check is left out for a network with several investment periods, whose
 objective weighs the periods.</p>
+<h2 id="prices">Prices<a class="headerlink" href="#prices" title="Permanent link">&para;</a></h2>
+<p>PyPSA records the marginal price of every bus at every snapshot, the dual
+of the balance of the bus, in <code>buses_t.marginal_price</code>. The document
+reports it under <code>prices</code>, by the location and the carrier of the bus. A
+bus named <code>north::electricity</code> is the price of <code>electricity</code> at <code>north</code>; a
+bus named with more parts, such as <code>north::electricity::battery</code>, keeps its
+name, which tells it from the bus of the location and the carrier; any
+other bus is named by its location and its carrier. PyPSA writes the series
+where a price is not zero; a bus whose price stays zero has none, and the
+document reports zero.</p>
+<h2 id="emissions">Emissions<a class="headerlink" href="#emissions" title="Permanent link">&para;</a></h2>
+<p>PyPSA records no emissions. It records what each carrier emits per unit, the
+attribute <code>co2_emissions</code> of the carriers, and counts the emissions of the
+network towards a global constraint of the type <code>primary_energy</code> by what is
+burnt. The document counts them the same way:</p>
+<ul>
+<li>A generator emits its output over its <code>efficiency</code>, times what its
+  carrier emits per unit. Every generator is listed once any carrier of the
+  network emits, with nothing for a carrier that does not; a generator that
+  stands for demand that is not met is left out.</li>
+<li>A storage unit or a store whose carrier emits and that is not cyclic emits
+  what it gives off over the snapshots: the energy it held at the start,
+  <code>state_of_charge_initial</code> or <code>e_initial</code>, less what it holds at the end.
+  What it keeps is negative.</li>
+</ul>
+<p><code>total_emissions</code> adds them up, with the weighting <code>generators</code>. The
+weighting of investment periods is not applied.</p>
+<p>The global constraints of the network, such as a cap on emissions, are
+reported under <code>details.global_constraints</code> as PyPSA states them, with
+the defaults PyPSA gives an attribute it does not write:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">"details"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">"global_constraints"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">      </span><span class="nt">"co2_cap"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"primary_energy"</span><span class="p">,</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="nt">"carrier_attribute"</span><span class="p">:</span><span class="w"> </span><span class="s2">"co2_emissions"</span><span class="p">,</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="nt">"sense"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;="</span><span class="p">,</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">        </span><span class="nt">"constant"</span><span class="p">:</span><span class="w"> </span><span class="mf">1000000.0</span><span class="p">,</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">        </span><span class="nt">"mu"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">      </span><span class="p">}</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="p">}</span>
+</span></code></pre></div>
+<p><code>constant</code> is the limit, <code>mu</code> its shadow price: what one more unit of the
+limit would save.</p>
+<h2 id="curtailment">Curtailment<a class="headerlink" href="#curtailment" title="Permanent link">&para;</a></h2>
+<p>A generator whose <code>p_max_pu</code> varies with time has a resource that the file
+records, the sun or the wind. What such a generator could have put out,
+<code>p_max_pu</code> times <code>p_nom_opt</code>, less what it did put out, where that is
+positive, is its curtailment, added up over the snapshots with the weighting
+<code>generators</code>. A generator whose availability does not vary has no resource to
+curtail, and is not listed; <code>n.statistics.curtailment</code> of PyPSA 1.2 counts
+the spare capacity of every generator instead, and so says more.</p>
 <h2 id="what-the-file-does-not-say">What the file does not say<a class="headerlink" href="#what-the-file-does-not-say" title="Permanent link">&para;</a></h2>
 <p><strong>How the solver ended.</strong> PyPSA does not record it. A network that has an
 objective has been optimised, and PyPSA assigns a solution only if the
@@ -1542,22 +1657,22 @@ converged, <code>termination_condition</code> is <code>converged</code> or <code
 holds a solution, and the warning says that the convergence is not recorded.
 A record that does not fit the network, with another number of rows or
 without the column, is not used, and the warning says why.</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">"success"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">"termination_condition"</span><span class="p">:</span><span class="w"> </span><span class="s2">"converged"</span><span class="p">,</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">"objective"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">"details"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nt">"power_flow"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">      </span><span class="nt">"converged"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">],</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">      </span><span class="nt">"iterations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">      </span><span class="nt">"slack_buses"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"hv::electricity"</span><span class="p">],</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">      </span><span class="nt">"voltage_magnitude"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"hv::electricity"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span><span class="w"> </span><span class="nt">"mv1::electricity"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.98</span><span class="p">,</span><span class="w"> </span><span class="mf">0.98</span><span class="p">,</span><span class="w"> </span><span class="mf">0.97</span><span class="p">,</span><span class="w"> </span><span class="mf">0.99</span><span class="p">]},</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">      </span><span class="nt">"voltage_angle"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"hv::electricity"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span><span class="w"> </span><span class="nt">"mv1::electricity"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">-0.09</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.09</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.09</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.07</span><span class="p">]},</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">      </span><span class="nt">"reactive_power"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"hv::grid"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">2.26</span><span class="p">,</span><span class="w"> </span><span class="mf">3.05</span><span class="p">,</span><span class="w"> </span><span class="mf">4.19</span><span class="p">,</span><span class="w"> </span><span class="mf">4.09</span><span class="p">],</span><span class="w"> </span><span class="nt">"mv2::pv"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">4.24</span><span class="p">,</span><span class="w"> </span><span class="mf">4.35</span><span class="p">,</span><span class="w"> </span><span class="mf">3.72</span><span class="p">,</span><span class="w"> </span><span class="mf">1.48</span><span class="p">]},</span>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">      </span><span class="nt">"branch_loading"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"l12"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.47</span><span class="p">,</span><span class="w"> </span><span class="mf">0.42</span><span class="p">,</span><span class="w"> </span><span class="mf">0.26</span><span class="p">,</span><span class="w"> </span><span class="mf">0.06</span><span class="p">],</span><span class="w"> </span><span class="nt">"trafo"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.49</span><span class="p">,</span><span class="w"> </span><span class="mf">0.51</span><span class="p">,</span><span class="w"> </span><span class="mf">0.49</span><span class="p">,</span><span class="w"> </span><span class="mf">0.32</span><span class="p">]}</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">"success"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">"termination_condition"</span><span class="p">:</span><span class="w"> </span><span class="s2">"converged"</span><span class="p">,</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nt">"objective"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">"details"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="nt">"power_flow"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">      </span><span class="nt">"converged"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">],</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">      </span><span class="nt">"iterations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">      </span><span class="nt">"slack_buses"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"hv::electricity"</span><span class="p">],</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">      </span><span class="nt">"voltage_magnitude"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"hv::electricity"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span><span class="w"> </span><span class="nt">"mv1::electricity"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.98</span><span class="p">,</span><span class="w"> </span><span class="mf">0.98</span><span class="p">,</span><span class="w"> </span><span class="mf">0.97</span><span class="p">,</span><span class="w"> </span><span class="mf">0.99</span><span class="p">]},</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">      </span><span class="nt">"voltage_angle"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"hv::electricity"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span><span class="w"> </span><span class="nt">"mv1::electricity"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">-0.09</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.09</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.09</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.07</span><span class="p">]},</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">      </span><span class="nt">"reactive_power"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"hv::grid"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">2.26</span><span class="p">,</span><span class="w"> </span><span class="mf">3.05</span><span class="p">,</span><span class="w"> </span><span class="mf">4.19</span><span class="p">,</span><span class="w"> </span><span class="mf">4.09</span><span class="p">],</span><span class="w"> </span><span class="nt">"mv2::pv"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">4.24</span><span class="p">,</span><span class="w"> </span><span class="mf">4.35</span><span class="p">,</span><span class="w"> </span><span class="mf">3.72</span><span class="p">,</span><span class="w"> </span><span class="mf">1.48</span><span class="p">]},</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">      </span><span class="nt">"branch_loading"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"l12"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.47</span><span class="p">,</span><span class="w"> </span><span class="mf">0.42</span><span class="p">,</span><span class="w"> </span><span class="mf">0.26</span><span class="p">,</span><span class="w"> </span><span class="mf">0.06</span><span class="p">],</span><span class="w"> </span><span class="nt">"trafo"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.49</span><span class="p">,</span><span class="w"> </span><span class="mf">0.51</span><span class="p">,</span><span class="w"> </span><span class="mf">0.49</span><span class="p">,</span><span class="w"> </span><span class="mf">0.32</span><span class="p">]}</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="stochastic-networks">Stochastic networks<a class="headerlink" href="#stochastic-networks" title="Permanent link">&para;</a></h2>
 <p>A stochastic network holds one set of results for each scenario. The
@@ -1574,7 +1689,8 @@ class and function: a pickle can yield lists, texts and numbers and nothing
 else, and a file that holds more is refused.</p>
 <h2 id="what-coati-does-not-read">What Coati does not read<a class="headerlink" href="#what-coati-does-not-read" title="Permanent link">&para;</a></h2>
 <ul>
-<li>The shadow prices of the buses and of the global constraints.</li>
+<li>The shadow prices of the constraints of the components, <code>mu_upper</code> and
+  <code>mu_lower</code>.</li>
 <li>The inputs of a power flow: the set points, the controls and the shunt
   impedances.</li>
 <li>Networks that were exported to CSV files.</li>
@@ -1601,7 +1717,7 @@ else, and a file that holds more is refused.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 25, 2026 13:19:55 UTC">October 25, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 25, 2026 19:32:35 UTC">October 25, 2026</span>
   </span>
 
     

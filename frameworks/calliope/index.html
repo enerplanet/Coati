@@ -1258,6 +1258,10 @@ and is left out of the document.</p>
 <td><code>results/storage_cap</code> by <code>node::tech</code></td>
 </tr>
 <tr>
+<td><code>storage_levels</code></td>
+<td><code>results/storage</code> by <code>node::tech</code></td>
+</tr>
+<tr>
 <td><code>generation</code></td>
 <td><code>results/flow_out</code>, each time counted with its weight, by <code>node::tech::carrier</code></td>
 </tr>
@@ -1278,8 +1282,24 @@ and is left out of the document.</p>
 <td><code>results/flow_out</code> of the technologies whose <code>base_tech</code> is <code>transmission</code>: what arrives at each of the two nodes that the technology joins</td>
 </tr>
 <tr>
+<td><code>prices</code></td>
+<td><code>results/shadow_price_system_balance</code> by <code>node::carrier</code>, which the file holds if <code>solve.shadow_prices</code> of the configuration lists <code>system_balance</code></td>
+</tr>
+<tr>
 <td><code>costs_by_location</code></td>
 <td><code>results/cost</code>, weighted as for the objective, by node and <code>tech</code></td>
+</tr>
+<tr>
+<td><code>fixed_costs_by_location</code></td>
+<td><code>results/cost_investment_annualised</code> and <code>results/cost_operation_fixed</code>, weighted as for the objective</td>
+</tr>
+<tr>
+<td><code>variable_costs_by_location</code></td>
+<td>the rest of the cost, which is <code>results/cost_operation_variable</code> over the times</td>
+</tr>
+<tr>
+<td><code>emissions_by_location</code></td>
+<td>the class <code>emissions</code> of <code>results/cost</code>, if the model has one, as Calliope's models name it by convention</td>
 </tr>
 <tr>
 <td><code>tech_metadata</code></td>
@@ -1293,8 +1313,23 @@ and is left out of the document.</p>
 <td><code>details.mode</code></td>
 <td><code>init.mode</code> of <code>attrs.config</code>: <code>base</code>, <code>operate</code> or <code>spores</code></td>
 </tr>
+<tr>
+<td><code>details.costs_by_class</code></td>
+<td><code>results/cost</code> of each class, by <code>node::tech</code>, as the file has it, unweighted</td>
+</tr>
+<tr>
+<td><code>details.systemwide_capacity_factor</code>, <code>details.systemwide_levelised_cost</code>, <code>details.total_levelised_cost</code>, <code>details.total_generation</code></td>
+<td>the figures of the same names that Calliope computes from the solution, by <code>tech::carrier</code>, <code>tech::carrier::class</code>, <code>carrier::class</code> and <code>tech::carrier</code></td>
+</tr>
+<tr>
+<td><code>details.source_use</code>, <code>details.unused_supply</code></td>
+<td>the series of the same names, by <code>node::tech</code> and <code>node::carrier</code></td>
+</tr>
 </tbody>
 </table>
+<p>The two parts of the cost are present where the file has any of the three
+variables that Calliope writes for them; the operate mode writes none, and
+its document has the costs alone.</p>
 <h3 id="transmission">Transmission<a class="headerlink" href="#transmission" title="Permanent link">&para;</a></h3>
 <p>A technology of transmission joins two nodes, which <code>inputs/link_from</code> and
 <code>inputs/link_to</code> name; a preview of 0.7 that does not write them is read by
@@ -1376,6 +1411,10 @@ the document are these labels.</p>
 <td><code>storage_cap</code></td>
 </tr>
 <tr>
+<td><code>storage_levels</code></td>
+<td><code>storage</code>, by the labels of <code>loc_techs_store</code></td>
+</tr>
+<tr>
 <td><code>generation</code></td>
 <td><code>carrier_prod</code>, each time counted with its weight</td>
 </tr>
@@ -1400,6 +1439,18 @@ the document are these labels.</p>
 <td><code>cost</code>, weighted as for the objective</td>
 </tr>
 <tr>
+<td><code>fixed_costs_by_location</code></td>
+<td><code>cost_investment</code>, weighted as for the objective, which Calliope 0.6 annualises together with the fixed costs of operation</td>
+</tr>
+<tr>
+<td><code>variable_costs_by_location</code></td>
+<td>the rest of the cost, which is <code>cost_var</code> over the times</td>
+</tr>
+<tr>
+<td><code>emissions_by_location</code></td>
+<td>the class <code>emissions</code> of <code>cost</code>, if the model has one</td>
+</tr>
+<tr>
 <td><code>tech_metadata</code></td>
 <td><code>parent</code> is the abstract technology that <code>inheritance</code> ends with; <code>carrier_out</code> the primary carrier of <code>lookup_primary_loc_tech_carriers_out</code>, else the first carrier that the technology produces; <code>display_name</code> and <code>color</code> are <code>names</code> and <code>colors</code></td>
 </tr>
@@ -1410,6 +1461,18 @@ the document are these labels.</p>
 <tr>
 <td><code>details.mode</code></td>
 <td><code>mode</code> of <code>run_config</code></td>
+</tr>
+<tr>
+<td><code>details.costs_by_class</code></td>
+<td><code>cost</code> of each class, by the labels of <code>loc_techs_cost</code>, unweighted</td>
+</tr>
+<tr>
+<td><code>details.systemwide_capacity_factor</code>, <code>details.systemwide_levelised_cost</code>, <code>details.total_levelised_cost</code></td>
+<td>the figures of the same names, by <code>tech::carrier</code>, <code>tech::carrier::class</code> and <code>carrier::class</code></td>
+</tr>
+<tr>
+<td><code>details.resource_con</code></td>
+<td>the series of the same name, by the labels of its set</td>
 </tr>
 </tbody>
 </table>
@@ -1434,7 +1497,10 @@ labels of the technology.</p>
 reports the first solution and lists all under <code>details.spores</code>.</p>
 <h2 id="what-coati-does-not-read">What Coati does not read<a class="headerlink" href="#what-coati-does-not-read" title="Permanent link">&para;</a></h2>
 <ul>
-<li>The shadow prices that Calliope 0.7 can save.</li>
+<li>The shadow prices of constraints other than the system balance, which
+  Calliope 0.7 can save as well.</li>
+<li>The capacity factor of each technology at each time, <code>capacity_factor</code>,
+  which is the dispatch over the capacity.</li>
 <li>The inputs of a model beyond those that the results document needs. The
   <a href="../../documents/dataset/">dataset document</a> holds them all: <code>coati dump</code>.</li>
 </ul>
@@ -1460,7 +1526,7 @@ reports the first solution and lists all under <code>details.spores</code>.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 28, 2026 09:52:51 UTC">September 28, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 25, 2026 19:33:10 UTC">October 25, 2026</span>
   </span>
 
     

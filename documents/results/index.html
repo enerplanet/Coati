@@ -816,10 +816,32 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#prices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prices
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#costs" class="md-nav__link">
     <span class="md-ellipsis">
       
         Costs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#emissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Emissions
       
     </span>
   </a>
@@ -1253,7 +1275,7 @@ cost. Its keys mean the same whichever framework solved the model. The
 pages of the frameworks tell how each key follows from a file of
 <a href="../../frameworks/calliope/">Calliope</a>, <a href="../../frameworks/pypsa/">PyPSA</a> and
 <a href="../../frameworks/adopt-net0/">AdOpT-NET0</a>.</p>
-<p>The document has the schema version <code>1.0</code>. Its
+<p>The document has the schema version <code>1.1</code>. Its
 <a href="#the-schema">JSON Schema</a> is part of the package.</p>
 <h2 id="names">Names<a class="headerlink" href="#names" title="Permanent link">&para;</a></h2>
 <p>A model consists of <em>technologies</em> at <em>locations</em> that take in and put out
@@ -1307,7 +1329,7 @@ out where a model has nothing to say: a model without storage has no
 <td><code>schema_version</code></td>
 <td>text</td>
 <td>always</td>
-<td>the version of the layout of the document, <code>1.0</code></td>
+<td>the version of the layout of the document, <code>1.1</code></td>
 </tr>
 <tr>
 <td><code>framework</code></td>
@@ -1435,6 +1457,12 @@ model, one value for each time. The <em>totals</em>, such as <code>generation</c
 <td>the capacity of each store to hold energy, by <code>location::technology</code></td>
 </tr>
 <tr>
+<td><code>storage_levels</code></td>
+<td>object of lists</td>
+<td></td>
+<td>the energy that each store holds at each time, by <code>location::technology</code></td>
+</tr>
+<tr>
 <td><code>generation</code></td>
 <td>object</td>
 <td>always</td>
@@ -1446,10 +1474,18 @@ model, one value for each time. The <em>totals</em>, such as <code>generation</c
 <td>always</td>
 <td>what each technology puts out at each time, all locations and carriers together, by technology</td>
 </tr>
+<tr>
+<td><code>curtailment</code></td>
+<td>object</td>
+<td></td>
+<td>what each technology could have put out from its resource but did not, over the modelled time, by <code>location::technology</code></td>
+</tr>
 </tbody>
 </table>
 <p><code>dispatch</code> leaves out the technologies of demand and of transmission, and
-the technologies that put out nothing.</p>
+the technologies that put out nothing. <code>curtailment</code> is present where the
+file records the availability of a resource over time, as PyPSA does with
+<code>p_max_pu</code>; it lists the technologies whose availability varies.</p>
 <h3 id="demand">Demand<a class="headerlink" href="#demand" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -1542,6 +1578,30 @@ the net flow that arrives at <code>to</code> from <code>from</code>; it is negat
 the other way. All technologies that join the two locations are counted
 together, and what is counted is what arrives, after the losses. A pair that
 exchanges nothing is left out.</p>
+<h3 id="prices">Prices<a class="headerlink" href="#prices" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th></th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>prices</code></td>
+<td>object of lists</td>
+<td></td>
+<td>the marginal price of each carrier at each location at each time, by <code>location::carrier</code></td>
+</tr>
+</tbody>
+</table>
+<p>A marginal price is what one more unit of the carrier would cost at that
+location and time: the dual of the balance of the carrier, as the framework
+reports it. PyPSA records it for every bus; Calliope 0.7 records it if the
+model asks for the shadow price of its balance; AdOpT-NET0 records none.
+The key is present where the file holds prices.</p>
 <h3 id="costs">Costs<a class="headerlink" href="#costs" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -1572,6 +1632,67 @@ which are revenues, among them. <code>costs_by_tech</code> lists the technologie
 whose cost is greater than zero.</p>
 <p>A connection between two locations has its capacity at both, and each bears
 half of its cost.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th></th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fixed_costs_by_location</code></td>
+<td>object of objects</td>
+<td></td>
+<td>the part of <code>costs_by_location</code> that is paid for having the capacity: the annualised investment and the fixed costs of operation and maintenance</td>
+</tr>
+<tr>
+<td><code>variable_costs_by_location</code></td>
+<td>object of objects</td>
+<td></td>
+<td>the part that is paid for operating: fuel, the variable costs of operation and maintenance, the price of imports less the revenue of exports</td>
+</tr>
+</tbody>
+</table>
+<p>The two parts are present where the file tells them apart, which every
+framework does for a model it has optimised; then every entry of
+<code>costs_by_location</code> is the sum of its two parts, and both parts have every
+entry. Which costs a framework counts as fixed is described on its page: PyPSA
+and Calliope 0.6 put the fixed costs of operation into the annualised
+investment, AdOpT-NET0 and Calliope 0.7 keep them apart, and the document
+counts both as fixed.</p>
+<h3 id="emissions">Emissions<a class="headerlink" href="#emissions" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th></th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>emissions_by_location</code></td>
+<td>object</td>
+<td></td>
+<td>the emissions of each technology at each location over the modelled time, in the unit of the model, by <code>location::technology</code></td>
+</tr>
+<tr>
+<td><code>total_emissions</code></td>
+<td>number</td>
+<td></td>
+<td>the emissions of all technologies and locations together</td>
+</tr>
+</tbody>
+</table>
+<p>The keys are present where the file states emissions. Each framework
+records them in its own way, which its page describes: PyPSA by the
+intensity of each carrier and what is burnt, Calliope as a class of cost
+named <code>emissions</code>, AdOpT-NET0 for each technology. A negative entry is what
+a technology takes up, or what a store keeps that it was given.</p>
 <h3 id="technologies">Technologies<a class="headerlink" href="#technologies" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -1668,7 +1789,7 @@ all that the file holds, or that the file is not what it seems:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">"generator"</span><span class="p">:</span><span class="w"> </span><span class="s2">"coati"</span><span class="p">,</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">"generator_version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.2.0a0"</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">"generator_version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.2.1a0"</span><span class="p">,</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nt">"framework_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"calliope-v0-7-0"</span><span class="p">,</span>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nt">"framework_family"</span><span class="p">:</span><span class="w"> </span><span class="s2">"calliope-v0-7"</span><span class="p">,</span>
 </span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"results.nc"</span><span class="p">,</span><span class="w"> </span><span class="nt">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"netcdf4"</span><span class="p">,</span><span class="w"> </span><span class="nt">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">460016</span><span class="p">}</span>
@@ -1694,6 +1815,14 @@ the machine and nothing about the model.</p>
 <tr>
 <td>an entry of <code>costs_by_tech</code></td>
 <td>the sum of the costs of the technology at all locations</td>
+</tr>
+<tr>
+<td>an entry of <code>costs_by_location</code></td>
+<td>the sum of its entries in <code>fixed_costs_by_location</code> and <code>variable_costs_by_location</code>, where these are present</td>
+</tr>
+<tr>
+<td><code>total_emissions</code></td>
+<td>the sum of <code>emissions_by_location</code></td>
 </tr>
 <tr>
 <td>the <code>generation</code> of a technology, all locations and carriers together</td>
@@ -1726,9 +1855,11 @@ schema is strict: it knows every key of the document and refuses any other
 at the top, so that a key that is misspelt does not go unnoticed. <code>details</code>
 may hold anything.</p>
 <p>The schema is also published at the address that its <code>$id</code> names,
-<a href="https://enerplanet.github.io/Coati/schemas/results-1.0.schema.json">https://enerplanet.github.io/Coati/schemas/results-1.0.schema.json</a>, and
+<a href="https://enerplanet.github.io/Coati/schemas/results-1.1.schema.json">https://enerplanet.github.io/Coati/schemas/results-1.1.schema.json</a>, and
 the schema of the dataset document at
-<a href="https://enerplanet.github.io/Coati/schemas/dataset-1.0.schema.json">https://enerplanet.github.io/Coati/schemas/dataset-1.0.schema.json</a>.</p>
+<a href="https://enerplanet.github.io/Coati/schemas/dataset-1.0.schema.json">https://enerplanet.github.io/Coati/schemas/dataset-1.0.schema.json</a>. The
+schema of the version 1.0 of the results document stays published at
+<a href="https://enerplanet.github.io/Coati/schemas/results-1.0.schema.json">https://enerplanet.github.io/Coati/schemas/results-1.0.schema.json</a>.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">importlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">resources</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
@@ -1745,6 +1876,27 @@ the schema of the dataset document at
 first part has keys that an earlier one lacks, and nothing that a reader of
 the earlier version relies on has changed. A change of the meaning or of
 the type of a key, or a key that is removed, raises the first part.</p>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Coati</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1.0</code></td>
+<td>0.1.0-alpha</td>
+<td>the first layout</td>
+</tr>
+<tr>
+<td><code>1.1</code></td>
+<td>0.2.1-alpha</td>
+<td>adds <code>storage_levels</code>, <code>curtailment</code>, <code>prices</code>, <code>fixed_costs_by_location</code>, <code>variable_costs_by_location</code>, <code>emissions_by_location</code> and <code>total_emissions</code>; nothing changed or removed</td>
+</tr>
+</tbody>
+</table>
 <h2 id="tempo">TEMPO<a class="headerlink" href="#tempo" title="Permanent link">&para;</a></h2>
 <p>The document holds the keys that <a href="https://github.com/THD-Spatial-AI/TEMPO">TEMPO</a>
 reads from the results of a model: <code>model_name</code>, <code>solver</code>, <code>success</code>,
@@ -1773,7 +1925,7 @@ reads from the results of a model: <code>model_name</code>, <code>solver</code>,
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 25, 2026 14:24:28 UTC">October 25, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 25, 2026 19:36:13 UTC">October 25, 2026</span>
   </span>
 
     
