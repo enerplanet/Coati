@@ -153,7 +153,7 @@ def test_every_key_of_the_results_is_described(source: Path) -> None:
     ("change", "message"),
     [
         (lambda d: d.pop("capacities"), "'capacities' is a required property"),
-        (lambda d: d.update(schema_version="2.0"), "'1.0' was expected"),
+        (lambda d: d.update(schema_version="2.0"), "'1.1' was expected"),
         (lambda d: d.update(success="yes"), "'yes' is not of type 'boolean'"),
         (lambda d: d.update(demand_timeseries={"a": [1.0]}), "is not of type 'array'"),
         (lambda d: d.update(framework="oemof"), "'oemof' is not one of"),

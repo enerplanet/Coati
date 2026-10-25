@@ -126,10 +126,10 @@ def test_labels_can_be_left_out(run, source: Path) -> None:
 @pytest.mark.parametrize(
     ("arguments", "expected"),
     [
-        ([], '{\n  "schema_version": "1.0",\n  "framework"'),
-        (["--indent", "4"], '{\n    "schema_version": "1.0",\n    "framework"'),
-        (["--indent", "0"], '{\n"schema_version": "1.0",\n"framework"'),
-        (["--compact"], '{"schema_version":"1.0","framework"'),
+        ([], '{\n  "schema_version": "1.1",\n  "framework"'),
+        (["--indent", "4"], '{\n    "schema_version": "1.1",\n    "framework"'),
+        (["--indent", "0"], '{\n"schema_version": "1.1",\n"framework"'),
+        (["--compact"], '{"schema_version":"1.1","framework"'),
         (["--sort-keys", "--compact"], '{"capacities":{"a::line":5.0,"a::pv":10.0,'),
     ],
 )
@@ -429,8 +429,10 @@ def test_inspect(run, source: Path) -> None:
     ]
     assert "group /results" in lines
     assert "  dimensions: nodes (2), techs (4), carriers (1), costs (2), timesteps (3)" in lines
-    assert "    flow_cap               float64  (nodes: 2, techs: 4, carriers: 1)" in lines
-    assert "    min_cost_optimisation  float64  ()" in lines
+    # The names are padded to the longest of the group; the columns are what is checked.
+    squeezed = [" ".join(line.split()) for line in lines]
+    assert "flow_cap float64 (nodes: 2, techs: 4, carriers: 1)" in squeezed
+    assert "min_cost_optimisation float64 ()" in squeezed
     assert "  attributes: config, runtime" in lines
 
 

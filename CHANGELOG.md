@@ -9,6 +9,21 @@ minor release may change the Python interface and the command line.
 
 ## [Unreleased]
 
+### Added
+
+- The results document, schema version 1.1, says more of what a solved
+  model says, in the same terms for every framework: `storage_levels`, the
+  energy each store holds at each time; `prices`, the marginal price of each
+  carrier at each location at each time, where the file holds it, which PyPSA
+  records for every bus and Calliope 0.7 if the model asks for the shadow
+  price of its balance; `fixed_costs_by_location` and
+  `variable_costs_by_location`, the cost told into what is paid for having
+  the capacity and what is paid for operating it; `emissions_by_location` and
+  `total_emissions`, as each framework records them; and `curtailment`, what
+  a generator could have put out from its resource but did not, where the
+  file records the resource. Nothing a reader of 1.0 relies on has changed,
+  and the schema of 1.0 stays published next to that of 1.1.
+
 ## [0.2.0-alpha] - 2026-10-25
 
 Coati reads every result file that

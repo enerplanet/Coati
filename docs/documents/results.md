@@ -7,7 +7,7 @@ pages of the frameworks tell how each key follows from a file of
 [Calliope](../frameworks/calliope.md), [PyPSA](../frameworks/pypsa.md) and
 [AdOpT-NET0](../frameworks/adopt-net0.md).
 
-The document has the schema version `1.0`. Its
+The document has the schema version `1.1`. Its
 [JSON Schema](#the-schema) is part of the package.
 
 ## Names
@@ -42,7 +42,7 @@ out where a model has nothing to say: a model without storage has no
 
 | Key | Type | | Meaning |
 |---|---|---|---|
-| `schema_version` | text | always | the version of the layout of the document, `1.0` |
+| `schema_version` | text | always | the version of the layout of the document, `1.1` |
 | `framework` | text | always | `calliope`, `pypsa` or `adopt-net0` |
 | `framework_version` | text or null | always | the version of the framework, as the file states it or as the caller named it; null if neither is known |
 | `model_name` | text or null | always | the name of the model |
@@ -86,11 +86,15 @@ model, one value for each time. The *totals*, such as `generation` or
 |---|---|---|---|
 | `capacities` | object | always | the capacity of each technology at each location, by `location::technology` |
 | `storage_capacities` | object | | the capacity of each store to hold energy, by `location::technology` |
+| `storage_levels` | object of lists | | the energy that each store holds at each time, by `location::technology` |
 | `generation` | object | always | what each technology puts out over the modelled time, by `location::technology::carrier` |
 | `dispatch` | object of lists | always | what each technology puts out at each time, all locations and carriers together, by technology |
+| `curtailment` | object | | what each technology could have put out from its resource but did not, over the modelled time, by `location::technology` |
 
 `dispatch` leaves out the technologies of demand and of transmission, and
-the technologies that put out nothing.
+the technologies that put out nothing. `curtailment` is present where the
+file records the availability of a resource over time, as PyPSA does with
+`p_max_pu`; it lists the technologies whose availability varies.
 
 ### Demand
 
@@ -132,6 +136,18 @@ the other way. All technologies that join the two locations are counted
 together, and what is counted is what arrives, after the losses. A pair that
 exchanges nothing is left out.
 
+### Prices
+
+| Key | Type | | Meaning |
+|---|---|---|---|
+| `prices` | object of lists | | the marginal price of each carrier at each location at each time, by `location::carrier` |
+
+A marginal price is what one more unit of the carrier would cost at that
+location and time: the dual of the balance of the carrier, as the framework
+reports it. PyPSA records it for every bus; Calliope 0.7 records it if the
+model asks for the shadow price of its balance; AdOpT-NET0 records none.
+The key is present where the file holds prices.
+
 ### Costs
 
 | Key | Type | | Meaning |
@@ -145,6 +161,32 @@ whose cost is greater than zero.
 
 A connection between two locations has its capacity at both, and each bears
 half of its cost.
+
+| Key | Type | | Meaning |
+|---|---|---|---|
+| `fixed_costs_by_location` | object of objects | | the part of `costs_by_location` that is paid for having the capacity: the annualised investment and the fixed costs of operation and maintenance |
+| `variable_costs_by_location` | object of objects | | the part that is paid for operating: fuel, the variable costs of operation and maintenance, the price of imports less the revenue of exports |
+
+The two parts are present where the file tells them apart, which every
+framework does for a model it has optimised; then every entry of
+`costs_by_location` is the sum of its two parts, and both parts have every
+entry. Which costs a framework counts as fixed is described on its page: PyPSA
+and Calliope 0.6 put the fixed costs of operation into the annualised
+investment, AdOpT-NET0 and Calliope 0.7 keep them apart, and the document
+counts both as fixed.
+
+### Emissions
+
+| Key | Type | | Meaning |
+|---|---|---|---|
+| `emissions_by_location` | object | | the emissions of each technology at each location over the modelled time, in the unit of the model, by `location::technology` |
+| `total_emissions` | number | | the emissions of all technologies and locations together |
+
+The keys are present where the file states emissions. Each framework
+records them in its own way, which its page describes: PyPSA by the
+intensity of each carrier and what is burnt, Calliope as a class of cost
+named `emissions`, AdOpT-NET0 for each technology. A negative entry is what
+a technology takes up, or what a store keeps that it was given.
 
 ### Technologies
 
@@ -220,6 +262,8 @@ The numbers of a document are related, and a program may rely on it:
 |---|---|
 | `objective` | the sum of all costs of `costs_by_location` |
 | an entry of `costs_by_tech` | the sum of the costs of the technology at all locations |
+| an entry of `costs_by_location` | the sum of its entries in `fixed_costs_by_location` and `variable_costs_by_location`, where these are present |
+| `total_emissions` | the sum of `emissions_by_location` |
 | the `generation` of a technology, all locations and carriers together | the sum of its `dispatch`, each time counted with its weight |
 | an entry of `demand_by_location`, all locations together | the sum of `demand_timeseries`, each time counted with its weight |
 | the sum of `imports_by_location` | the sum of `exports_by_location` |
@@ -245,9 +289,11 @@ at the top, so that a key that is misspelt does not go unnoticed. `details`
 may hold anything.
 
 The schema is also published at the address that its `$id` names,
-<https://enerplanet.github.io/Coati/schemas/results-1.0.schema.json>, and
+<https://enerplanet.github.io/Coati/schemas/results-1.1.schema.json>, and
 the schema of the dataset document at
-<https://enerplanet.github.io/Coati/schemas/dataset-1.0.schema.json>.
+<https://enerplanet.github.io/Coati/schemas/dataset-1.0.schema.json>. The
+schema of the version 1.0 of the results document stays published at
+<https://enerplanet.github.io/Coati/schemas/results-1.0.schema.json>.
 
 ```python
 import json
@@ -268,6 +314,11 @@ with open("results.json", encoding="utf-8") as file:
 first part has keys that an earlier one lacks, and nothing that a reader of
 the earlier version relies on has changed. A change of the meaning or of
 the type of a key, or a key that is removed, raises the first part.
+
+| Version | Coati | Change |
+|---|---|---|
+| `1.0` | 0.1.0-alpha | the first layout |
+| `1.1` | 0.2.1-alpha | adds `storage_levels`, `curtailment`, `prices`, `fixed_costs_by_location`, `variable_costs_by_location`, `emissions_by_location` and `total_emissions`; nothing changed or removed |
 
 ## TEMPO
 

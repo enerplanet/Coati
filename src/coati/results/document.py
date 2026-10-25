@@ -12,6 +12,7 @@ Locations, technologies and carriers are joined into keys with `::`, as in
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Any, Final
 
@@ -21,10 +22,12 @@ from coati._version import __version__
 from coati.frameworks import Framework
 
 __all__ = [
+    "FIXED",
     "INACTIVE",
     "SCHEMA_VERSION",
     "SEPARATOR",
     "SOLVED",
+    "VARIABLE",
     "Results",
     "Transmission",
     "join",
@@ -35,7 +38,11 @@ __all__ = [
 ]
 
 #: The version of the layout of the results document.
-SCHEMA_VERSION: Final = "1.0"
+SCHEMA_VERSION: Final = "1.1"
+
+#: The two kinds of cost: what is paid for having a capacity, and what is paid for operating it.
+FIXED: Final = "fixed"
+VARIABLE: Final = "variable"
 
 #: What joins a location, a technology and a carrier into a key.
 SEPARATOR: Final = "::"
@@ -143,17 +150,32 @@ class Results:
         periods: The investment period of each time, for a model with several.
         capacities: The capacity of each technology at each location.
         storage_capacities: The capacity of each store to hold energy.
+        storage_levels: The energy that each store holds at each time.
         generation: What each technology puts out over the modelled time, for
             each location and carrier.
         dispatch: What each technology puts out at each time, all locations
             and carriers together.
+        curtailment: What each technology could have put out from its
+            resource but did not, over the modelled time.
         demand_timeseries: The demand at each time, all locations together.
         demand_by_location: The demand over the modelled time at each location.
         unmet_demand_timeseries: The demand that is not met at each time.
         unmet_demand_by_location: The demand that is not met, at each location.
         transmission_flow: The exchange between each pair of locations.
+        prices: The marginal price of each carrier at each location at each
+            time, as the framework reports it.
         costs_by_tech: The cost of each technology.
         costs_by_location: The cost of each technology at each location.
+        fixed_costs_by_location: The part of the cost that is paid for having
+            the capacity: the annualised investment and the fixed costs of
+            operation and maintenance.
+        variable_costs_by_location: The part of the cost that is paid for
+            operating: fuel, the variable costs of operation, the price of
+            imports less the revenue of exports.
+        split: Whether every cost was told fixed from variable. If not, the
+            two parts are not reported.
+        emissions_by_location: The emissions of each technology at each
+            location over the modelled time.
         tech_metadata: The kind of each technology and what it puts out.
         coordinates: The latitude and longitude of each location.
         scenarios: The weight of each scenario, for a stochastic model.
@@ -173,33 +195,67 @@ class Results:
     periods: list[Any] | None = None
     capacities: dict[str, float] = field(default_factory=dict)
     storage_capacities: dict[str, float] = field(default_factory=dict)
+    storage_levels: dict[str, np.ndarray[Any, Any]] = field(default_factory=dict)
     generation: dict[str, float] = field(default_factory=dict)
     dispatch: dict[str, np.ndarray[Any, Any]] = field(default_factory=dict)
+    curtailment: dict[str, float] = field(default_factory=dict)
     demand_timeseries: np.ndarray[Any, Any] | None = None
     demand_by_location: dict[str, float] = field(default_factory=dict)
     unmet_demand_timeseries: np.ndarray[Any, Any] | None = None
     unmet_demand_by_location: dict[str, float] = field(default_factory=dict)
     transmission_flow: dict[str, Transmission] = field(default_factory=dict)
+    prices: dict[str, np.ndarray[Any, Any]] = field(default_factory=dict)
     costs_by_tech: dict[str, float] = field(default_factory=dict)
     costs_by_location: dict[str, dict[str, float]] = field(default_factory=dict)
+    fixed_costs_by_location: dict[str, dict[str, float]] = field(default_factory=dict)
+    variable_costs_by_location: dict[str, dict[str, float]] = field(default_factory=dict)
+    split: bool = True
+    emissions_by_location: dict[str, float] = field(default_factory=dict)
     tech_metadata: dict[str, dict[str, str]] = field(default_factory=dict)
     coordinates: dict[str, list[float]] = field(default_factory=dict)
     scenarios: dict[str, float] | None = None
     details: dict[str, Any] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
 
-    def add_cost(self, location: str, technology: str, cost: float) -> None:
-        """Add `cost` to what `technology` costs at `location`; `NaN` adds nothing."""
+    def add_cost(
+        self, location: str, technology: str, cost: float, kind: str | None = None
+    ) -> None:
+        """Add `cost` to what `technology` costs at `location`; `NaN` adds nothing.
+
+        Args:
+            location: The location.
+            technology: The technology.
+            cost: The cost.
+            kind: `FIXED` if the cost is paid for having the capacity,
+                `VARIABLE` if it is paid for operating it. A cost of neither
+                kind leaves the two parts out of the document.
+        """
         if np.isnan(cost):
             return
-        at_location = self.costs_by_location.setdefault(location, {})
-        at_location[technology] = at_location.get(technology, 0.0) + cost
+        _add(self.costs_by_location, location, technology, cost)
+        if kind == FIXED:
+            _add(self.fixed_costs_by_location, location, technology, cost)
+        elif kind == VARIABLE:
+            _add(self.variable_costs_by_location, location, technology, cost)
+        elif kind is None:
+            self.split = False
+        else:
+            raise ValueError(f"a cost is {FIXED!r} or {VARIABLE!r}, not {kind!r}")
+
+    def add_emissions(self, location: str, technology: str, amount: float) -> None:
+        """Add `amount` to what `technology` emits at `location`; `NaN` adds nothing."""
+        if np.isnan(amount):
+            return
+        key = join(location, technology)
+        self.emissions_by_location[key] = self.emissions_by_location.get(key, 0.0) + amount
 
     def add_dispatch(self, technology: str, series: np.ndarray[Any, Any]) -> None:
         """Add `series` to what `technology` puts out at each time."""
-        clean = np.nan_to_num(np.asarray(series, dtype=np.float64))
-        known = self.dispatch.get(technology)
-        self.dispatch[technology] = clean if known is None else known + clean
+        _add_series(self.dispatch, technology, series)
+
+    def add_storage_level(self, key: str, series: np.ndarray[Any, Any]) -> None:
+        """Add `series` to what the store `key` holds at each time."""
+        _add_series(self.storage_levels, key, series)
 
     def finish(self) -> None:
         """Derive what follows from the rest: the cost of each technology, and tidy up.
@@ -219,6 +275,11 @@ class Results:
             for name, series in self.dispatch.items()
             if series.size and float(series.max()) >= INACTIVE
         }
+        if self.split:
+            for parts in (self.fixed_costs_by_location, self.variable_costs_by_location):
+                for location, at_location in self.costs_by_location.items():
+                    for technology in at_location:
+                        parts.setdefault(location, {}).setdefault(technology, 0.0)
 
     def total(self, series: np.ndarray[Any, Any]) -> float:
         """Add up a time series, each time counted with its weight."""
@@ -268,8 +329,10 @@ class Results:
         _put(document, "scenarios", self.scenarios)
         document["capacities"] = self.capacities
         _put(document, "storage_capacities", self.storage_capacities)
+        _put(document, "storage_levels", self.storage_levels)
         document["generation"] = self.generation
         document["dispatch"] = self.dispatch
+        _put(document, "curtailment", self.curtailment)
         document["demand_timeseries"] = _series(self.demand_timeseries)
         _put(document, "demand_by_location", self.demand_by_location)
         self._put_unmet_demand(document)
@@ -279,8 +342,15 @@ class Results:
         imports, exports = self.exchanges()
         _put(document, "imports_by_location", imports)
         _put(document, "exports_by_location", exports)
+        _put(document, "prices", self.prices)
         document["costs_by_tech"] = self.costs_by_tech
         document["costs_by_location"] = self.costs_by_location
+        if self.split and self.costs_by_location:
+            document["fixed_costs_by_location"] = self.fixed_costs_by_location
+            document["variable_costs_by_location"] = self.variable_costs_by_location
+        if self.emissions_by_location:
+            document["emissions_by_location"] = self.emissions_by_location
+            document["total_emissions"] = math.fsum(self.emissions_by_location.values())
         document["tech_metadata"] = self.tech_metadata
         document["tech_parents"] = {
             name: entry.get("parent", "") for name, entry in self.tech_metadata.items()
@@ -304,6 +374,17 @@ class Results:
         document["unmet_demand_timeseries"] = unmet
         document["unmet_demand_by_location"] = self.unmet_demand_by_location
         document["total_unmet_demand"] = self.total(unmet)
+
+
+def _add(target: dict[str, dict[str, float]], location: str, technology: str, value: float) -> None:
+    at_location = target.setdefault(location, {})
+    at_location[technology] = at_location.get(technology, 0.0) + value
+
+
+def _add_series(target: dict[str, np.ndarray[Any, Any]], key: str, series: Any) -> None:
+    clean = np.nan_to_num(np.asarray(series, dtype=np.float64))
+    known = target.get(key)
+    target[key] = clean if known is None else known + clean
 
 
 def _put(document: dict[str, Any], key: str, value: Any) -> None:

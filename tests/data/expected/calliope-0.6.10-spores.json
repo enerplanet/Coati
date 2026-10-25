@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "framework": "calliope",
   "framework_version": "0.6.10",
   "model_name": "Coati test model",

@@ -11,7 +11,7 @@ import coati
 from coati import frameworks
 from coati.errors import CoatiError, FrameworkError
 from coati.results import ExtractOptions, Results, Transmission, extract_results
-from coati.results.document import INACTIVE, join, net_flows, positions, succeeded
+from coati.results.document import FIXED, INACTIVE, VARIABLE, join, net_flows, positions, succeeded
 from coati.results.options import parse_duration, parse_instant, synthesize_timestamps
 from support.compare import as_json
 
@@ -95,7 +95,7 @@ def test_an_exchange_as_it_is_written() -> None:
 def test_the_least_that_a_document_holds() -> None:
     document = as_json(results().to_document())
     assert document == {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "framework": "calliope",
         "framework_version": "0.7.0",
         "model_name": None,
@@ -131,13 +131,19 @@ def test_the_order_of_the_keys() -> None:
         periods=[2030, 2040],
         scenarios={"a": 1.0},
         storage_capacities={"a::b": 1.0},
+        storage_levels={"a::b": np.array([1.0, 0.5])},
+        curtailment={"a::pv": 1.0},
         demand_by_location={"a": 1.0},
         unmet_demand_timeseries=np.array([1.0, 0.0]),
         unmet_demand_by_location={"a": 1.0},
         transmission_flow={"a::b": Transmission("a", "b", np.array([1.0, -1.0]))},
+        prices={"a::power": np.array([1.0, 2.0])},
         coordinates={"a": [1.0, 2.0]},
         details={"mode": "base"},
     )
+    found.add_cost("a", "pv", 1.0, FIXED)
+    found.add_emissions("a", "pv", 1.0)
+    found.finish()
     assert list(found.to_document({"name": "x"})) == [
         "schema_version",
         "framework",
@@ -154,8 +160,10 @@ def test_the_order_of_the_keys() -> None:
         "scenarios",
         "capacities",
         "storage_capacities",
+        "storage_levels",
         "generation",
         "dispatch",
+        "curtailment",
         "demand_timeseries",
         "demand_by_location",
         "unmet_demand_timeseries",
@@ -164,8 +172,13 @@ def test_the_order_of_the_keys() -> None:
         "transmission_flow",
         "imports_by_location",
         "exports_by_location",
+        "prices",
         "costs_by_tech",
         "costs_by_location",
+        "fixed_costs_by_location",
+        "variable_costs_by_location",
+        "emissions_by_location",
+        "total_emissions",
         "tech_metadata",
         "tech_parents",
         "coordinates",
@@ -212,18 +225,72 @@ def test_exchanges() -> None:
 
 def test_costs() -> None:
     found = results()
-    found.add_cost("a", "pv", 10.0)
-    found.add_cost("a", "pv", 5.0)
-    found.add_cost("b", "pv", 1.0)
-    found.add_cost("b", "export", -4.0)
-    found.add_cost("b", "idle", 0.0)
-    found.add_cost("b", "unknown", float("nan"))
+    found.add_cost("a", "pv", 10.0, FIXED)
+    found.add_cost("a", "pv", 5.0, VARIABLE)
+    found.add_cost("b", "pv", 1.0, FIXED)
+    found.add_cost("b", "export", -4.0, VARIABLE)
+    found.add_cost("b", "idle", 0.0, FIXED)
+    found.add_cost("b", "unknown", float("nan"), FIXED)
     found.finish()
     assert found.costs_by_location == {
         "a": {"pv": 15.0},
         "b": {"pv": 1.0, "export": -4.0, "idle": 0.0},
     }
     assert found.costs_by_tech == {"pv": 16.0}
+    # The two parts have every entry of the costs, those of nothing among them.
+    assert found.fixed_costs_by_location == {
+        "a": {"pv": 10.0},
+        "b": {"pv": 1.0, "export": 0.0, "idle": 0.0},
+    }
+    assert found.variable_costs_by_location == {
+        "a": {"pv": 5.0},
+        "b": {"pv": 0.0, "export": -4.0, "idle": 0.0},
+    }
+    document = as_json(found.to_document())
+    assert document["fixed_costs_by_location"] == found.fixed_costs_by_location
+    assert document["variable_costs_by_location"] == found.variable_costs_by_location
+
+
+def test_a_cost_of_no_kind_leaves_the_parts_out() -> None:
+    found = results()
+    found.add_cost("a", "pv", 10.0, FIXED)
+    found.add_cost("a", "gas", 5.0)
+    found.finish()
+    assert found.split is False
+    document = as_json(found.to_document())
+    assert document["costs_by_location"] == {"a": {"pv": 10.0, "gas": 5.0}}
+    assert "fixed_costs_by_location" not in document
+    assert "variable_costs_by_location" not in document
+
+
+def test_a_cost_of_an_unknown_kind_is_refused() -> None:
+    with pytest.raises(ValueError, match="'fixed' or 'variable'"):
+        results().add_cost("a", "pv", 1.0, "sometimes")
+
+
+def test_without_costs_there_are_no_parts() -> None:
+    document = as_json(results().to_document())
+    assert "fixed_costs_by_location" not in document
+
+
+def test_emissions_add_up() -> None:
+    found = results()
+    found.add_emissions("a", "gas", 2.0)
+    found.add_emissions("a", "gas", 1.5)
+    found.add_emissions("b", "coal", float("nan"))
+    found.add_emissions("b", "dam", -0.5)
+    document = as_json(found.to_document())
+    assert document["emissions_by_location"] == {"a::gas": 3.5, "b::dam": -0.5}
+    assert document["total_emissions"] == 3.0
+    assert "emissions_by_location" not in as_json(results().to_document())
+
+
+def test_storage_levels_add_up_and_nan_holds_nothing() -> None:
+    found = results()
+    found.add_storage_level("a::dam", np.array([1.0, np.nan]))
+    found.add_storage_level("a::dam", np.array([2.0, 3.0]))
+    document = as_json(found.to_document())
+    assert document["storage_levels"] == {"a::dam": [3.0, 3.0]}
 
 
 def test_dispatch() -> None:
