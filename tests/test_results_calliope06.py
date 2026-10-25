@@ -28,7 +28,7 @@ def test_run_is_described(solved: dict) -> None:
     assert solved["solver"] == "cbc"
     assert solved["success"] is True
     assert solved["termination_condition"] == "optimal"
-    assert solved["details"] == {"mode": "plan"}
+    assert solved["details"]["mode"] == "plan"
     assert solved["metadata"]["framework_family"] == "calliope-v0-6"
 
 
@@ -200,7 +200,7 @@ def test_a_weight_that_is_no_number_counts_as_zero(tmp_path: Path) -> None:
     found = document(files.calliope06(tmp_path / "model.nc", run=run))
     assert found["objective"] == 0.5 * 4
     assert found["solver"] is None
-    assert "details" not in found
+    assert "mode" not in found["details"]
 
 
 def test_the_primary_carrier_is_the_one_a_technology_puts_out(tmp_path: Path) -> None:
@@ -280,3 +280,82 @@ def test_unmet_demand_without_times_is_left_out(tmp_path: Path) -> None:
     with files.netCDF4.Dataset(path, "a") as dataset:
         dataset.createVariable("unmet_demand", "f8", ("loc_carriers",))
     assert "unmet_demand_timeseries" not in document(path)
+
+
+# -- what else the solution says --------------------------------------------------------------
+
+
+def test_the_costs_are_told_fixed_from_variable(solved: dict) -> None:
+    # The investment, which Calliope 0.6 annualises together with the fixed costs of operation,
+    # is fixed; the rest of the cost is variable. The objective counts the monetary class alone.
+    assert solved["fixed_costs_by_location"] == {
+        "a": {"pv": 90.0, "line:b": 3.0},
+        "b": {"battery": 15.0, "line:a": 3.0},
+    }
+    assert solved["variable_costs_by_location"] == {
+        "a": {"pv": 10.0, "line:b": 0.0},
+        "b": {"battery": 5.0, "line:a": 0.0},
+    }
+
+
+def test_a_file_without_the_parts_of_the_cost_reports_no_split(tmp_path: Path) -> None:
+    found = document(
+        files.calliope06(tmp_path / "model.nc", without=("cost_investment", "cost_var"))
+    )
+    assert found["costs_by_location"] == {
+        "a": {"pv": 100.0, "line:b": 3.0},
+        "b": {"battery": 20.0, "line:a": 3.0},
+    }
+    assert "fixed_costs_by_location" not in found
+
+
+def test_storage_levels(solved: dict) -> None:
+    assert solved["storage_levels"] == {"b::battery": [16.0, 15.0, 14.0]}
+
+
+def test_emissions_are_the_class_of_cost_so_named(solved: dict) -> None:
+    assert solved["emissions_by_location"] == {
+        "a::pv": 0.0,
+        "b::battery": 4.0,
+        "a::line:b": 0.0,
+        "b::line:a": 0.0,
+    }
+    assert solved["total_emissions"] == 4.0
+
+
+def test_the_costs_of_every_class_are_reported_as_they_are(solved: dict) -> None:
+    assert solved["details"]["costs_by_class"] == {
+        "monetary": {"a::pv": 100.0, "b::battery": 20.0, "a::line:b": 3.0, "b::line:a": 3.0},
+        "emissions": {"a::pv": 0.0, "b::battery": 4.0, "a::line:b": 0.0, "b::line:a": 0.0},
+    }
+
+
+def test_the_figures_of_calliope_are_reported_in_its_terms(solved: dict) -> None:
+    details = solved["details"]
+    assert details["systemwide_capacity_factor"] == {
+        "pv::power": 0.6,
+        "battery::power": 0.3,
+        "line::power": 0.9,
+    }
+    assert details["systemwide_levelised_cost"] == {
+        "pv::power::monetary": 5.0,
+        "battery::power::monetary": 7.0,
+        "line::power::monetary": 0.5,
+        "pv::power::emissions": 0.0,
+        "battery::power::emissions": 1.0,
+        "line::power::emissions": 0.0,
+    }
+    assert details["total_levelised_cost"] == {"power::monetary": 4.0, "power::emissions": 0.1}
+    assert details["resource_con"] == {"a::pv": [7.0, 9.0, 5.0]}
+
+
+def test_what_the_file_lacks_is_left_out(tmp_path: Path) -> None:
+    path = files.calliope06(
+        tmp_path / "model.nc",
+        without=("storage", "resource_con", "systemwide_capacity_factor", "total_levelised_cost"),
+    )
+    found = document(path)
+    assert "storage_levels" not in found
+    for name in ("resource_con", "systemwide_capacity_factor", "total_levelised_cost"):
+        assert name not in found["details"]
+    assert "systemwide_levelised_cost" in found["details"]

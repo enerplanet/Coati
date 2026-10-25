@@ -26,6 +26,11 @@ minor release may change the Python interface and the command line.
 - PyPSA: `details.global_constraints`, the limits of the network such as a
   cap on emissions, with the defaults PyPSA leaves out of a file and the
   shadow price `mu`.
+- Calliope: the figures that Calliope computes from the solution, under
+  `details`: the cost of every class as the file has it, the systemwide
+  capacity factors and levelised costs, the total levelised cost, the total
+  generation and the use of the sources (0.7) or the resources (0.6), and the
+  supply that was not used (0.7).
 
 ## [0.2.0-alpha] - 2026-10-25
 

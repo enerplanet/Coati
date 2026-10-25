@@ -248,12 +248,76 @@ def facts(model: Any) -> dict[str, Any]:
     for label, value in cost.to_series().dropna().items():
         technology = str(label).split("::")[1]
         found["costs"][technology] = found["costs"].get(technology, 0.0) + float(value)
+    if "storage" in results:
+        found["storage_levels"] = _rows(results["storage"])
+    if "cost_investment" in results or "cost_var" in results:
+        fixed = (
+            _entries(results["cost_investment"].sel(costs="monetary"))
+            if "cost_investment" in results
+            else {}
+        )
+        total = _entries(cost)
+        found["fixed_costs_by_location"] = _by_location({k: fixed.get(k, 0.0) for k in total})
+        found["variable_costs_by_location"] = _by_location(
+            {k: v - fixed.get(k, 0.0) for k, v in total.items()}
+        )
+    if "emissions" in results["costs"].values:
+        emitted = _entries(results["cost"].sel(costs="emissions"))
+        found["emissions_by_location"] = emitted
+        found["total_emissions"] = sum(emitted.values())
+    details: dict[str, Any] = {
+        "costs_by_class": {
+            str(name): _entries(results["cost"].sel(costs=name)) for name in results["costs"].values
+        }
+    }
+    for name, dims in (
+        ("systemwide_capacity_factor", ("techs", "carriers")),
+        ("systemwide_levelised_cost", ("techs", "carriers", "costs")),
+        ("total_levelised_cost", ("carriers", "costs")),
+    ):
+        if name in results:
+            series = results[name].transpose(*dims).to_series().dropna()
+            details[name] = {
+                "::".join(str(part) for part in label): (
+                    float(value) if math.isfinite(float(value)) else None
+                )
+                for label, value in series.items()
+            }
+    if "resource_con" in results:
+        details["resource_con"] = _rows(results["resource_con"])
+    found["details"] = details
     return found
 
 
-def _entries(array: Any) -> dict[str, float]:
-    """Return the elements of an array that have a value, by their labels."""
-    return {str(label): float(value) for label, value in array.to_series().dropna().items()}
+def _rows(array: Any) -> dict[str, list[float]]:
+    """Return the time series of an array for each label of its set that has values."""
+    dim = next(name for name in array.dims if name != "timesteps")
+    rows: dict[str, list[float]] = {}
+    for label in array[dim].values:
+        series = array.sel({dim: label})
+        if not series.isnull().all():
+            rows[str(label)] = [float(value) for value in series.fillna(0).values]
+    return rows
+
+
+def _by_location(entries: dict[str, float]) -> dict[str, dict[str, float]]:
+    """Group entries keyed by ``location::technology`` by their location."""
+    grouped: dict[str, dict[str, float]] = {}
+    for key, value in entries.items():
+        location, technology = key.split("::", 1)
+        grouped.setdefault(location, {})[technology] = value
+    return grouped
+
+
+def _entries(array: Any) -> dict[str, float | None]:
+    """Return the elements of an array that have a value, by their labels.
+
+    A value that is not finite is written as null, as Coati writes it.
+    """
+    return {
+        str(label): float(value) if math.isfinite(float(value)) else None
+        for label, value in array.to_series().dropna().items()
+    }
 
 
 def build(directory: Path, solver: str = "cbc") -> dict[str, Path]:

@@ -217,5 +217,126 @@
    0.0,
    0.0
   ]
+ },
+ "storage_levels": {
+  "south::battery": [
+   188.99129,
+   166.25653,
+   141.41859,
+   113.235,
+   80.691272,
+   43.070047,
+   0.0,
+   0.0,
+   49.887134,
+   95.839239,
+   138.77189,
+   179.80643,
+   220.19357,
+   261.22811,
+   304.16076,
+   350.11287,
+   400.0,
+   400.0,
+   356.92995,
+   319.30873,
+   286.765,
+   258.58141,
+   233.74347,
+   211.00871
+  ]
+ },
+ "fixed_costs_by_location": {
+  "north": {
+   "line:south": 0.076400895,
+   "pv": 7.243928
+  },
+  "south": {
+   "battery": 0.72040426,
+   "boiler": 0.032180719,
+   "gas": 0.27340908,
+   "line:north": 0.076400895
+  }
+ },
+ "variable_costs_by_location": {
+  "north": {
+   "line:south": 0.0,
+   "pv": 0.0
+  },
+  "south": {
+   "battery": 0.0,
+   "boiler": 0.0,
+   "gas": 15716.750590919999,
+   "line:north": 0.0
+  }
+ },
+ "emissions_by_location": {
+  "north::line:south": 0.0,
+  "north::pv": 0.0,
+  "south::battery": 0.0,
+  "south::boiler": 0.0,
+  "south::gas": 157.16751,
+  "south::line:north": 0.0
+ },
+ "total_emissions": 157.16751,
+ "details": {
+  "costs_by_class": {
+   "emissions": {
+    "north::line:south": 0.0,
+    "north::pv": 0.0,
+    "south::battery": 0.0,
+    "south::boiler": 0.0,
+    "south::gas": 157.16751,
+    "south::line:north": 0.0
+   },
+   "monetary": {
+    "north::line:south": 0.076400895,
+    "north::pv": 7.243928,
+    "south::battery": 0.72040426,
+    "south::boiler": 0.032180719,
+    "south::gas": 15717.024,
+    "south::line:north": 0.076400895
+   }
+  },
+  "systemwide_capacity_factor": {
+   "battery::heat": 0.0,
+   "battery::power": 0.15833333375,
+   "boiler::heat": 1.0,
+   "boiler::power": 0.0,
+   "gas::heat": 0.0,
+   "gas::power": 0.5422040318722692,
+   "line:north::heat": 0.0,
+   "line:north::power": 0.41400548511230956,
+   "line:south::heat": 0.0,
+   "line:south::power": 0.0,
+   "pv::heat": 0.0,
+   "pv::power": 0.192006875
+  },
+  "systemwide_levelised_cost": {
+   "battery::heat::monetary": null,
+   "battery::power::emissions": 0.0,
+   "battery::power::monetary": 0.0018958006792215772,
+   "boiler::heat::emissions": 0.0,
+   "boiler::heat::monetary": 0.0001340863291666667,
+   "boiler::power::monetary": null,
+   "gas::heat::emissions": null,
+   "gas::heat::monetary": null,
+   "gas::power::emissions": 0.4000000048661457,
+   "gas::power::monetary": 40.00069528671243,
+   "line:north::heat::monetary": null,
+   "line:north::power::emissions": 0.0,
+   "line:north::power::monetary": 5.6392727527884594e-05,
+   "line:south::heat::monetary": null,
+   "line:south::power::monetary": null,
+   "pv::heat::monetary": null,
+   "pv::power::emissions": 0.0,
+   "pv::power::monetary": 0.005239922326276657
+  },
+  "total_levelised_cost": {
+   "heat::emissions": 0.654864625,
+   "heat::monetary": 65.52155547820416,
+   "power::emissions": 0.0885267088729282,
+   "power::monetary": 8.857414869096639
+  }
  }
 }

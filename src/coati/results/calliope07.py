@@ -29,7 +29,15 @@ from coati.errors import ExtractionError
 from coati.frameworks import Framework
 from coati.labeled import LabeledArray, labels_of, texts_of, weights_of
 from coati.model import Dataset, Group
-from coati.results.document import Results, join, net_flows, solutions_of_spores, succeeded
+from coati.results.document import (
+    FIXED,
+    VARIABLE,
+    Results,
+    join,
+    net_flows,
+    solutions_of_spores,
+    succeeded,
+)
 from coati.results.options import ExtractOptions
 
 __all__ = ["extract"]
@@ -43,6 +51,22 @@ _SPORES: Final = "spores"
 
 _DEMAND: Final = "demand"
 _TRANSMISSION: Final = "transmission"
+
+# The class of cost in which Calliope's models keep their emissions, by convention.
+_EMISSIONS: Final = "emissions"
+
+# The parts of the cost that are paid for having the capacity; the rest is paid for operating.
+_FIXED_PARTS: Final = ("cost_investment_annualised", "cost_operation_fixed")
+_VARIABLE_PARTS: Final = ("cost_operation_variable",)
+
+# The figures that Calliope computes from the solution, reported under `details` as they are.
+_SUMMARIES: Final = (
+    ("systemwide_capacity_factor", (_TECHS, _CARRIERS)),
+    ("systemwide_levelised_cost", (_TECHS, _CARRIERS, _COSTS)),
+    ("total_levelised_cost", (_CARRIERS, _COSTS)),
+    ("total_generation", (_TECHS, _CARRIERS)),
+)
+_SERIES: Final = (("source_use", (_NODES, _TECHS)), ("unused_supply", (_NODES, _CARRIERS)))
 
 
 def extract(dataset: Dataset, framework: Framework, options: ExtractOptions) -> Results:
@@ -82,6 +106,9 @@ class _Extractor:
         self._demand(flow_in)
         self._unmet_demand()
         self._costs()
+        self._storage_levels()
+        self._prices()
+        self._summaries()
         self._technologies(flow_out)
         self._coordinates()
         self._list_spores()
@@ -270,13 +297,104 @@ class _Extractor:
         cost = self._array("cost", _NODES, _TECHS, _COSTS, _TIME)
         if cost is None:
             return
-        if _COSTS in cost:
-            cost = cost.scale(_COSTS, self._cost_weights(cost.labels[_COSTS]))
-        total = cost.sum(_COSTS, _TIME)
+        self._emissions(cost)
+        self._classes(cost)
+        total = self._weighed(cost).sum(_COSTS, _TIME)
+        fixed = self._part(_FIXED_PARTS)
+        stated = fixed is not None or self._part(_VARIABLE_PARTS) is not None
         for (node, technology), value in _by(total, _NODES, _TECHS):
-            self._results.add_cost(node, technology, value)
+            if not stated:
+                self._results.add_cost(node, technology, value)
+                continue
+            paid = (fixed or {}).get((node, technology), 0.0)
+            self._results.add_cost(node, technology, paid, FIXED)
+            self._results.add_cost(node, technology, value - paid, VARIABLE)
         if np.isfinite(total.values).any():
             self._results.objective = float(np.nansum(total.values))
+
+    def _weighed(self, cost: LabeledArray) -> LabeledArray:
+        """Return a cost with its classes counted as the objective counts them."""
+        if _COSTS not in cost:
+            return cost
+        return cost.scale(_COSTS, self._cost_weights(cost.labels[_COSTS]))
+
+    def _part(self, names: tuple[str, ...]) -> dict[tuple[str, str], float] | None:
+        """Return the sum of the parts of the cost that `names` name, by node and technology.
+
+        Calliope writes a part only where the model has it; `None` if the
+        file has none of them.
+        """
+        found: dict[tuple[str, str], float] | None = None
+        for name in names:
+            part = self._array(name, _NODES, _TECHS, _COSTS, _TIME)
+            if part is None:
+                continue
+            found = found or {}
+            for (node, technology), value in _by(
+                self._weighed(part).sum(_COSTS, _TIME), _NODES, _TECHS
+            ):
+                found[node, technology] = found.get((node, technology), 0.0) + value
+        return found
+
+    def _emissions(self, cost: LabeledArray) -> None:
+        """Record the class of cost named `emissions` as the emissions of the technologies."""
+        if _COSTS not in cost or _EMISSIONS not in cost.labels[_COSTS]:
+            return
+        emitted = cost.select(_COSTS, _EMISSIONS).sum(_TIME)
+        for (node, technology), value in _by(emitted, _NODES, _TECHS):
+            self._results.add_emissions(node, technology, value)
+
+    def _classes(self, cost: LabeledArray) -> None:
+        """Report the cost of each technology in each class, as the file has it."""
+        if _COSTS not in cost:
+            return
+        by_class = {
+            name: {
+                join(node, technology): value
+                for (node, technology), value in _by(
+                    cost.select(_COSTS, name).sum(_TIME), _NODES, _TECHS
+                )
+            }
+            for name in cost.labels[_COSTS]
+        }
+        self._results.details["costs_by_class"] = by_class
+
+    def _storage_levels(self) -> None:
+        storage = self._array("storage", _NODES, _TECHS, _TIME)
+        if storage is None or _TIME not in storage:
+            return
+        for (node, technology), series in _series_by(storage, _NODES, _TECHS):
+            self._results.add_storage_level(join(node, technology), series)
+
+    def _prices(self) -> None:
+        """Record the shadow prices of the balance of each carrier at each node, if saved."""
+        shadow = self._array("shadow_price_system_balance", _NODES, _CARRIERS, _TIME)
+        if shadow is None or _TIME not in shadow:
+            return
+        for (node, carrier), series in _series_by(shadow, _NODES, _CARRIERS):
+            self._results.prices[join(node, carrier)] = series
+
+    def _summaries(self) -> None:
+        """Report the figures that Calliope computes from the solution, in its own terms."""
+        for name, dims in _SUMMARIES:
+            array = self._lenient(name, *dims)
+            if array is not None and set(array.dims) == set(dims):
+                self._results.details[name] = {
+                    join(*labels): value for labels, value in _by(array, *dims)
+                }
+        for name, dims in _SERIES:
+            array = self._lenient(name, *dims, _TIME)
+            if array is not None and _TIME in array and set(array.dims) == {*dims, _TIME}:
+                self._results.details[name] = {
+                    join(*labels): series for labels, series in _series_by(array, *dims)
+                }
+
+    def _lenient(self, name: str, *dims: str) -> LabeledArray | None:
+        """Read a variable of the solution; none if it has dimensions other than expected."""
+        try:
+            return self._array(name, *dims)
+        except ExtractionError:
+            return None
 
     def _cost_weights(self, classes: tuple[str, ...]) -> np.ndarray[Any, Any]:
         """Return the weight of each class of cost in the objective; one unless given."""
@@ -371,6 +489,24 @@ def _by(array: LabeledArray, *dims: str) -> list[tuple[tuple[str, ...], float]]:
         )
     order = [array.dims.index(dim) for dim in dims]
     return [(tuple(labels[axis] for axis in order), value) for labels, value in array.items()]
+
+
+def _series_by(array: LabeledArray, *dims: str) -> list[tuple[tuple[str, ...], Any]]:
+    """Return the time series of `array` for each combination of `dims` that has values."""
+    reduced = array.sum(*(dim for dim in array.dims if dim not in dims and dim != _TIME))
+    time = reduced.axis(_TIME)
+    defined = ~np.isnan(reduced.values).all(axis=time)
+    found = []
+    for index in zip(*np.nonzero(defined), strict=True):
+        part = reduced
+        labels = []
+        for dim, position in zip((dim for dim in reduced.dims if dim != _TIME), index, strict=True):
+            label = reduced.labels[dim][int(position)]
+            labels.append(label)
+            part = part.select(dim, label)
+        order = [tuple(dim for dim in reduced.dims if dim != _TIME).index(dim) for dim in dims]
+        found.append((tuple(labels[axis] for axis in order), part.series(_TIME)))
+    return found
 
 
 def _value_or_map(array: LabeledArray) -> Any:

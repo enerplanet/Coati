@@ -28,7 +28,7 @@ def test_run_is_described(solved: dict) -> None:
     assert solved["solver"] == "highs"
     assert solved["success"] is True
     assert solved["termination_condition"] == "optimal"
-    assert solved["details"] == {"mode": "base"}
+    assert solved["details"]["mode"] == "base"
     assert solved["warnings"] == []
 
 
@@ -265,3 +265,90 @@ def test_a_variable_with_unknown_dimensions_is_refused(tmp_path: Path) -> None:
     )
     with pytest.raises(ExtractionError, match=r"flow_cap has the dimensions years, techs"):
         coati.results_document(path)
+
+
+# -- what else the solution says --------------------------------------------------------------
+
+
+def test_the_costs_are_told_fixed_from_variable(solved: dict) -> None:
+    # The annualised investment is fixed; the rest of the cost, the variable cost of operation
+    # weighed as the objective weighs the classes, is variable: the battery emits 4 at 0.5.
+    assert solved["fixed_costs_by_location"] == {
+        "a": {"pv": 90.0, "line": 3.0},
+        "b": {"battery": 15.0, "line": 3.0},
+    }
+    assert solved["variable_costs_by_location"] == {
+        "a": {"pv": 10.0, "line": 0.0},
+        "b": {"battery": 5.0 + 0.5 * 4, "line": 0.0},
+    }
+
+
+def test_storage_levels(solved: dict) -> None:
+    assert solved["storage_levels"] == {"b::battery": [16.0, 15.0, 14.0]}
+
+
+def test_prices_are_the_shadow_prices_of_the_balance(solved: dict) -> None:
+    assert solved["prices"] == {"a::power": [10.0, 20.0, 30.0], "b::power": [11.0, 21.0, 31.0]}
+
+
+def test_emissions_are_the_class_of_cost_so_named(solved: dict) -> None:
+    assert solved["emissions_by_location"] == {
+        "a::pv": 0.0,
+        "a::line": 0.0,
+        "b::battery": 4.0,
+        "b::line": 0.0,
+    }
+    assert solved["total_emissions"] == 4.0
+
+
+def test_the_costs_of_every_class_are_reported_as_they_are(solved: dict) -> None:
+    assert solved["details"]["costs_by_class"] == {
+        "monetary": {"a::pv": 100.0, "a::line": 3.0, "b::battery": 20.0, "b::line": 3.0},
+        "emissions": {"a::pv": 0.0, "a::line": 0.0, "b::battery": 4.0, "b::line": 0.0},
+    }
+
+
+def test_the_figures_of_calliope_are_reported_in_its_terms(solved: dict) -> None:
+    details = solved["details"]
+    assert details["systemwide_capacity_factor"] == {
+        "pv::power": 0.6,
+        "battery::power": 0.3,
+        "line::power": 0.9,
+    }
+    assert details["systemwide_levelised_cost"] == {
+        "pv::power::monetary": 5.0,
+        "pv::power::emissions": 0.0,
+        "battery::power::monetary": 7.0,
+        "battery::power::emissions": 1.0,
+        "line::power::monetary": 0.5,
+        "line::power::emissions": 0.0,
+    }
+    assert details["total_levelised_cost"] == {"power::monetary": 4.0, "power::emissions": 0.1}
+    assert details["total_generation"] == {
+        "pv::power": 26.0,
+        "battery::power": 4.0,
+        "line::power": 14.0,
+    }
+    assert details["source_use"] == {"a::pv": [7.0, 9.0, 5.0]}
+    assert details["unused_supply"] == {"a::power": [0.0, 0.0, 0.0], "b::power": [0.0, 0.0, 1.0]}
+
+
+def test_a_file_without_the_parts_of_the_cost_reports_no_split(tmp_path: Path) -> None:
+    found = document(files.calliope07(tmp_path / "model.nc", operate=True))
+    assert found["costs_by_location"] == {
+        "a": {"pv": 100.0, "line": 3.0},
+        "b": {"battery": 22.0, "line": 3.0},
+    }
+    assert "fixed_costs_by_location" not in found
+    assert "variable_costs_by_location" not in found
+
+
+def test_a_summary_with_other_dimensions_is_left_out(tmp_path: Path) -> None:
+    path = files.calliope07(tmp_path / "model.nc")
+    with files.netCDF4.Dataset(path, "a") as dataset:
+        group = dataset.groups["results"]
+        group.renameVariable("total_generation", "total_generation_gone")
+        group.createVariable("total_generation", "f8", ("techs",))[:] = [1.0, 2.0, 3.0, 4.0]
+    found = document(path)
+    assert "total_generation" not in found["details"]
+    assert "source_use" in found["details"]

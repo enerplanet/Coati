@@ -191,7 +191,21 @@ def calliope07(
         "flow_out": (("nodes", "techs", "carriers", "timesteps"), flow_out),
         "flow_in": (("nodes", "techs", "carriers", "timesteps"), flow_in),
         "unmet_demand": (("nodes", "carriers", "timesteps"), unmet),
+        "unused_supply": (("nodes", "carriers", "timesteps"), [[[0, 0, 0]], [[0, 0, 1.0]]]),
         "storage_cap": (("nodes", "techs"), _at({(1, 2): 16}, (2, 4))),
+        "storage": (("nodes", "techs", "timesteps"), _at({(1, 2): [16, 15, 14]}, (2, 4, 3))),
+        "shadow_price_system_balance": (
+            ("nodes", "carriers", "timesteps"),
+            [[[10, 20, 30]], [[11, 21, 31]]],
+        ),
+        "source_use": (("nodes", "techs", "timesteps"), _at({(0, 0): [7, 9, 5]}, (2, 4, 3))),
+        "systemwide_capacity_factor": (("techs", "carriers"), [[0.6], [NAN], [0.3], [0.9]]),
+        "systemwide_levelised_cost": (
+            ("techs", "carriers", "costs"),
+            [[[5.0, 0]], [[NAN, NAN]], [[7.0, 1.0]], [[0.5, 0]]],
+        ),
+        "total_levelised_cost": (("carriers", "costs"), [[4.0, 0.1]]),
+        "total_generation": (("techs", "carriers"), [[26.0], [NAN], [4.0], [14.0]]),
     }
     if operate:
         shifted = np.full((3, 2, 4, 2), NAN)
@@ -201,6 +215,15 @@ def calliope07(
     else:
         results["flow_cap"] = (("nodes", "techs", "carriers"), capacity)
         results["cost"] = (("nodes", "techs", "costs"), cost)
+        # The cost is the annualised investment plus the variable cost of operation.
+        results["cost_investment_annualised"] = (
+            ("nodes", "techs", "costs"),
+            _at({(0, 0): [90, 0], (1, 2): [15, 0], (0, 3): [3, 0], (1, 3): [3, 0]}, (2, 4, 2)),
+        )
+        results["cost_operation_variable"] = (
+            ("nodes", "techs", "costs", "timesteps"),
+            _at({(0, 0): [[4, 3, 3], [0, 0, 0]], (1, 2): [[2, 2, 1], [1, 2, 1]]}, (2, 4, 2, 3)),
+        )
         results["min_cost_optimisation"] = ((), 127.0)
     result_dimensions = dict(dimensions)
     if spores:
@@ -286,6 +309,9 @@ def calliope06(
         ],
         "loc_tech_carriers_con": ["b::load::power", "b::battery::power"],
         "loc_carriers": ["a::power", "b::power"],
+        "loc_techs_investment_cost": ["a::pv", "b::battery", "a::line:b", "b::line:a"],
+        "loc_techs_om_cost": ["a::pv", "b::battery"],
+        "loc_techs_finite_resource": ["a::pv"],
         "techs": ["pv", "battery", "load", "line", "line:a", "line:b"],
         "locs": ["a", "b"],
         "carriers": ["power"],
@@ -307,6 +333,26 @@ def calliope06(
                 [[-5.0, -6, -7], [-1, 0, 0]],
             ),
             "cost": (("costs", "loc_techs_cost"), [[100.0, 20, 3, 3], [0, 4, 0, 0]]),
+            # The cost is the investment plus the variable cost of operation over the times.
+            "cost_investment": (
+                ("costs", "loc_techs_investment_cost"),
+                [[90.0, 15, 3, 3], [0, 0, 0, 0]],
+            ),
+            "cost_var": (
+                ("costs", "loc_techs_om_cost", "timesteps"),
+                [[[4.0, 3, 3], [2, 2, 1]], [[0, 0, 0], [1, 2, 1]]],
+            ),
+            "storage": (("loc_techs_store", "timesteps"), [[16.0, 15, 14]]),
+            "resource_con": (("loc_techs_finite_resource", "timesteps"), [[7.0, 9, 5]]),
+            "systemwide_capacity_factor": (
+                ("carriers", "techs"),
+                [[0.6, 0.3, NAN, 0.9, NAN, NAN]],
+            ),
+            "systemwide_levelised_cost": (
+                ("carriers", "costs", "techs"),
+                [[[5.0, 7, NAN, 0.5, NAN, NAN], [0, 1, NAN, 0, NAN, NAN]]],
+            ),
+            "total_levelised_cost": (("carriers", "costs"), [[4.0, 0.1]]),
             "unmet_demand": (("loc_carriers", "timesteps"), [[0.0, 0, 0], [0, 0.5, 0]]),
             "inheritance": (("techs",), ["supply", "storage", "demand", "transmission", "", ""]),
             "names": (("techs",), ["Solar", "Battery", "Load", "Line", "", ""]),

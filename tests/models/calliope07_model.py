@@ -242,16 +242,75 @@ def facts(model: Any) -> dict[str, Any]:
     found["transmission_flow"] = {"north::south": [float(value) for value in net]}
     for technology, value in cost.sum("nodes", min_count=1).to_series().dropna().items():
         found["costs"][str(technology)] = float(value)
+    found["storage_levels"] = _series_entries(results["storage"], "nodes", "techs")
+    parts = [
+        (results[name] * classes).sum("costs", min_count=1).fillna(0)
+        for name in ("cost_investment_annualised", "cost_operation_fixed")
+        if name in results
+    ]
+    if parts or "cost_operation_variable" in results:
+        fixed = sum(parts[1:], parts[0]) if parts else cost * 0
+        fixed = fixed.where(cost.notnull())
+        found["fixed_costs_by_location"] = _by_location(_entries(fixed, "nodes", "techs"))
+        found["variable_costs_by_location"] = _by_location(_entries(cost - fixed, "nodes", "techs"))
+    if "emissions" in results["costs"].values:
+        emitted = _entries(results["cost"].sel(costs="emissions"), "nodes", "techs")
+        found["emissions_by_location"] = emitted
+        found["total_emissions"] = sum(emitted.values())
+    details: dict[str, Any] = {
+        "costs_by_class": {
+            str(name): _entries(results["cost"].sel(costs=name), "nodes", "techs")
+            for name in results["costs"].values
+        }
+    }
+    for name, dims in (
+        ("systemwide_capacity_factor", ("techs", "carriers")),
+        ("systemwide_levelised_cost", ("techs", "carriers", "costs")),
+        ("total_levelised_cost", ("carriers", "costs")),
+        ("total_generation", ("techs", "carriers")),
+    ):
+        if name in results:
+            details[name] = _entries(results[name], *dims)
+    for name, dims in (
+        ("source_use", ("nodes", "techs")),
+        ("unused_supply", ("nodes", "carriers")),
+    ):
+        if name in results:
+            details[name] = _series_entries(results[name], *dims)
+    found["details"] = details
     return found
 
 
-def _entries(array: Any, *dims: str) -> dict[str, float]:
+def _series_entries(array: Any, *dims: str) -> dict[str, list[float]]:
+    """Return the time series of an array for each combination of ``dims`` that has values."""
+    entries: dict[str, list[float]] = {}
+    stacked = array.transpose(*dims, "timesteps").stack(entry=dims)
+    for label in stacked["entry"].values:
+        series = stacked.sel(entry=label)
+        if series.isnull().all():
+            continue
+        key = "::".join(str(part) for part in label)
+        entries[key] = [float(value) for value in series.fillna(0).values]
+    return entries
+
+
+def _by_location(entries: dict[str, float]) -> dict[str, dict[str, float]]:
+    """Group entries keyed by ``location::technology`` by their location."""
+    grouped: dict[str, dict[str, float]] = {}
+    for key, value in entries.items():
+        location, technology = key.split("::", 1)
+        grouped.setdefault(location, {})[technology] = value
+    return grouped
+
+
+def _entries(array: Any, *dims: str) -> dict[str, float | None]:
     """Return the elements of an array that have a value, by their labels joined with ``::``."""
     series = array.transpose(*dims).to_series().dropna()
-    entries: dict[str, float] = {}
+    entries: dict[str, float | None] = {}
     for labels, value in series.items():
         key = labels if isinstance(labels, str) else "::".join(str(label) for label in labels)
-        entries[key] = float(value)
+        # A value that is not finite is written as null, as Coati writes it.
+        entries[key] = float(value) if math.isfinite(float(value)) else None
     return entries
 
 

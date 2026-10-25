@@ -28,15 +28,27 @@ and is left out of the document.
 | `weights` | `inputs/timestep_weights`, if the times count differently |
 | `capacities` | `results/flow_cap`, the largest over the carriers, by `node::tech` |
 | `storage_capacities` | `results/storage_cap` by `node::tech` |
+| `storage_levels` | `results/storage` by `node::tech` |
 | `generation` | `results/flow_out`, each time counted with its weight, by `node::tech::carrier` |
 | `dispatch` | `results/flow_out`, all nodes and carriers together, by `tech`; without the technologies of demand and of transmission |
 | `demand_timeseries`, `demand_by_location` | `results/flow_in` of the technologies whose `inputs/base_tech` is `demand` |
 | `unmet_demand_*` | `results/unmet_demand`, which exists if the model was built with `ensure_feasibility` |
 | `transmission_flow` | `results/flow_out` of the technologies whose `base_tech` is `transmission`: what arrives at each of the two nodes that the technology joins |
+| `prices` | `results/shadow_price_system_balance` by `node::carrier`, which the file holds if `solve.shadow_prices` of the configuration lists `system_balance` |
 | `costs_by_location` | `results/cost`, weighted as for the objective, by node and `tech` |
+| `fixed_costs_by_location` | `results/cost_investment_annualised` and `results/cost_operation_fixed`, weighted as for the objective |
+| `variable_costs_by_location` | the rest of the cost, which is `results/cost_operation_variable` over the times |
+| `emissions_by_location` | the class `emissions` of `results/cost`, if the model has one, as Calliope's models name it by convention |
 | `tech_metadata` | `parent` is `inputs/base_tech`; `carrier_out` the first carrier that `inputs/carrier_out` marks; `display_name` and `color` are `inputs/name` and `inputs/color` |
 | `coordinates` | `inputs/latitude` and `inputs/longitude` |
 | `details.mode` | `init.mode` of `attrs.config`: `base`, `operate` or `spores` |
+| `details.costs_by_class` | `results/cost` of each class, by `node::tech`, as the file has it, unweighted |
+| `details.systemwide_capacity_factor`, `details.systemwide_levelised_cost`, `details.total_levelised_cost`, `details.total_generation` | the figures of the same names that Calliope computes from the solution, by `tech::carrier`, `tech::carrier::class`, `carrier::class` and `tech::carrier` |
+| `details.source_use`, `details.unused_supply` | the series of the same names, by `node::tech` and `node::carrier` |
+
+The two parts of the cost are present where the file has any of the three
+variables that Calliope writes for them; the operate mode writes none, and
+its document has the costs alone.
 
 ### Transmission
 
@@ -96,15 +108,22 @@ the document are these labels.
 | `timestamps`, `weights` | `timesteps` and `timestep_weights` |
 | `capacities` | `energy_cap` by the labels of `loc_techs` |
 | `storage_capacities` | `storage_cap` |
+| `storage_levels` | `storage`, by the labels of `loc_techs_store` |
 | `generation` | `carrier_prod`, each time counted with its weight |
 | `dispatch` | `carrier_prod` by technology, without demand and transmission |
 | `demand_timeseries`, `demand_by_location` | `carrier_con` of the technologies that inherit from `demand` |
 | `unmet_demand_*` | `unmet_demand` |
 | `transmission_flow` | `carrier_prod` of the technologies of transmission |
 | `costs_by_location` | `cost`, weighted as for the objective |
+| `fixed_costs_by_location` | `cost_investment`, weighted as for the objective, which Calliope 0.6 annualises together with the fixed costs of operation |
+| `variable_costs_by_location` | the rest of the cost, which is `cost_var` over the times |
+| `emissions_by_location` | the class `emissions` of `cost`, if the model has one |
 | `tech_metadata` | `parent` is the abstract technology that `inheritance` ends with; `carrier_out` the primary carrier of `lookup_primary_loc_tech_carriers_out`, else the first carrier that the technology produces; `display_name` and `color` are `names` and `colors` |
 | `coordinates` | `loc_coordinates`, if it holds `lat` and `lon`; locations in a plane, with `x` and `y`, are left out |
 | `details.mode` | `mode` of `run_config` |
+| `details.costs_by_class` | `cost` of each class, by the labels of `loc_techs_cost`, unweighted |
+| `details.systemwide_capacity_factor`, `details.systemwide_levelised_cost`, `details.total_levelised_cost` | the figures of the same names, by `tech::carrier`, `tech::carrier::class` and `carrier::class` |
+| `details.resource_con` | the series of the same name, by the labels of its set |
 
 ### Transmission
 
@@ -134,6 +153,9 @@ reports the first solution and lists all under `details.spores`.
 
 ## What Coati does not read
 
-- The shadow prices that Calliope 0.7 can save.
+- The shadow prices of constraints other than the system balance, which
+  Calliope 0.7 can save as well.
+- The capacity factor of each technology at each time, `capacity_factor`,
+  which is the dispatch over the capacity.
 - The inputs of a model beyond those that the results document needs. The
   [dataset document](../documents/dataset.md) holds them all: `coati dump`.

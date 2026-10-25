@@ -234,8 +234,19 @@ def test_both_formats_of_pypsa_say_the_same(data_dir: Path, version: str) -> Non
 def test_the_preview_of_calliope_says_what_the_release_says(data_dir: Path, preview: str) -> None:
     release = document_of(data_dir / f"{preview.replace('.dev7', '')}.nc")
     found = document_of(data_dir / f"{preview}.nc")
+    # The figures that Calliope computes from the solution changed between the preview and
+    # the release; the solution itself did not.
+    computed = {
+        "systemwide_capacity_factor",
+        "systemwide_levelised_cost",
+        "total_levelised_cost",
+        "total_generation",
+    }
     for document in (release, found):
         del document["metadata"], document["framework_version"]
+        document["details"] = {
+            key: value for key, value in document["details"].items() if key not in computed
+        }
     assert differences(found, release) == []
 
 

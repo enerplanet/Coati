@@ -28,7 +28,9 @@ from coati.frameworks import Framework
 from coati.labeled import LabeledArray, finite, labels_of, texts_of, weights_of
 from coati.model import Dataset
 from coati.results.document import (
+    FIXED,
     SEPARATOR,
+    VARIABLE,
     Results,
     join,
     net_flows,
@@ -49,6 +51,17 @@ _TRANSMISSION: Final = "transmission"
 
 # What separates a transmission technology from the location at the other end of the link.
 _REMOTE: Final = ":"
+
+# The class of cost in which Calliope's models keep their emissions, by convention.
+_EMISSIONS: Final = "emissions"
+
+# The figures that Calliope computes from the solution, reported under `details` as they are,
+# with the order of the labels of their keys.
+_SUMMARIES: Final = (
+    ("systemwide_capacity_factor", (_TECHS, "carriers")),
+    ("systemwide_levelised_cost", (_TECHS, "carriers", _COSTS)),
+    ("total_levelised_cost", ("carriers", _COSTS)),
+)
 
 
 def extract(dataset: Dataset, framework: Framework, options: ExtractOptions) -> Results:
@@ -71,6 +84,12 @@ def _split(label: str) -> tuple[str, str, str]:
 def _base(technology: str) -> str:
     """Return a technology without the location at the other end of its link."""
     return technology.split(_REMOTE, 1)[0]
+
+
+def _labelled(array: LabeledArray, dims: tuple[str, ...] | None = None) -> list[tuple[str, float]]:
+    """Return the elements of `array` that have a value, keyed by their labels joined with `::`."""
+    order = [array.dims.index(dim) for dim in dims] if dims else list(range(len(array.dims)))
+    return [(join(*(labels[axis] for axis in order)), value) for labels, value in array.items()]
 
 
 class _Extractor:
@@ -97,6 +116,8 @@ class _Extractor:
         self._demand()
         self._unmet_demand()
         self._costs()
+        self._storage_levels()
+        self._summaries()
         self._technologies(produced)
         self._coordinates()
         self._list_spores()
@@ -267,15 +288,78 @@ class _Extractor:
         cost = self._array("cost")
         if cost is None:
             return
-        if _COSTS in cost:
-            cost = cost.scale(_COSTS, self._cost_weights(cost.labels[_COSTS]))
-        total = cost.sum(_COSTS, _TIME)
+        self._emissions(cost)
+        self._classes(cost)
+        total = self._weighed(cost).sum(_COSTS, _TIME)
         self._set_of(total, "cost")
+        fixed = self._part("cost_investment")
+        stated = fixed is not None or self._array("cost_var") is not None
         for (label,), value in total.items():
             location, technology, _ = _split(label)
-            self._results.add_cost(location, technology, value)
+            if not stated:
+                self._results.add_cost(location, technology, value)
+                continue
+            paid = (fixed or {}).get(label, 0.0)
+            self._results.add_cost(location, technology, paid, FIXED)
+            self._results.add_cost(location, technology, value - paid, VARIABLE)
         if np.isfinite(total.values).any():
             self._results.objective = float(np.nansum(total.values))
+
+    def _weighed(self, cost: LabeledArray) -> LabeledArray:
+        """Return a cost with its classes counted as the objective counts them."""
+        if _COSTS not in cost:
+            return cost
+        return cost.scale(_COSTS, self._cost_weights(cost.labels[_COSTS]))
+
+    def _part(self, name: str) -> dict[str, float] | None:
+        """Return a part of the cost by the label of its set; `None` if the file has none."""
+        part = self._array(name)
+        if part is None:
+            return None
+        total = self._weighed(part).sum(_COSTS, _TIME)
+        self._set_of(total, name)
+        return {label: value for (label,), value in total.items()}
+
+    def _emissions(self, cost: LabeledArray) -> None:
+        """Record the class of cost named `emissions` as the emissions of the technologies."""
+        if _COSTS not in cost or _EMISSIONS not in cost.labels[_COSTS]:
+            return
+        emitted = cost.select(_COSTS, _EMISSIONS).sum(_TIME)
+        self._set_of(emitted, "cost")
+        for (label,), value in emitted.items():
+            location, technology, _ = _split(label)
+            self._results.add_emissions(location, technology, value)
+
+    def _classes(self, cost: LabeledArray) -> None:
+        """Report the cost of each technology in each class, as the file has it."""
+        if _COSTS not in cost:
+            return
+        self._results.details["costs_by_class"] = {
+            name: dict(_labelled(cost.select(_COSTS, name).sum(_TIME)))
+            for name in cost.labels[_COSTS]
+        }
+
+    def _storage_levels(self) -> None:
+        storage = self._array("storage")
+        if storage is None or _TIME not in storage:
+            return
+        for label, series in self._rows("storage", storage):
+            if not np.isnan(series).all():
+                self._results.add_storage_level(label, finite(series))
+
+    def _summaries(self) -> None:
+        """Report the figures that Calliope computes from the solution, in its own terms."""
+        for name, dims in _SUMMARIES:
+            array = self._array(name)
+            if array is not None and set(array.dims) == set(dims):
+                self._results.details[name] = dict(_labelled(array, dims))
+        consumed = self._array("resource_con")
+        if consumed is not None and _TIME in consumed and len(consumed.dims) == 2:
+            self._results.details["resource_con"] = {
+                label: finite(series)
+                for label, series in self._rows("resource_con", consumed)
+                if not np.isnan(series).all()
+            }
 
     def _cost_weights(self, classes: tuple[str, ...]) -> np.ndarray[Any, Any]:
         """Return the weight of each class of cost in the objective.
