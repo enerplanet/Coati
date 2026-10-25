@@ -281,6 +281,20 @@ def test_the_name_of_a_bus_states_its_carrier(tmp_path: Path) -> None:
     }
 
 
+def test_the_noise_of_a_solver_is_no_dispatch(tmp_path: Path) -> None:
+    path = _network(
+        tmp_path,
+        generators_i=(("generators_i",), ["idle", "busy"]),
+        generators_bus=(("generators_i",), ["hub", "hub"]),
+        generators_p_nom_opt=(("generators_i",), [3.0, 3.0]),
+        generators_t_p_i=(("generators_t_p_i",), ["idle", "busy"]),
+        generators_t_p=(("snapshots", "generators_t_p_i"), [[1e-9, 1e-6], [-1e-9, 0.0]]),
+    )
+    found = document(path)
+    assert found["dispatch"] == {"busy": [1e-6, 0.0]}
+    assert found["generation"] == {"hub::idle::AC": 0.0, "hub::busy::AC": 1e-6}
+
+
 def test_a_link_between_carriers_is_a_conversion(tmp_path: Path) -> None:
     path = _network(
         tmp_path,

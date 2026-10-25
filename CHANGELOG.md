@@ -17,6 +17,8 @@ minor release may change the Python interface and the command line.
   `generation` and `carrier_out` of `tech_metadata`.)
 - PyPSA: a generator whose carrier or name is `unmet` stands for demand that
   is not met, as one named `unmet_demand` does.
+- A technology whose output stays below 1e-6 at every time is left out of
+  `dispatch`, like one that puts out nothing.
 
 ### Fixed
 

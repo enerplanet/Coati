@@ -205,8 +205,9 @@ class Results:
         """Derive what follows from the rest: the cost of each technology, and tidy up.
 
         A technology that puts out nothing at all is dropped from the
-        dispatch, and `costs_by_tech` lists the technologies that cost
-        something; `costs_by_location` keeps every entry.
+        dispatch, as is one whose output never reaches `INACTIVE`, which is
+        the noise of a solver; `costs_by_tech` lists the technologies that
+        cost something; `costs_by_location` keeps every entry.
         """
         totals: dict[str, float] = {}
         for at_location in self.costs_by_location.values():
@@ -214,7 +215,9 @@ class Results:
                 totals[technology] = totals.get(technology, 0.0) + cost
         self.costs_by_tech = {name: cost for name, cost in totals.items() if cost > 0}
         self.dispatch = {
-            name: series for name, series in self.dispatch.items() if float(series.sum()) > 0
+            name: series
+            for name, series in self.dispatch.items()
+            if series.size and float(series.max()) >= INACTIVE
         }
 
     def total(self, series: np.ndarray[Any, Any]) -> float:
