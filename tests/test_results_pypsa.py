@@ -262,6 +262,25 @@ def test_a_bus_without_a_carrier_carries_alternating_current(tmp_path: Path) -> 
     assert "weights" not in found
 
 
+def test_the_name_of_a_bus_states_its_carrier(tmp_path: Path) -> None:
+    # The attribute says AC, as PyPSA has it for every bus of a power flow; the name says more.
+    # A third part of the name tells the buses of a location and a carrier apart.
+    path = _network(
+        tmp_path,
+        buses_i=(("buses_i",), ["hub::power", "hub::power::tank", "plain"]),
+        buses_carrier=(("buses_i",), ["AC", "AC", "AC"]),
+        generators_i=(("generators_i",), ["wind", "pump", "diesel"]),
+        generators_bus=(("generators_i",), ["hub::power", "hub::power::tank", "plain"]),
+        generators_p_nom_opt=(("generators_i",), [3.0, 1.0, 2.0]),
+    )
+    found = document(path)
+    assert found["generation"] == {
+        "hub::wind::power": 0.0,
+        "hub::pump::power": 0.0,
+        "plain::diesel::AC": 0.0,
+    }
+
+
 def test_a_link_between_carriers_is_a_conversion(tmp_path: Path) -> None:
     path = _network(
         tmp_path,

@@ -9,6 +9,13 @@ minor release may change the Python interface and the command line.
 
 ## [Unreleased]
 
+### Changed
+
+- PyPSA: a bus named `north::electricity` carries `electricity` whatever its
+  attribute `carrier` says, as the documentation promised; a further part of
+  the name, as in `north::electricity::battery`, tells buses apart. (Keys of
+  `generation` and `carrier_out` of `tech_metadata`.)
+
 ### Fixed
 
 - PyPSA: a committable unit that was never off has no series `status` in the

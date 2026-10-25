@@ -22,8 +22,10 @@ translated:
 
 **Location.** The location of a component is that of its bus. A bus that is
 named `north::electricity` is at the location `north` and carries
-`electricity`. Any other bus is its own location, and carries what its
-attribute `carrier` says, or `AC` if it says nothing.
+`electricity`, whatever its attribute `carrier` says; a further part of the
+name, as in `north::electricity::battery`, tells the buses of one location
+and one carrier apart. Any other bus is its own location, and carries what
+its attribute `carrier` says, or `AC` if it says nothing.
 
 **Technology.** The technology is the name of the component, without the
 location if the name states it as `north::pv` or as `pv@north`. Components

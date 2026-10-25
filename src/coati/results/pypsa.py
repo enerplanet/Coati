@@ -5,7 +5,9 @@ speaks of technologies at locations instead, so the extractor translates:
 
 * The **location** of a component is that of its bus. A bus named
   `north::electricity` is at the location `north` and carries
-  `electricity`; any other bus is its own location and carries what its
+  `electricity`, whatever its attribute `carrier` says, and a further part of
+  the name, as in `north::electricity::battery`, tells the buses of a location
+  and a carrier apart; any other bus is its own location and carries what its
   attribute `carrier` says.
 * The **technology** is the name of the component, without the location if the
   name states it as `north::pv` or `pv@north`.
@@ -214,6 +216,12 @@ def _states(component: Component, attribute: str) -> bool:
     return False
 
 
+def _split(bus: str) -> tuple[str, str]:
+    """Return the location and the carrier that the name of a bus states, the carrier if any."""
+    parts = bus.split(SEPARATOR)
+    return parts[0], parts[1] if len(parts) > 1 else ""
+
+
 def _geographic(dataset: Dataset) -> bool:
     """Tell whether the coordinates of the buses are longitudes and latitudes."""
     system = dataset.attributes.get("network_srid", _WGS84)
@@ -262,9 +270,9 @@ class _Scenario:
         buses = self._network.component("buses")
         carriers = buses.texts("carrier")
         for name, carrier in zip(buses.names, carriers, strict=True):
-            location, _, rest = name.partition(SEPARATOR)
+            location, named = _split(name)
             self._location[name] = location
-            self._carrier[name] = carrier or rest or "AC"
+            self._carrier[name] = named or carrier or "AC"
         if not self._geographic or not (buses.has("x") or buses.has("y")):
             return
         east, north = buses.numbers("x", 0.0), buses.numbers("y", 0.0)
@@ -277,8 +285,8 @@ class _Scenario:
         """Return the location and the carrier of a bus."""
         location = self._location.get(bus)
         if location is None:
-            location, _, rest = bus.partition(SEPARATOR)
-            return location, rest or "AC"
+            location, named = _split(bus)
+            return location, named or "AC"
         return location, self._carrier[bus]
 
     @staticmethod
