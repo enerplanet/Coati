@@ -191,7 +191,7 @@ def test_the_badges_read_files_that_exist() -> None:
         for address in IMAGE.findall(read("README.md"))
         if raw in unquote(address)
     ]
-    assert sorted(read_by_badges) == ["CITATION.cff", "pyproject.toml"]
+    assert sorted(read_by_badges) == ["pyproject.toml"]
     for name in read_by_badges:
         assert (ROOT / name).is_file()
 

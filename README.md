@@ -5,9 +5,9 @@
 
 [![CI](https://github.com/enerplanet/Coati/actions/workflows/ci.yml/badge.svg)](https://github.com/enerplanet/Coati/actions/workflows/ci.yml)
 [![MkDocs](https://github.com/enerplanet/Coati/actions/workflows/docs.yml/badge.svg)](https://enerplanet.github.io/Coati)
-[![Version](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fenerplanet%2FCoati%2Fmain%2FCITATION.cff&query=%24.version&label=version)](CHANGELOG.md)
-[![Python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fenerplanet%2FCoati%2Fmain%2Fpyproject.toml)](pyproject.toml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/enerplanet/Coati?include_prereleases&sort=semver&display_name=tag)](https://github.com/enerplanet/Coati/releases)
+[![Python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fenerplanet%2FCoati%2Fmain%2Fpyproject.toml&logo=python&logoColor=white)](pyproject.toml)
+[![License: MIT](https://img.shields.io/github/license/enerplanet/Coati)](LICENSE)
 
 Coati converts the result files of energy system models to JSON. It reads the
 netCDF and HDF5 files that [Calliope](https://www.callio.pe/),
