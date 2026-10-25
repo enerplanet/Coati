@@ -9,6 +9,14 @@ minor release may change the Python interface and the command line.
 
 ## [Unreleased]
 
+## [0.2.1-alpha] - 2026-10-25
+
+The results document says more of what a solved model says. Every one of
+its new keys was checked, for every framework, against what the framework
+itself reports: for the files under `tests/data` and for every result file
+of the scenarios and examples of [MEME](https://github.com/enerplanet/meme)
+0.2.0-alpha.
+
 ### Added
 
 - The results document, schema version 1.1, says more of what a solved
@@ -133,6 +141,7 @@ document that agrees with what the framework itself reports for the file.
   compose services for the tests, the checks, the docs server, the `coati`
   command and a shell, selected with `ENV=dev|test`.
 
-[Unreleased]: https://github.com/enerplanet/Coati/compare/v0.2.0-alpha...HEAD
+[Unreleased]: https://github.com/enerplanet/Coati/compare/v0.2.1-alpha...HEAD
+[0.2.1-alpha]: https://github.com/enerplanet/Coati/releases/tag/v0.2.1-alpha
 [0.2.0-alpha]: https://github.com/enerplanet/Coati/releases/tag/v0.2.0-alpha
 [0.1.0-alpha]: https://github.com/enerplanet/Coati/releases/tag/v0.1.0-alpha
