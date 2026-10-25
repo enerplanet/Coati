@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/logos/coati-favicon.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -33,10 +33,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -473,6 +473,8 @@
   
     
     
+      
+        
       
         
       
@@ -935,6 +937,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#the-runs-of-meme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The runs of MEME
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#properties" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1281,7 +1294,7 @@ it comes from.</p>
 <tbody>
 <tr>
 <td>Calliope</td>
-<td>0.6.10, 0.7.0.dev7, 0.7.0; each with a run in the SPORES mode</td>
+<td>0.6.8, 0.6.10, 0.7.0.dev7, 0.7.0; each with a run in the SPORES mode</td>
 </tr>
 <tr>
 <td>PyPSA</td>
@@ -1349,6 +1362,18 @@ the test suite runs without them.</p>
 alone. Calliope 0.6 needs a version of Python that Coati does not support,
 so the two cannot be installed together. Its files are tested from
 <code>tests/data</code> alone.</p>
+<h3 id="the-runs-of-meme">The runs of MEME<a class="headerlink" href="#the-runs-of-meme" title="Permanent link">&para;</a></h3>
+<p>Before a release, every scenario and example of the matching release of
+<a href="https://github.com/enerplanet/meme">MEME</a> is run on every target that
+accepts it, with the solvers of MEME's own environment, and every result
+file is converted. For each, the document is validated against the schema,
+and its numbers are compared with what the framework reports for the file
+through its own interface: the tables and <code>n.statistics</code> of PyPSA, the
+<code>results</code> and <code>inputs</code> of Calliope, and the datasets that AdOpT-NET0 reads
+from its file. For MEME 0.1.0-alpha that is 54 payloads, 133 jobs and 172
+result files of four versions of the frameworks; the notes of the release
+state the outcome. The scripts of this check live outside the repository,
+because they need MEME and its environment.</p>
 <h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
 <p>The tests of the writer and of the readers state properties that hold for
 any input, and <a href="https://hypothesis.works/">Hypothesis</a> looks for an input
@@ -1425,7 +1450,7 @@ write, as far as is known.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 28, 2026 17:18:16 UTC">September 28, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="October 25, 2026 12:28:43 UTC">October 25, 2026</span>
   </span>
 
     
@@ -1535,10 +1560,10 @@ write, as far as is known.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.expand", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.prune", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.path", "navigation.tracking", "navigation.sections", "search.highlight", "search.share", "search.suggest", "toc.follow", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.expand", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.prune", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.path", "navigation.tracking", "navigation.sections", "search.highlight", "search.share", "search.suggest", "toc.follow", "toc.integrate"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>
