@@ -9,6 +9,12 @@ minor release may change the Python interface and the command line.
 
 ## [Unreleased]
 
+### Fixed
+
+- PyPSA: a committable unit that was never off has no series `status` in the
+  file, since the default of the status is on, and its stand-by cost was
+  counted as nothing. It is counted for every snapshot now.
+
 ## [0.1.0-alpha] - 2026-10-25
 
 The first pre-release. It reads every result file that

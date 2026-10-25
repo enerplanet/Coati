@@ -102,7 +102,9 @@ operation that PyPSA knows and the network states:
 
 Each is counted from the time series that PyPSA writes for it. PyPSA writes
 a series only where a value differs from the default, so a series that the
-file lacks is zero: a unit that never started up, a store that never spilled.
+file lacks has the default: a unit that never started up, a store that
+never spilled, and a committable unit that was never off, whose `status`
+defaults to on and which stands by at every snapshot.
 
 The `objective` of the document is the sum of these costs, so that the costs
 of the technologies add up to it, as they do for the other frameworks. The

@@ -89,7 +89,8 @@ _WGS84: Final = 4326
 # series is squared, and whether the cost counts each snapshot with the objective weighting.
 # (An event such as a start-up is counted once, a state such as standing by for as long as it
 # lasts.) PyPSA writes a series only where a value differs from the default, so a series that
-# the file lacks is zero: a unit that never started up, a store that never spilled.
+# the file lacks has the default: no start-up, no spill, and the status "on" of a unit that
+# was never off (see `_amount`).
 _Other = tuple[str, str, bool, bool]
 _OTHER_COSTS: Final[dict[str, tuple[_Other, ...]]] = {
     "generators": (
@@ -316,7 +317,7 @@ class _Scenario:
             if not _states(component, name):
                 continue
             price = component.varying(name, 0.0, self._length)
-            amount = component.flow(series, self._length)
+            amount = self._amount(component, series)
             if squared:
                 amount = amount * amount
             if weighted:
@@ -324,6 +325,19 @@ class _Scenario:
             running = running + (price * amount).sum(axis=0)
         decided = component.numbers(attribute + "_extendable", 0.0) > 0
         return _Costs(np.asarray(capital), np.asarray(running), decided)
+
+    def _amount(self, component: Component, series: str) -> np.ndarray[Any, Any]:
+        """Return the time series that a cost of operation applies to, with its default.
+
+        PyPSA writes a series only where a value differs from its default.
+        The default of `status` is on, so a committable unit that was never
+        off has no series of it and stands by at every snapshot; a unit that
+        is not committable has no status to pay for.
+        """
+        if series != "status":
+            return component.flow(series, self._length)
+        committable = component.numbers("committable", 0.0) > 0
+        return component.varying(series, 1.0, self._length) * committable
 
     def _charge(
         self, location: str, technology: str, costs: _Costs, position: int, share: float = 1.0

@@ -394,7 +394,7 @@ def test_a_cost_whose_series_the_file_lacks_is_nothing(tmp_path: Path) -> None:
     assert found["warnings"] == []
 
 
-def committable(tmp_path: Path, **changes: object) -> Path:
+def committable(tmp_path: Path, *, is_committable: bool = True, **changes: object) -> Path:
     """A committable generator: on in the second hour, with the costs of commitment."""
     return _network(
         tmp_path,
@@ -404,7 +404,7 @@ def committable(tmp_path: Path, **changes: object) -> Path:
         generators_bus=(("generators_i",), ["hub"]),
         generators_p_nom=(("generators_i",), [100.0]),
         generators_p_nom_opt=(("generators_i",), [100.0]),
-        generators_committable=(("generators_i",), np.array([True])),
+        generators_committable=(("generators_i",), np.array([is_committable])),
         generators_marginal_cost=(("generators_i",), [10.0]),
         generators_stand_by_cost=(("generators_i",), [5.0]),
         generators_start_up_cost=(("generators_i",), [300.0]),
@@ -433,16 +433,24 @@ def test_the_costs_of_commitment_are_counted(tmp_path: Path) -> None:
     assert found["warnings"] == []
 
 
-def test_a_unit_that_was_never_on_stood_by_for_nothing(tmp_path: Path) -> None:
-    path = committable(tmp_path, objective=1180.0)
+def test_a_unit_whose_status_the_file_lacks_was_on_all_the_time(tmp_path: Path) -> None:
+    # The default of the status is on, and PyPSA writes a series only where a value differs
+    # from the default: a committable unit that was never off stands by at every snapshot.
+    path = committable(tmp_path, objective=800.0 + 5.0 * 4 + 300.0 + 70.0)
     with files.netCDF4.Dataset(path, "a") as dataset:
         dataset.renameVariable("generators_t_status", "generators_t_status_gone")
     found = document(path)
-    assert found["costs_by_location"] == {"hub": {"coal": 800.0 + 300.0 + 70.0}}
-    assert found["warnings"][0].startswith(
-        "the objective of the network and its constant add up to 1180, the costs that the"
-        " document counts towards them to 1170"
-    )
+    assert found["costs_by_location"] == {"hub": {"coal": 800.0 + 20.0 + 300.0 + 70.0}}
+    assert found["warnings"] == []
+
+
+def test_a_unit_that_is_not_committable_does_not_stand_by(tmp_path: Path) -> None:
+    path = committable(tmp_path, is_committable=False, objective=800.0 + 300.0 + 70.0)
+    with files.netCDF4.Dataset(path, "a") as dataset:
+        dataset.renameVariable("generators_t_status", "generators_t_status_gone")
+    found = document(path)
+    assert found["costs_by_location"] == {"hub": {"coal": 1170.0}}
+    assert found["warnings"] == []
 
 
 def test_the_costs_of_a_store_and_of_spilling_are_counted(tmp_path: Path) -> None:
