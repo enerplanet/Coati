@@ -1,10 +1,14 @@
 name: Release
 
-# Publishes a version to PyPI when its tag is pushed: v0.1.0 for the version
-# 0.1.0, v0.1.0-alpha or v0.1.0a0 for the version that Python writes 0.1.0a0.
-# PyPI trusts this workflow through a trusted publisher that is configured for
-# the project there (workflow release.yml, environment pypi), so that no token
-# is stored in the repository.
+# A pushed tag v<version> releases that version: v0.1.0 for the version 0.1.0,
+# v0.1.0-alpha for the version that Python writes 0.1.0a0. The distributions
+# are built once and attached to the release on GitHub, whose notes come from
+# .github/releases/<tag>.md or else from the changelog; a pre-release is marked
+# as one. The same distributions then go to PyPI, which trusts this workflow
+# through a trusted publisher configured for the project there (workflow
+# release.yml, environment pypi), so that no token is stored in the repository.
+# If the publisher is not configured yet, the job to PyPI fails and the release
+# on GitHub stands; configure the publisher and re-run the failed job.
 
 on:
   push:
@@ -17,6 +21,8 @@ jobs:
   build:
     name: build
     runs-on: ubuntu-latest
+    outputs:
+      prerelease: ${{ steps.version.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,6 +30,7 @@ jobs:
           python-version: "3.13"
       - run: pip install build twine packaging
       - name: The tag must name the version of the package
+        id: version
         run: |
           python - <<'PY'
           import os
@@ -36,16 +43,45 @@ jobs:
           if Version(tag.removeprefix("v")) != Version(version):
               raise SystemExit(f"::error::the tag {tag} does not name the version {version}")
           PY
-      - run: python -m build
+          if python .github/scripts/release_notes.py "$GITHUB_REF_NAME" --prerelease; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build the source distribution and the wheel
+        run: python -m build
       - run: twine check --strict dist/*
+      - name: Write the notes of the release
+        run: python .github/scripts/release_notes.py "$GITHUB_REF_NAME" > dist/release-notes.md
       - uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
 
+  release:
+    name: release on GitHub
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Create the release with the distributions
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PRERELEASE: ${{ needs.build.outputs.prerelease }}
+        run: |
+          flags=(--verify-tag --title "Coati ${GITHUB_REF_NAME#v}" --notes-file dist/release-notes.md)
+          if [ "$PRERELEASE" = "true" ]; then flags+=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" dist/*.whl dist/*.tar.gz "${flags[@]}"
+
   publish:
     name: publish to PyPI
-    needs: build
+    needs: [build, release]
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -57,21 +93,6 @@ jobs:
         with:
           name: dist
           path: dist/
+      - name: Leave the notes out of what goes to PyPI
+        run: rm -f dist/release-notes.md
       - uses: pypa/gh-action-pypi-publish@release/v1
-
-  release:
-    name: release on GitHub
-    needs: publish
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
-      - name: Create the release with the distributions
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --generate-notes

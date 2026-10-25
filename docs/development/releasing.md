@@ -1,8 +1,8 @@
 # Releasing
 
 A release is a tag. The workflow `release.yml` builds the distributions from
-the tag, publishes them to [PyPI](https://pypi.org/project/enerplanet-coati/)
-and creates the release on GitHub.
+the tag, creates the release on GitHub with them, and then publishes them to
+[PyPI](https://pypi.org/project/enerplanet-coati/).
 
 ## Versions
 
@@ -33,6 +33,10 @@ with the layout of a document and not with the package. See
     - set `version` and `date-released` in `CITATION.cff`
     - in `CHANGELOG.md`, rename *Unreleased* to the version with the date,
       and start a new, empty *Unreleased*
+    - write the notes of the release to `.github/releases/v<version>.md`:
+      what the release brings, in the words of the release notes of the
+      other projects of the organisation; without the file, the notes are
+      the section of the changelog
 3. Open a pull request, and merge it once CI passes.
 4. Tag the merge commit and push the tag:
 
@@ -42,6 +46,8 @@ with the layout of a document and not with the package. See
     ```
 
 The workflow refuses a tag that does not name the version of the package.
+A version before a release, such as `0.1.0-alpha`, is marked as a
+pre-release on GitHub.
 
 ## PyPI
 
@@ -62,6 +68,11 @@ For the first release, the project does not exist on PyPI yet; a *pending*
 publisher with these settings creates it on the first upload. The
 environment `pypi` of the repository can require a review, so that a
 release is published only after a maintainer has approved it.
+
+The release on GitHub does not wait for PyPI: it is created as soon as the
+distributions are built. If the publisher is not configured, the job
+*publish to PyPI* fails and the release stands; configure the publisher and
+re-run the failed job of the workflow.
 
 The badges of the readme take the version from `CITATION.cff` and the
 versions of Python from `pyproject.toml`, as they are on `main`. They do not
