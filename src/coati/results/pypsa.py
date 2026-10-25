@@ -28,7 +28,11 @@ capacity is listed at both ends, and each end bears half of its cost.
 Costs follow the definitions of `n.statistics`: the capital cost of a
 component is its `capital_cost` times its optimised capacity, whether or not
 the capacity was extendable, and the operational cost is its `marginal_cost`
-times its dispatch, weighted with the objective weighting of the snapshots.
+times its dispatch, weighted with the objective weighting of the snapshots,
+together with the other costs of operation that PyPSA knows: the quadratic
+marginal cost, the cost of holding energy in a store, the cost of spilling,
+and the costs of a committable unit for standing by, starting up and shutting
+down. Each is counted from the time series that PyPSA writes for it.
 The `objective` of the document is the sum of these costs. The objective of
 the network, which the document reports as `objective_function_value`, is
 another number: PyPSA leaves out of it the capital cost of the capacities that
@@ -80,16 +84,36 @@ _SHORTFALL: Final = frozenset({"unmet_demand", "load_shedding", "load shedding"}
 # The coordinate reference system in which x is the longitude and y the latitude.
 _WGS84: Final = 4326
 
-# Costs that PyPSA knows and the document does not count, with the tables that may state them.
-_UNCOUNTED: Final = (
-    "marginal_cost_quadratic",
-    "marginal_cost_storage",
-    "spill_cost",
-    "stand_by_cost",
-    "start_up_cost",
-    "shut_down_cost",
-)
-_TABLES: Final = ("generators", "storage_units", "stores", "links", "lines", "transformers")
+# The costs of operation that PyPSA knows besides the marginal cost, by the table of the
+# components: the attribute that prices them, the time series that they apply to, whether the
+# series is squared, and whether the cost counts each snapshot with the objective weighting.
+# (An event such as a start-up is counted once, a state such as standing by for as long as it
+# lasts.) PyPSA writes a series only where a value differs from the default, so a series that
+# the file lacks is zero: a unit that never started up, a store that never spilled.
+_Other = tuple[str, str, bool, bool]
+_OTHER_COSTS: Final[dict[str, tuple[_Other, ...]]] = {
+    "generators": (
+        ("marginal_cost_quadratic", "p", True, True),
+        ("stand_by_cost", "status", False, True),
+        ("start_up_cost", "start_up", False, False),
+        ("shut_down_cost", "shut_down", False, False),
+    ),
+    "storage_units": (
+        ("marginal_cost_quadratic", "p_dispatch", True, True),
+        ("marginal_cost_storage", "state_of_charge", False, True),
+        ("spill_cost", "spill", False, True),
+    ),
+    "stores": (
+        ("marginal_cost_quadratic", "p", True, True),
+        ("marginal_cost_storage", "e", False, True),
+    ),
+    "links": (
+        ("marginal_cost_quadratic", "p0", True, True),
+        ("stand_by_cost", "status", False, True),
+        ("start_up_cost", "start_up", False, False),
+        ("shut_down_cost", "shut_down", False, False),
+    ),
+}
 
 # How far the objective may be from the costs that make it up, relative and absolute.
 _CLOSE: Final = (1e-4, 1e-3)
@@ -168,17 +192,6 @@ def _account(results: Results, network: Network, given: float, unmet: float) -> 
         results.details["capital_cost_of_given_capacities"] = given
     if unmet:
         results.details["cost_of_unmet_demand"] = unmet
-    uncounted = [
-        f"{attribute} of the {table}"
-        for table in _TABLES
-        for attribute in _UNCOUNTED
-        if _states(network.component(table), attribute)
-    ]
-    if uncounted:
-        results.warnings.append(
-            "the network states costs that the document does not count: " + ", ".join(uncounted)
-        )
-        return
     if network.periods or network.objective is None:
         return
     stated = network.objective + (network.objective_constant or 0.0)
@@ -291,6 +304,7 @@ class _Scenario:
         attribute: str,
         capacity: np.ndarray[Any, Any],
         dispatch: np.ndarray[Any, Any] | None,
+        table: str = "",
     ) -> _Costs:
         """Return what the components cost: their capacity and their operation."""
         capital = component.numbers("capital_cost", 0.0) * capacity
@@ -298,6 +312,16 @@ class _Scenario:
         if dispatch is not None:
             price = component.varying("marginal_cost", 0.0, self._length)
             running = (price * dispatch * self._money[:, np.newaxis]).sum(axis=0)
+        for name, series, squared, weighted in _OTHER_COSTS.get(table, ()):
+            if not _states(component, name):
+                continue
+            price = component.varying(name, 0.0, self._length)
+            amount = component.flow(series, self._length)
+            if squared:
+                amount = amount * amount
+            if weighted:
+                amount = amount * self._money[:, np.newaxis]
+            running = running + (price * amount).sum(axis=0)
         decided = component.numbers(attribute + "_extendable", 0.0) > 0
         return _Costs(np.asarray(capital), np.asarray(running), decided)
 
@@ -346,7 +370,7 @@ class _Scenario:
         generators = self._network.component("generators")
         output = generators.flow("p", self._length)
         capacity = self._capacity(generators, "p_nom")
-        costs = self._costs(generators, "p_nom", capacity, output)
+        costs = self._costs(generators, "p_nom", capacity, output, "generators")
         carriers = generators.texts("carrier")
         for position, (name, bus) in enumerate(
             zip(generators.names, generators.texts("bus"), strict=True)
@@ -375,10 +399,13 @@ class _Scenario:
 
     def _storage_units(self) -> None:
         units = self._network.component("storage_units")
-        discharge = np.maximum(units.flow("p", self._length), 0.0)
+        if "p_dispatch" in units.series:
+            discharge = units.flow("p_dispatch", self._length)
+        else:
+            discharge = np.maximum(units.flow("p", self._length), 0.0)
         capacity = self._capacity(units, "p_nom")
         hours = units.numbers("max_hours", 1.0)
-        costs = self._costs(units, "p_nom", capacity, discharge)
+        costs = self._costs(units, "p_nom", capacity, discharge, "storage_units")
         for position, (name, bus) in enumerate(zip(units.names, units.texts("bus"), strict=True)):
             location, carrier = self._place(bus)
             technology = self._technology(name, location)
@@ -395,7 +422,7 @@ class _Scenario:
         flow = stores.flow("p", self._length)
         withdrawal = np.maximum(flow, 0.0)
         capacity = self._capacity(stores, "e_nom")
-        costs = self._costs(stores, "e_nom", capacity, flow)
+        costs = self._costs(stores, "e_nom", capacity, flow, "stores")
         for position, (name, bus) in enumerate(zip(stores.names, stores.texts("bus"), strict=True)):
             location, carrier = self._place(bus)
             technology = self._technology(name, location)
@@ -431,7 +458,7 @@ class _Scenario:
         flows = {port: links.flow(f"p{port}", self._length) for port in ports}
         capacity = self._capacity(links, "p_nom")
         efficiency = links.numbers("efficiency", 1.0)
-        costs = self._costs(links, "p_nom", capacity, flows.get(0))
+        costs = self._costs(links, "p_nom", capacity, flows.get(0), "links")
         for position, name in enumerate(links.names):
             ends = [(port, buses[port][position]) for port in ports if buses[port][position]]
             outputs = [(port, bus) for port, bus in ends if port > 0]

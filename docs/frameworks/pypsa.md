@@ -64,7 +64,7 @@ technology, and what it costs is no cost of the system.
 | `dispatch` | the output at each snapshot: `p` of a generator, what a storage unit or a store gives off, what arrives at the outputs of a link |
 | `demand_timeseries`, `demand_by_location` | `p` of the loads; `p_set` for a network that has not been optimised |
 | `transmission_flow` | what arrives at either end of the lines, transformers and links of transmission |
-| `costs_by_location` | `capital_cost` times the capacity, and `marginal_cost` times the dispatch, weighted with the weighting `objective` |
+| `costs_by_location` | `capital_cost` times the capacity, `marginal_cost` times the dispatch, weighted with the weighting `objective`, and the other costs of operation that the network states |
 | `tech_metadata` | the kind as above; `carrier_out` is the carrier of the bus that the component feeds |
 | `coordinates` | `y` and `x` of the buses, if the network has the reference system 4326 |
 | `details.objective_constant` | `n.objective_constant` |
@@ -89,7 +89,20 @@ once.
 The costs follow the definitions of `n.statistics`: the capital cost of a
 component is its `capital_cost` times its optimised capacity, whether or not
 the capacity was extendable, and its operational cost is its
-`marginal_cost` times its dispatch.
+`marginal_cost` times its dispatch, together with every other cost of
+operation that PyPSA knows and the network states:
+
+| Cost | Applies to | Counted as |
+|---|---|---|
+| `marginal_cost_quadratic` | the dispatch, squared | weighted with the weighting `objective` |
+| `marginal_cost_storage` | the energy held: `state_of_charge` of a storage unit, `e` of a store | weighted |
+| `spill_cost` | `spill` of a storage unit | weighted |
+| `stand_by_cost` | `status` of a committable generator or link, the hours it is on | weighted |
+| `start_up_cost`, `shut_down_cost` | `start_up` and `shut_down` of a committable unit | once per event |
+
+Each is counted from the time series that PyPSA writes for it. PyPSA writes
+a series only where a value differs from the default, so a series that the
+file lacks is zero: a unit that never started up, a store that never spilled.
 
 The `objective` of the document is the sum of these costs, so that the costs
 of the technologies add up to it, as they do for the other frameworks. The
@@ -128,10 +141,6 @@ of the document is what the system costs, and
 The check is left out for a network with several investment periods, whose
 objective weighs the periods.
 
-Costs of other kinds than the capital and the marginal cost are not counted:
-`marginal_cost_quadratic`, `marginal_cost_storage`, `spill_cost`,
-`stand_by_cost`, `start_up_cost` and `shut_down_cost`. A document of a
-network that states one of them names it in a warning.
 
 ## What the file does not say
 

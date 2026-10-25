@@ -373,10 +373,11 @@ def test_an_objective_may_differ_by_what_the_solver_tolerates(tmp_path: Path) ->
     assert document(path)["warnings"] == []
 
 
-def test_costs_that_the_document_does_not_count_are_named(tmp_path: Path) -> None:
+def test_a_cost_whose_series_the_file_lacks_is_nothing(tmp_path: Path) -> None:
+    # PyPSA writes a series only where a value differs from the default: no start-up, no spill.
     path = _network(
         tmp_path,
-        objective=500.0,
+        objective=0.0,
         generators_i=(("generators_i",), ["coal", "wind"]),
         generators_bus=(("generators_i",), ["hub", "hub"]),
         generators_p_nom_opt=(("generators_i",), [3.0, 1.0]),
@@ -387,12 +388,96 @@ def test_costs_that_the_document_does_not_count_are_named(tmp_path: Path) -> Non
         storage_units_t_spill_cost_i=(("storage_units_t_spill_cost_i",), ["dam"]),
         storage_units_t_spill_cost=(("snapshots", "storage_units_t_spill_cost_i"), [[0.0], [1.5]]),
     )
-    assert document(path)["warnings"] == [
-        (
-            "the network states costs that the document does not count:"
-            " start_up_cost of the generators, spill_cost of the storage_units"
-        )
-    ]
+    found = document(path)
+    assert found["costs_by_location"] == {"hub": {"coal": 0.0, "wind": 0.0, "dam": 0.0}}
+    assert found["objective"] == 0.0
+    assert found["warnings"] == []
+
+
+def committable(tmp_path: Path, **changes: object) -> Path:
+    """A committable generator: on in the second hour, with the costs of commitment."""
+    return _network(
+        tmp_path,
+        snapshots=(("snapshots",), np.arange(3)),
+        snapshots_objective=(("snapshots",), [1.0, 2.0, 1.0]),
+        generators_i=(("generators_i",), ["coal"]),
+        generators_bus=(("generators_i",), ["hub"]),
+        generators_p_nom=(("generators_i",), [100.0]),
+        generators_p_nom_opt=(("generators_i",), [100.0]),
+        generators_committable=(("generators_i",), np.array([True])),
+        generators_marginal_cost=(("generators_i",), [10.0]),
+        generators_stand_by_cost=(("generators_i",), [5.0]),
+        generators_start_up_cost=(("generators_i",), [300.0]),
+        generators_shut_down_cost=(("generators_i",), [70.0]),
+        generators_t_p_i=(("generators_t_p_i",), ["coal"]),
+        generators_t_p=(("snapshots", "generators_t_p_i"), [[0.0], [40.0], [0.0]]),
+        generators_t_status_i=(("generators_t_status_i",), ["coal"]),
+        generators_t_status=(("snapshots", "generators_t_status_i"), [[0.0], [1.0], [0.0]]),
+        generators_t_start_up_i=(("generators_t_start_up_i",), ["coal"]),
+        generators_t_start_up=(("snapshots", "generators_t_start_up_i"), [[0.0], [1.0], [0.0]]),
+        generators_t_shut_down_i=(("generators_t_shut_down_i",), ["coal"]),
+        generators_t_shut_down=(("snapshots", "generators_t_shut_down_i"), [[0.0], [0.0], [1.0]]),
+        **changes,
+    )
+
+
+def test_the_costs_of_commitment_are_counted(tmp_path: Path) -> None:
+    # Running: 10 * 40 * 2. Standing by: 5 * 1 * 2, for as long as the unit is on. Starting up
+    # and shutting down: once each, whatever the hour weighs.
+    path = committable(tmp_path, objective=800.0 + 10.0 + 300.0 + 70.0)
+    found = document(path)
+    assert found["costs_by_location"] == {"hub": {"coal": 1180.0}}
+    assert found["objective"] == 1180.0
+    assert found["objective_function_value"] == 1180.0
+    assert "details" not in found
+    assert found["warnings"] == []
+
+
+def test_a_unit_that_was_never_on_stood_by_for_nothing(tmp_path: Path) -> None:
+    path = committable(tmp_path, objective=1180.0)
+    with files.netCDF4.Dataset(path, "a") as dataset:
+        dataset.renameVariable("generators_t_status", "generators_t_status_gone")
+    found = document(path)
+    assert found["costs_by_location"] == {"hub": {"coal": 800.0 + 300.0 + 70.0}}
+    assert found["warnings"][0].startswith(
+        "the objective of the network and its constant add up to 1180, the costs that the"
+        " document counts towards them to 1170"
+    )
+
+
+def test_the_costs_of_a_store_and_of_spilling_are_counted(tmp_path: Path) -> None:
+    path = _network(
+        tmp_path,
+        objective=0.5 * 7 + 2.0 * 3 + 1.0 * 10 + 3.0 * 4,
+        storage_units_i=(("storage_units_i",), ["dam"]),
+        storage_units_bus=(("storage_units_i",), ["hub"]),
+        storage_units_p_nom_opt=(("storage_units_i",), [10.0]),
+        storage_units_marginal_cost=(("storage_units_i",), [0.5]),
+        storage_units_marginal_cost_storage=(("storage_units_i",), [2.0]),
+        storage_units_spill_cost=(("storage_units_i",), [1.0]),
+        storage_units_t_p_i=(("storage_units_t_p_i",), ["dam"]),
+        storage_units_t_p=(("snapshots", "storage_units_t_p_i"), [[7.0], [-5.0]]),
+        storage_units_t_p_dispatch_i=(("storage_units_t_p_dispatch_i",), ["dam"]),
+        storage_units_t_p_dispatch=(("snapshots", "storage_units_t_p_dispatch_i"), [[7.0], [0.0]]),
+        storage_units_t_state_of_charge_i=(("storage_units_t_state_of_charge_i",), ["dam"]),
+        storage_units_t_state_of_charge=(
+            ("snapshots", "storage_units_t_state_of_charge_i"),
+            [[1.0], [2.0]],
+        ),
+        storage_units_t_spill_i=(("storage_units_t_spill_i",), ["dam"]),
+        storage_units_t_spill=(("snapshots", "storage_units_t_spill_i"), [[4.0], [6.0]]),
+        stores_i=(("stores_i",), ["tank"]),
+        stores_bus=(("stores_i",), ["hub"]),
+        stores_e_nom_opt=(("stores_i",), [40.0]),
+        stores_marginal_cost_quadratic=(("stores_i",), [3.0]),
+        stores_t_p_i=(("stores_t_p_i",), ["tank"]),
+        stores_t_p=(("snapshots", "stores_t_p_i"), [[2.0], [0.0]]),
+    )
+    found = document(path)
+    # dam: 0.5 per unit dispatched, 2 per unit held, 1 per unit spilled; tank: 3 per unit squared
+    assert found["costs_by_location"] == {"hub": {"dam": 3.5 + 6.0 + 10.0, "tank": 12.0}}
+    assert found["dispatch"] == {"dam": [7.0, 0.0], "tank": [2.0, 0.0]}
+    assert found["warnings"] == []
 
 
 def test_a_store_has_a_capacity_for_energy_alone(tmp_path: Path) -> None:
