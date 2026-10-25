@@ -171,6 +171,101 @@ def stochastic() -> Any:
     return n
 
 
+def power_flow() -> Any:
+    """Build an electrical network with a dispatch that is given, and solve its power flow.
+
+    The grid feeds a town and a village at medium voltage through two
+    transformers and a line, which form a ring. Photovoltaics in the south
+    hold the voltage of their bus, a combined heat and power plant in the
+    north runs at a set point, a battery charges and discharges by a
+    schedule, and a cable feeds an island that balances itself. The power
+    flow is linear first and then non-linear, as MEME runs it.
+    """
+    import numpy as np
+    import pandas as pd
+    import pypsa
+
+    hours = np.arange(SNAPSHOTS)
+    sun = np.clip(np.sin((hours % 24 - 6) / 12 * np.pi), 0, None)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        n = pypsa.Network(name="coati-power-flow")
+        n.set_snapshots(pd.date_range("2025-03-01", periods=SNAPSHOTS, freq="h"))
+        n.add("Bus", "grid::electricity", v_nom=110.0, x=11.0, y=49.0, v_mag_pu_set=1.02)
+        n.add("Bus", "north::electricity", v_nom=20.0, x=11.0, y=49.2)
+        n.add("Bus", "south::electricity", v_nom=20.0, x=12.0, y=48.0, v_mag_pu_set=1.0)
+        n.add("Bus", "island::electricity", v_nom=20.0, x=12.5, y=48.0)
+        # A slack takes up the balance; its set point of zero is what PyPSA adds the balance to.
+        n.add("Generator", "grid", bus="grid::electricity", p_nom=100.0, control="Slack", p_set=0.0)
+        n.add(
+            "Generator", "pv", bus="south::electricity", p_nom=12.0, control="PV", p_set=10.0 * sun
+        )
+        n.add("Generator", "chp", bus="north::electricity", p_nom=8.0, p_set=5.0, q_set=1.5)
+        n.add(
+            "Generator", "diesel", bus="island::electricity", p_nom=6.0, control="Slack", p_set=0.0
+        )
+        n.add(
+            "Load",
+            "town",
+            bus="north::electricity",
+            p_set=12.0 + 4.0 * sun,
+            q_set=0.3 * (12.0 + 4.0 * sun),
+        )
+        n.add("Load", "village", bus="south::electricity", p_set=6.0, q_set=1.0)
+        n.add("Load", "hamlet", bus="island::electricity", p_set=2.5, q_set=0.5)
+        n.add(
+            "StorageUnit",
+            "battery",
+            bus="south::electricity",
+            p_nom=3.0,
+            max_hours=2.0,
+            p_set=3.0 * np.sin(hours / 24 * 2 * np.pi),
+        )
+        n.add(
+            "Transformer",
+            "station_north",
+            bus0="grid::electricity",
+            bus1="north::electricity",
+            s_nom=30.0,
+            x=0.1,
+            r=0.01,
+        )
+        n.add(
+            "Transformer",
+            "station_south",
+            bus0="grid::electricity",
+            bus1="south::electricity",
+            s_nom=25.0,
+            x=0.12,
+            r=0.012,
+        )
+        n.add(
+            "Line",
+            "ring",
+            bus0="north::electricity",
+            bus1="south::electricity",
+            s_nom=15.0,
+            x=2.0,
+            r=0.5,
+            b=0.0001,
+        )
+        n.add(
+            "Link",
+            "cable",
+            bus0="south::electricity",
+            bus1="island::electricity",
+            p_nom=5.0,
+            p_set=1.5,
+            efficiency=0.98,
+        )
+        n.add("ShuntImpedance", "compensation", bus="north::electricity", b=0.001)
+        n.lpf()
+        found = n.pf(use_seed=True, x_tol=1e-8)
+        if not bool(found["converged"].all().all()):
+            raise RuntimeError("the power flow did not converge")
+    return n
+
+
 # What the components of the network are called in the results document.
 GENERATORS = {"north::pv": "north::pv", "wind@north": "north::wind", "gas": "south::gas"}
 CARRIERS = {"north::pv": "electricity", "north::wind": "electricity", "south::gas": "electricity"}
@@ -234,6 +329,94 @@ def facts(n: Any) -> dict[str, Any]:
     stated = found["objective_function_value"] + constant
     if not math.isclose(stated, found["objective"] - given, rel_tol=1e-6):
         raise RuntimeError("the statistics of the network do not add up to its objective")
+    return found
+
+
+def power_flow_facts(n: Any) -> dict[str, Any]:
+    """Say what PyPSA says about the solved power flow, in the terms of the results document.
+
+    Every number comes from the tables of the network in memory, which hold
+    a result for every bus and component, where the file holds only what
+    differs from the defaults.
+    """
+    location = {bus: bus.split("::")[0] for bus in n.buses.index}
+    found: dict[str, Any] = {
+        "success": True,
+        "termination_condition": "unknown",
+        "objective": None,
+        "timestamps": [stamp.isoformat() for stamp in n.snapshots],
+        "capacities": {},
+        "generation": {},
+        "dispatch": {},
+        "costs_by_location": {},
+        "details": {"power_flow": {}},
+    }
+    for name, row in n.generators.iterrows():
+        key = f"{location[row.bus]}::{name}"
+        output = n.generators_t.p[name]
+        found["capacities"][key] = float(row.p_nom)
+        found["generation"][f"{key}::electricity"] = float(output.sum())
+        found["dispatch"][name] = [float(value) for value in output]
+    discharge = n.storage_units_t.p["battery"].clip(lower=0)
+    found["capacities"]["south::battery"] = float(n.storage_units.p_nom["battery"])
+    found["storage_capacities"] = {
+        "south::battery": float(
+            n.storage_units.p_nom["battery"] * n.storage_units.max_hours["battery"]
+        )
+    }
+    found["generation"]["south::battery::electricity"] = float(discharge.sum())
+    found["dispatch"]["battery"] = [float(value) for value in discharge]
+    for table, size in ((n.lines, "s_nom"), (n.transformers, "s_nom"), (n.links, "p_nom")):
+        for name, row in table.iterrows():
+            for end in (row.bus0, row.bus1):
+                found["capacities"][f"{location[end]}::{name}"] = float(row[size])
+    found["demand_timeseries"] = [float(value) for value in n.loads_t.p.sum(axis=1)]
+    arriving: dict[tuple[str, str], Any] = {}
+    for table, series in (
+        (n.lines, n.lines_t),
+        (n.transformers, n.transformers_t),
+        (n.links, n.links_t),
+    ):
+        for name, row in table.iterrows():
+            origin, destination = location[row.bus0], location[row.bus1]
+            arriving[origin, destination] = arriving.get((origin, destination), 0.0) + (
+                -series.p1[name]
+            ).clip(lower=0)
+            arriving[destination, origin] = arriving.get((destination, origin), 0.0) + (
+                -series.p0[name]
+            ).clip(lower=0)
+    flows: dict[str, Any] = {}
+    for (origin, destination), series in arriving.items():
+        first, second = sorted((origin, destination))
+        signed = series if (origin, destination) == (first, second) else -series
+        flows[f"{first}::{second}"] = flows.get(f"{first}::{second}", 0.0) + signed
+    found["transmission_flow"] = {
+        pair: [float(value) for value in series] for pair, series in flows.items()
+    }
+    details = found["details"]["power_flow"]
+    details["slack_buses"] = [str(bus) for bus in n.sub_networks.slack_bus]
+    details["voltage_magnitude"] = {
+        bus: [float(value) for value in n.buses_t.v_mag_pu[bus]] for bus in n.buses.index
+    }
+    details["voltage_angle"] = {
+        bus: [float(value) for value in n.buses_t.v_ang[bus]] for bus in n.buses.index
+    }
+    details["reactive_power"] = {
+        **{
+            f"{location[row.bus]}::{name}": [float(value) for value in n.generators_t.q[name]]
+            for name, row in n.generators.iterrows()
+        },
+        "south::battery": [float(value) for value in n.storage_units_t.q["battery"]],
+    }
+    details["branch_loading"] = {}
+    for table, series in ((n.lines, n.lines_t), (n.transformers, n.transformers_t)):
+        for name, row in table.iterrows():
+            apparent = [
+                (series.p0[name] ** 2 + series.q0[name] ** 2) ** 0.5,
+                (series.p1[name] ** 2 + series.q1[name] ** 2) ** 0.5,
+            ]
+            loading = apparent[0].where(apparent[0] >= apparent[1], apparent[1]) / row.s_nom
+            details["branch_loading"][name] = [float(value) for value in loading]
     return found
 
 
@@ -307,6 +490,7 @@ def build(directory: Path, *, formats: tuple[str, ...] = ("nc", "h5")) -> dict[s
         target.unlink(missing_ok=True)
         network(solve=False).export_to_netcdf(target)
         written["unsolved.nc"] = target
+        written.update(build_power_flow(directory))
         try:
             uncertain = stochastic()
         except (AttributeError, TypeError, KeyError):  # versions without scenarios
@@ -316,6 +500,20 @@ def build(directory: Path, *, formats: tuple[str, ...] = ("nc", "h5")) -> dict[s
         uncertain.export_to_netcdf(target)
         written["stochastic.nc"] = target
     return written
+
+
+def build_power_flow(directory: Path) -> dict[str, Path]:
+    """Write the network of the power flow and its facts to ``directory``."""
+    directory.mkdir(parents=True, exist_ok=True)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        flowed = power_flow()
+        facts_path = directory / "power-flow.facts.json"
+        facts_path.write_text(json.dumps(power_flow_facts(flowed), indent=1) + "\n")
+        target = directory / "power-flow.nc"
+        target.unlink(missing_ok=True)
+        flowed.export_to_netcdf(target)
+    return {"power-flow.nc": target, "power-flow.facts.json": facts_path}
 
 
 if __name__ == "__main__":

@@ -63,6 +63,11 @@ def test_pypsa(tmp_path: Path) -> None:
     unsolved = as_json(coati.results_document(built["unsolved.nc"]))
     assert unsolved["success"] is False
     assert unsolved["costs_by_location"] == {}
+    flowed = as_json(coati.results_document(built["power-flow.nc"]))
+    assert flowed["success"] is True
+    assert flowed["termination_condition"] == "unknown"
+    assert against_facts(flowed, facts_of(built["power-flow.facts.json"])) == []
+    assert len(flowed["warnings"]) == 1
     if "stochastic.nc" in built:
         uncertain = as_json(coati.results_document(built["stochastic.nc"]))
         assert uncertain["scenarios"] == {"high": 0.25, "low": 0.75}

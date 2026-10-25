@@ -38,6 +38,8 @@ def _pypsa(work: Path) -> tuple[str, dict[str, Path]]:
         "facts.json": "{}.facts.json",
         "stochastic.nc": "{}-stochastic.nc",
         "unsolved.nc": "{}-unsolved.nc",
+        "power-flow.nc": "{}-power-flow.nc",
+        "power-flow.facts.json": "{}-power-flow.facts.json",
     }
     stem = f"pypsa-{version}"
     return stem, {names[name].format(stem): path for name, path in built.items()}

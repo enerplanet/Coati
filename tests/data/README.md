@@ -21,6 +21,7 @@ supply, demand, storage, conversion and transmission.
 | `pypsa-0.25.2.nc`, `.h5` | PyPSA 0.25.2 | the network in both formats, 24 snapshots that count twice |
 | `pypsa-0.35.2.nc`, `.h5` | PyPSA 0.35.2 | the network in both formats |
 | `pypsa-1.2.4.nc`, `.h5` | PyPSA 1.2.4 | the network in both formats |
+| `pypsa-1.2.4-power-flow.nc` | PyPSA 1.2.4 | an electrical network of four buses with a dispatch that is given, solved by a non-linear power flow |
 | `pypsa-1.2.4-stochastic.nc` | PyPSA 1.2.4 | a network with two scenarios |
 | `pypsa-1.2.4-unsolved.nc` | PyPSA 1.2.4 | the network before it is optimised |
 | `pypsa-1.3.0.nc`, `.h5` | PyPSA 1.3.0 | the network in both formats |

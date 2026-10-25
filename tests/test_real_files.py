@@ -45,6 +45,7 @@ FILES = {
     "pypsa-0.35.2.h5": ("pypsa-v0-35-2", "0.35.2"),
     "pypsa-1.2.4.nc": ("pypsa-v1-2-4", "1.2.4"),
     "pypsa-1.2.4.h5": ("pypsa-v1-2-4", "1.2.4"),
+    "pypsa-1.2.4-power-flow.nc": ("pypsa-v1-2-4", "1.2.4"),
     "pypsa-1.2.4-stochastic.nc": ("pypsa-v1-2-4", "1.2.4"),
     "pypsa-1.2.4-unsolved.nc": ("pypsa-v1-2-4", "1.2.4"),
     "pypsa-1.3.0.nc": ("pypsa-v1-3-0", "1.3.0"),
@@ -60,7 +61,9 @@ NAMED = {
     "calliope-0.7.0-spores.nc": ("calliope-v0-7-0", "0.7.0"),
 }
 
-SOLVED = sorted(name for name in FILES if "unsolved" not in name)
+#: The files of models that were optimised: not the network before it is optimised, nor the
+#: network that a power flow solved for a dispatch that was given.
+SOLVED = sorted(name for name in FILES if not name.endswith(("-unsolved.nc", "-power-flow.nc")))
 
 #: How many times the models have.
 STEPS = {"pypsa-1.2.4-stochastic.nc": 4, "adopt-net0-0.1.10-typical-days.h5": 144}
@@ -286,6 +289,42 @@ def test_a_network_that_is_not_solved(data_dir: Path) -> None:
     assert len(found["warnings"]) == 1
 
 
+def test_a_network_that_a_power_flow_solved(data_dir: Path) -> None:
+    found = document_of(data_dir / "pypsa-1.2.4-power-flow.nc")
+    assert found["success"] is True
+    assert found["termination_condition"] == "unknown"
+    assert found["objective"] is None
+    assert found["costs_by_location"] == {}
+    assert found["capacities"]["grid::grid"] == 100.0
+    assert len(found["warnings"]) == 1
+    flow = found["details"]["power_flow"]
+    assert set(flow) == {
+        "slack_buses",
+        "voltage_magnitude",
+        "voltage_angle",
+        "reactive_power",
+        "branch_loading",
+    }
+    assert flow["slack_buses"] == ["grid::electricity", "island::electricity"]
+    # The slack holds 1.02 per unit, the photovoltaics hold their bus at 1, and the voltage of
+    # the town lies between. The transformers carry the town and the village, well within their
+    # ratings. Every generator and the battery has its reactive power, and the sum of the
+    # dispatch is the demand plus the losses.
+    assert flow["voltage_magnitude"]["grid::electricity"] == [1.02] * 24
+    assert flow["voltage_magnitude"]["south::electricity"] == pytest.approx([1.0] * 24)
+    assert all(1.0 < value < 1.02 for value in flow["voltage_magnitude"]["north::electricity"])
+    assert all(0 < value < 1 for value in flow["branch_loading"]["station_north"])
+    assert set(flow["reactive_power"]) == {
+        "grid::grid",
+        "south::pv",
+        "north::chp",
+        "island::diesel",
+        "south::battery",
+    }
+    supplied = [sum(values) for values in zip(*found["dispatch"].values(), strict=True)]
+    assert all(supplied[hour] > found["demand_timeseries"][hour] for hour in range(24))
+
+
 def test_typical_days_stand_for_the_whole_time(data_dir: Path) -> None:
     # Two typical days stand for six days. The file has the 48 hours of the typical days;
     # the summary has the costs of the six days, which AdOpT-NET0 computes from the model.
@@ -388,6 +427,7 @@ def golden(document: dict[str, Any]) -> dict[str, Any]:
         "pypsa-0.25.2.nc",
         "pypsa-0.35.2.nc",
         "pypsa-1.2.4.nc",
+        "pypsa-1.2.4-power-flow.nc",
         "pypsa-1.2.4-stochastic.nc",
         "pypsa-1.2.4-unsolved.nc",
     ],

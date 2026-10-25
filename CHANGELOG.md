@@ -19,6 +19,8 @@ minor release may change the Python interface and the command line.
   The convergence is taken from `power_flow/convergence.csv` next to the
   network, as MEME writes it: `termination_condition` is `converged` or
   `not_converged`, and `unknown` without a record.
+- The file `pypsa-1.2.4-power-flow.nc` under `tests/data`, an electrical
+  network that PyPSA 1.2.4 solved by a power flow, with the facts of PyPSA.
 
 ### Changed
 
