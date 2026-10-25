@@ -63,14 +63,21 @@ of the system.
 | `scenarios` | the probability of each scenario, for a stochastic network |
 | `capacities` | `p_nom_opt`, for a line or a transformer `s_nom_opt`; for a link of conversion times its `efficiency`, which is what it can put out |
 | `storage_capacities` | `e_nom_opt` of a store; `p_nom_opt` times `max_hours` of a storage unit |
+| `storage_levels` | `state_of_charge` of a storage unit, `e` of a store, for a network that was optimised; zero where PyPSA writes none |
 | `generation` | the output of each component over the snapshots, weighted with the weighting `generators` |
 | `dispatch` | the output at each snapshot: `p` of a generator, what a storage unit or a store gives off, what arrives at the outputs of a link |
+| `curtailment` | for a generator whose `p_max_pu` varies with time: `p_max_pu` times `p_nom_opt` less `p`, where that is positive, weighted with the weighting `generators`; see below |
 | `demand_timeseries`, `demand_by_location` | `p` of the loads; `p_set` for a network that has not been optimised |
 | `transmission_flow` | what arrives at either end of the lines, transformers and links of transmission |
+| `prices` | `marginal_price` of the buses; see below |
 | `costs_by_location` | `capital_cost` times the capacity, `marginal_cost` times the dispatch, weighted with the weighting `objective`, and the other costs of operation that the network states |
+| `fixed_costs_by_location` | `capital_cost` times the capacity, the annualised investment and the fixed costs of operation together, as PyPSA keeps them |
+| `variable_costs_by_location` | the costs of operation: `marginal_cost` times the dispatch and the other costs of operation |
+| `emissions_by_location` | what each generator burns, times what its carrier emits per unit; see below |
 | `tech_metadata` | the kind as above; `carrier_out` is the carrier of the bus that the component feeds |
 | `coordinates` | `y` and `x` of the buses, if the network has the reference system 4326 |
 | `details.objective_constant` | `n.objective_constant` |
+| `details.global_constraints` | the global constraints of the network, such as a limit on emissions; see below |
 | `details.power_flow` | what a [power flow](#power-flow) found |
 
 ### Defaults
@@ -147,6 +154,70 @@ of the document is what the system costs, and
 The check is left out for a network with several investment periods, whose
 objective weighs the periods.
 
+
+## Prices
+
+PyPSA records the marginal price of every bus at every snapshot, the dual
+of the balance of the bus, in `buses_t.marginal_price`. The document
+reports it under `prices`, by the location and the carrier of the bus. A
+bus named `north::electricity` is the price of `electricity` at `north`; a
+bus named with more parts, such as `north::electricity::battery`, keeps its
+name, which tells it from the bus of the location and the carrier; any
+other bus is named by its location and its carrier. PyPSA writes the series
+where a price is not zero; a bus whose price stays zero has none, and the
+document reports zero.
+
+## Emissions
+
+PyPSA records no emissions. It records what each carrier emits per unit, the
+attribute `co2_emissions` of the carriers, and counts the emissions of the
+network towards a global constraint of the type `primary_energy` by what is
+burnt. The document counts them the same way:
+
+- A generator emits its output over its `efficiency`, times what its
+  carrier emits per unit. Every generator is listed once any carrier of the
+  network emits, with nothing for a carrier that does not; a generator that
+  stands for demand that is not met is left out.
+- A storage unit or a store whose carrier emits and that is not cyclic emits
+  what it gives off over the snapshots: the energy it held at the start,
+  `state_of_charge_initial` or `e_initial`, less what it holds at the end.
+  What it keeps is negative.
+
+`total_emissions` adds them up, with the weighting `generators`. The
+weighting of investment periods is not applied.
+
+The global constraints of the network, such as a cap on emissions, are
+reported under `details.global_constraints` as PyPSA states them, with
+the defaults PyPSA gives an attribute it does not write:
+
+```json
+{
+  "details": {
+    "global_constraints": {
+      "co2_cap": {
+        "type": "primary_energy",
+        "carrier_attribute": "co2_emissions",
+        "sense": "<=",
+        "constant": 1000000.0,
+        "mu": 0.0
+      }
+    }
+  }
+}
+```
+
+`constant` is the limit, `mu` its shadow price: what one more unit of the
+limit would save.
+
+## Curtailment
+
+A generator whose `p_max_pu` varies with time has a resource that the file
+records, the sun or the wind. What such a generator could have put out,
+`p_max_pu` times `p_nom_opt`, less what it did put out, where that is
+positive, is its curtailment, added up over the snapshots with the weighting
+`generators`. A generator whose availability does not vary has no resource to
+curtail, and is not listed; `n.statistics.curtailment` of PyPSA 1.2 counts
+the spare capacity of every generator instead, and so says more.
 
 ## What the file does not say
 
@@ -246,7 +317,8 @@ else, and a file that holds more is refused.
 
 ## What Coati does not read
 
-- The shadow prices of the buses and of the global constraints.
+- The shadow prices of the constraints of the components, `mu_upper` and
+  `mu_lower`.
 - The inputs of a power flow: the set points, the controls and the shunt
   impedances.
 - Networks that were exported to CSV files.

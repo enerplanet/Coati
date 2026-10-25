@@ -324,6 +324,35 @@ def facts(n: Any) -> dict[str, Any]:
     found["demand_timeseries"] = [float(value) for value in n.loads_t.p.sum(axis=1)]
     found["demand_by_location"] = {"south": float((n.loads_t.p.sum(axis=1) * energy).sum())}
     found["costs"] = costs
+    found["storage_levels"] = {
+        "south::battery": [float(v) for v in n.storage_units_t.state_of_charge["battery"]],
+        "south::heat_store": [float(v) for v in n.stores_t.e["heat_store"]],
+    }
+    found["prices"] = {
+        str(bus): [float(v) for v in n.buses_t.marginal_price[bus]] for bus in n.buses.index
+    }
+    # What a generator emits: what it burns, times what its carrier emits per unit. The sun and
+    # the wind emit nothing and are listed with nothing.
+    rates = n.carriers["co2_emissions"]
+    emitted: dict[str, float] = {}
+    for name, key in GENERATORS.items():
+        row = n.generators.loc[name]
+        burnt = n.generators_t.p[name] / float(row["efficiency"])
+        emitted[key] = float((burnt * energy).sum() * float(rates[row["carrier"]]))
+    found["emissions_by_location"] = emitted
+    found["total_emissions"] = sum(emitted.values())
+    # What the sun and the wind allowed but was not put out.
+    curtailed: dict[str, float] = {}
+    for name, key in GENERATORS.items():
+        if name in n.generators_t.p_max_pu.columns:
+            allowed = n.generators_t.p_max_pu[name] * float(n.generators.p_nom_opt[name])
+            curtailed[key] = float(
+                ((allowed - n.generators_t.p[name]).clip(lower=0) * energy).sum()
+            )
+    found["curtailment"] = curtailed
+    fixed, variable = _cost_parts(n)
+    found["fixed_costs_by_location"] = fixed
+    found["variable_costs_by_location"] = variable
     if hasattr(n, "objective_constant"):
         found["details"]["objective_constant"] = constant
     stated = found["objective_function_value"] + constant
@@ -440,6 +469,46 @@ def _costs(n: Any) -> dict[str, float]:
             technology = names.get(name, name)
             costs[technology] = costs.get(technology, 0.0) + float(value)
     return costs
+
+
+def _cost_parts(n: Any) -> tuple[dict[str, dict[str, float]], dict[str, dict[str, float]]]:
+    """Return the fixed and the variable part of the cost of each technology at each location.
+
+    The fixed part is the capital cost times the optimised capacity, as
+    ``n.statistics.capex`` has it; the variable part is the rest of what the
+    statistics count. A connection bears half of each at either end.
+    """
+    places = {
+        **{name: [key.split("::")[0]] for name, key in GENERATORS.items()},
+        "battery": ["south"],
+        "heat_store": ["south"],
+        "heat_pump": ["south"],
+        "cable": ["north", "south"],
+        "overhead": ["north", "south"],
+    }
+    sizes = {"Generator": "p_nom_opt", "StorageUnit": "p_nom_opt", "Store": "e_nom_opt",
+             "Link": "p_nom_opt", "Line": "s_nom_opt"}  # fmt: skip
+    tables = {"Generator": n.generators, "StorageUnit": n.storage_units, "Store": n.stores,
+              "Link": n.links, "Line": n.lines}  # fmt: skip
+    try:
+        counted: dict[tuple[str, str], float] = {}
+        for statistic in (n.statistics.capex, n.statistics.opex):
+            for (kind, name), value in dict(statistic(groupby=False)).items():
+                counted[kind, str(name)] = counted.get((kind, str(name)), 0.0) + float(value)
+    except (TypeError, UnboundLocalError):
+        counted = _costs_of_the_tables(n)
+    fixed: dict[str, dict[str, float]] = {}
+    variable: dict[str, dict[str, float]] = {}
+    for kind, table in tables.items():
+        for name, row in table.iterrows():
+            capital = float(row["capital_cost"] * row[sizes[kind]])
+            total = counted.get((kind, str(name)), capital)
+            technology = GENERATORS.get(name, f"x::{name}").split("::")[1]
+            ends = places[name]
+            for end in ends:
+                fixed.setdefault(end, {})[technology] = capital / len(ends)
+                variable.setdefault(end, {})[technology] = (total - capital) / len(ends)
+    return fixed, variable
 
 
 def _costs_of_the_tables(n: Any) -> dict[tuple[str, str], float]:

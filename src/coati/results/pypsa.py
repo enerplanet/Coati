@@ -71,7 +71,7 @@ from coati.frameworks import Framework
 from coati.labeled import finite
 from coati.model import Dataset
 from coati.results import pypsa_power_flow
-from coati.results.document import SEPARATOR, Results, join, net_flows
+from coati.results.document import FIXED, SEPARATOR, VARIABLE, Results, join, net_flows
 from coati.results.options import ExtractOptions, synthesize_timestamps
 from coati.results.pypsa_network import Component, Network, read_network
 
@@ -124,6 +124,19 @@ _OTHER_COSTS: Final[dict[str, tuple[_Other, ...]]] = {
 # How far the objective may be from the costs that make it up, relative and absolute.
 _CLOSE: Final = (1e-4, 1e-3)
 
+# The attribute of a carrier that states what burning a unit of it emits, which PyPSA counts
+# towards a limit of the type primary_energy.
+_INTENSITY: Final = "co2_emissions"
+
+# The attributes of a global constraint that the document reports, with the defaults that PyPSA
+# gives them and leaves out of a file; an attribute without a default is reported if stated.
+_CONSTRAINT_TEXTS: Final = {
+    "type": "primary_energy",
+    "carrier_attribute": "co2_emissions",
+    "sense": "<=",
+}
+_CONSTRAINT_NUMBERS: Final = {"constant": None, "mu": 0.0, "investment_period": None}
+
 _Arrivals = dict[tuple[str, str], np.ndarray[Any, Any]]
 
 
@@ -145,6 +158,10 @@ class _Costs:
     def of(self, position: int) -> float:
         """Return what a component costs."""
         return float(self.capital[position] + self.running[position])
+
+    def parts(self, position: int) -> tuple[float, float]:
+        """Return what a component costs for its capacity and for its operation."""
+        return float(self.capital[position]), float(self.running[position])
 
     def given(self, position: int) -> float:
         """Return the part of the cost that the objective of PyPSA leaves out."""
@@ -169,6 +186,9 @@ def extract(dataset: Dataset, framework: Framework, options: ExtractOptions) -> 
     results.periods = first.periods
     if first.objective_constant is not None:
         results.details["objective_constant"] = first.objective_constant
+    constraints = _global_constraints(first)
+    if constraints:
+        results.details["global_constraints"] = constraints
     if not solved and not flowed:
         results.warnings.append(
             "the network has no objective: it has not been optimised,"
@@ -212,6 +232,31 @@ def _account(results: Results, network: Network, given: float, unmet: float) -> 
             f" that the document counts towards them to {counted:.10g}; the network may have"
             " been optimised with an objective of its own, or in several steps"
         )
+
+
+def _global_constraints(network: Network) -> dict[str, dict[str, Any]]:
+    """Return the global constraints of the network, such as a limit on emissions, as stated."""
+    table = network.component("global_constraints")
+    found: dict[str, dict[str, Any]] = {}
+    for position, name in enumerate(table.names):
+        entry: dict[str, Any] = {}
+        for attribute, default in _CONSTRAINT_TEXTS.items():
+            text = table.texts(attribute, default)[position]
+            if text:
+                entry[attribute] = text
+        for attribute, fallback in _CONSTRAINT_NUMBERS.items():
+            stored = table.static.get(attribute)
+            value = (
+                float(stored[position])
+                if stored is not None and stored.dtype.kind in "biuf"
+                else math.nan
+            )
+            if np.isfinite(value):
+                entry[attribute] = value
+            elif fallback is not None:
+                entry[attribute] = fallback
+        found[name] = entry
+    return found
 
 
 def _states(component: Component, attribute: str) -> bool:
@@ -268,6 +313,8 @@ class _Scenario:
         self._links()
         for table in ("lines", "transformers"):
             self._branches(table)
+        self._prices()
+        self._emissions()
         return self
 
     # -- naming -----------------------------------------------------------------------------
@@ -358,7 +405,9 @@ class _Scenario:
     ) -> None:
         """Record the cost of a component; a network that has not been optimised has none."""
         if self._solved:
-            self.results.add_cost(location, technology, share * costs.of(position))
+            fixed, variable = costs.parts(position)
+            self.results.add_cost(location, technology, share * fixed, FIXED)
+            self.results.add_cost(location, technology, share * variable, VARIABLE)
             self.given += share * costs.given(position)
 
     def _connect(
@@ -400,6 +449,7 @@ class _Scenario:
         capacity = self._capacity(generators, "p_nom")
         costs = self._costs(generators, "p_nom", capacity, output, "generators")
         carriers = generators.texts("carrier")
+        curtailed = self._curtailment(generators, capacity, output)
         for position, (name, bus) in enumerate(
             zip(generators.names, generators.texts("bus"), strict=True)
         ):
@@ -416,6 +466,27 @@ class _Scenario:
             self.results.add_dispatch(technology, series)
             self._charge(location, technology, costs, position)
             self._register(technology, _SUPPLY, carrier)
+            if curtailed is not None and not np.isnan(curtailed[position]):
+                self._add(self.results.curtailment, join(location, technology), curtailed[position])
+
+    def _curtailment(
+        self,
+        generators: Component,
+        capacity: np.ndarray[Any, Any],
+        output: np.ndarray[Any, Any],
+    ) -> np.ndarray[Any, Any] | None:
+        """Return what each generator could have put out but did not, over the snapshots.
+
+        As `n.statistics` has it: the availability `p_max_pu` times the
+        capacity, less the output, for the generators whose availability
+        varies with time, which is what records the resource; `NaN` for the
+        others.
+        """
+        available = generators.series.get("p_max_pu")
+        if available is None or "p" not in generators.series:
+            return None
+        spare = np.maximum(available * capacity - output, 0.0)
+        return np.asarray((spare * self._energy[:, np.newaxis]).sum(axis=0))
 
     def _shortfall(self, location: str, series: np.ndarray[Any, Any]) -> None:
         unmet = np.maximum(series, 0.0)
@@ -434,6 +505,7 @@ class _Scenario:
         capacity = self._capacity(units, "p_nom")
         hours = units.numbers("max_hours", 1.0)
         costs = self._costs(units, "p_nom", capacity, discharge, "storage_units")
+        levels = self._levels(units, "state_of_charge")
         for position, (name, bus) in enumerate(zip(units.names, units.texts("bus"), strict=True)):
             location, carrier = self._place(bus)
             technology = self._technology(name, location)
@@ -444,6 +516,18 @@ class _Scenario:
             self.results.add_dispatch(technology, discharge[:, position])
             self._charge(location, technology, costs, position)
             self._register(technology, _STORAGE, carrier)
+            if levels is not None:
+                self.results.add_storage_level(key, levels[:, position])
+
+    def _levels(self, component: Component, attribute: str) -> np.ndarray[Any, Any] | None:
+        """Return the energy that each store holds at each snapshot, if the network was solved.
+
+        PyPSA writes the series where it is not zero; a store that was never
+        filled has none and held nothing.
+        """
+        if not self._solved and attribute not in component.series:
+            return None
+        return component.flow(attribute, self._length)
 
     def _stores(self) -> None:
         stores = self._network.component("stores")
@@ -451,6 +535,7 @@ class _Scenario:
         withdrawal = np.maximum(flow, 0.0)
         capacity = self._capacity(stores, "e_nom")
         costs = self._costs(stores, "e_nom", capacity, flow, "stores")
+        levels = self._levels(stores, "e")
         for position, (name, bus) in enumerate(zip(stores.names, stores.texts("bus"), strict=True)):
             location, carrier = self._place(bus)
             technology = self._technology(name, location)
@@ -460,6 +545,8 @@ class _Scenario:
             self.results.add_dispatch(technology, withdrawal[:, position])
             self._charge(location, technology, costs, position)
             self._register(technology, _STORAGE, carrier)
+            if levels is not None:
+                self.results.add_storage_level(key, levels[:, position])
 
     def _loads(self) -> None:
         loads = self._network.component("loads")
@@ -531,6 +618,78 @@ class _Scenario:
             self._arrive(source, target, arriving)
             self._deliver(technology, target, carrier, arriving)
 
+    def _prices(self) -> None:
+        """Record the marginal price of each bus, if the network was solved for them.
+
+        PyPSA writes the series where a price is not zero; a bus whose price
+        stays zero has none. A bus named `north::electricity` is the price of
+        `electricity` at `north`; a bus named with more parts keeps its name,
+        which tells it from the bus of the location and the carrier; any
+        other bus is named by its location and its carrier.
+        """
+        buses = self._network.component("buses")
+        if "marginal_price" not in buses.series:
+            return
+        prices = buses.flow("marginal_price", self._length)
+        for position, name in enumerate(buses.names):
+            key = name if SEPARATOR in name else join(*self._place(name))
+            self.results.prices[key] = prices[:, position]
+
+    def _emissions(self) -> None:
+        """Record what each component emits, as PyPSA counts it towards a limit of emissions.
+
+        A generator emits what it burns, its output over its efficiency,
+        times what its carrier emits per unit; every generator is listed
+        once any carrier emits, with nothing for a carrier that does not. A
+        storage unit or a store whose carrier emits and that is not cyclic
+        emits what it gives off over the snapshots, the energy it held at
+        the start less what it holds at the end.
+        """
+        carriers = self._network.component("carriers")
+        intensity = dict(
+            zip(carriers.names, carriers.numbers(_INTENSITY, 0.0).tolist(), strict=True)
+        )
+        generators = self._network.component("generators")
+        if not any(intensity.values()) or "p" not in generators.series:
+            return
+        output = generators.flow("p", self._length)
+        burnt = output / generators.varying("efficiency", 1.0, self._length)
+        emitted = (burnt * self._energy[:, np.newaxis]).sum(axis=0)
+        kinds = generators.texts("carrier")
+        for position, (name, bus) in enumerate(
+            zip(generators.names, generators.texts("bus"), strict=True)
+        ):
+            location, _ = self._place(bus)
+            technology = self._technology(name, location)
+            if {kinds[position].lower(), technology.lower()} & _SHORTFALL:
+                continue
+            rate = intensity.get(kinds[position], 0.0)
+            self.results.add_emissions(location, technology, rate * emitted[position])
+        for table, level, initial, cyclic in (
+            (
+                "storage_units",
+                "state_of_charge",
+                "state_of_charge_initial",
+                "cyclic_state_of_charge",
+            ),
+            ("stores", "e", "e_initial", "e_cyclic"),
+        ):
+            component = self._network.component(table)
+            if level not in component.series:
+                continue
+            held = component.flow(level, self._length)
+            start = component.numbers(initial, 0.0)
+            circular = component.numbers(cyclic, 0.0) > 0
+            for position, (name, bus) in enumerate(
+                zip(component.names, component.texts("bus"), strict=True)
+            ):
+                rate = intensity.get(component.texts("carrier")[position], 0.0)
+                if rate and not circular[position]:
+                    location, _ = self._place(bus)
+                    technology = self._technology(name, location)
+                    released = start[position] - held[-1, position]
+                    self.results.add_emissions(location, technology, rate * released)
+
     def reactive(self) -> dict[str, np.ndarray[Any, Any]]:
         """Return the reactive power that each technology supplies at each location.
 
@@ -600,17 +759,28 @@ def _blend(
             "capacities",
             "storage_capacities",
             "generation",
+            "curtailment",
             "demand_by_location",
             "unmet_demand_by_location",
+            "emissions_by_location",
         ):
             target = getattr(results, name)
             for key, value in getattr(found, name).items():
                 target[key] = target.get(key, 0.0) + share * value
-        for location, costs in found.costs_by_location.items():
-            for technology, cost in costs.items():
-                results.add_cost(location, technology, share * cost)
+        for kind, costs_by_location in (
+            (FIXED, found.fixed_costs_by_location),
+            (VARIABLE, found.variable_costs_by_location),
+        ):
+            for location, costs in costs_by_location.items():
+                for technology, cost in costs.items():
+                    results.add_cost(location, technology, share * cost, kind)
         for technology, series in found.dispatch.items():
             results.add_dispatch(technology, share * series)
+        for key, series in found.storage_levels.items():
+            results.add_storage_level(key, share * series)
+        for key, series in found.prices.items():
+            known = results.prices.get(key)
+            results.prices[key] = share * series if known is None else known + share * series
         for name in ("demand_timeseries", "unmet_demand_timeseries"):
             series = getattr(found, name)
             if series is not None:

@@ -23,6 +23,9 @@ minor release may change the Python interface and the command line.
   a generator could have put out from its resource but did not, where the
   file records the resource. Nothing a reader of 1.0 relies on has changed,
   and the schema of 1.0 stays published next to that of 1.1.
+- PyPSA: `details.global_constraints`, the limits of the network such as a
+  cap on emissions, with the defaults PyPSA leaves out of a file and the
+  shadow price `mu`.
 
 ## [0.2.0-alpha] - 2026-10-25
 

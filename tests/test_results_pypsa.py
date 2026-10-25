@@ -45,12 +45,12 @@ def test_the_objective_is_the_cost_of_the_system(solved: dict) -> None:
 
 def test_the_objective_of_pypsa_can_be_reconciled(solved: dict) -> None:
     assert solved["objective_function_value"] == files.PYPSA_OBJECTIVE
-    assert solved["details"] == {
+    details = solved["details"]
+    assert {key: details[key] for key in details if key != "global_constraints"} == {
         "objective_constant": files.PYPSA_CONSTANT,
         "capital_cost_of_given_capacities": 2.0 * 20,
         "cost_of_unmet_demand": 1000.0 * 0.5 * 2,
     }
-    details = solved["details"]
     assert solved["objective_function_value"] + details["objective_constant"] == (
         solved["objective"]
         - details["capital_cost_of_given_capacities"]
@@ -128,6 +128,51 @@ def test_costs_follow_the_statistics_of_pypsa(solved: dict) -> None:
     assert solved["costs_by_tech"] == {"pv": 50.0, "gas": 170.0, "line": 20.0}
 
 
+def test_the_costs_are_told_fixed_from_variable(solved: dict) -> None:
+    # The capital cost is fixed, whether the capacity was decided or given; what the operation
+    # costs is variable. Every entry of the costs has its two parts.
+    assert solved["fixed_costs_by_location"] == {
+        "a": {"pv": 50.0, "line": 10.0},
+        "b": {"gas": 40.0, "battery": 0.0, "line": 10.0},
+    }
+    assert solved["variable_costs_by_location"] == {
+        "a": {"pv": 0.0, "line": 0.0},
+        "b": {"gas": 130.0, "battery": 0.0, "line": 0.0},
+    }
+
+
+def test_storage_levels_are_the_state_of_charge(solved: dict) -> None:
+    assert solved["storage_levels"] == {"b::battery": [2.0, 1.0, 3.0]}
+
+
+def test_prices_are_the_marginal_prices_of_the_buses(solved: dict) -> None:
+    assert solved["prices"] == {"a::power": [30.0, 40.0, 50.0], "b::power": [30.0, 40.0, 50.0]}
+
+
+def test_emissions_follow_the_carriers(solved: dict) -> None:
+    # The gas burns 1, 0 and 2 at 0.2 a unit; the snapshots weigh 1, 2 and 1. The sun emits
+    # nothing, and the generator that sheds load is no technology.
+    assert solved["emissions_by_location"] == {"a::pv": 0.0, "b::gas": pytest.approx(0.6)}
+    assert solved["total_emissions"] == pytest.approx(0.6)
+
+
+def test_curtailment_is_what_the_resource_allowed_but_was_not_put_out(solved: dict) -> None:
+    # The sun allowed 8, 10 and 5 of the 10 that were built; 6, 8 and 4 were put out.
+    assert solved["curtailment"] == {"a::pv": 2 + 2 * 2 + 1}
+
+
+def test_global_constraints_are_reported_as_stated(solved: dict) -> None:
+    assert solved["details"]["global_constraints"] == {
+        "co2_cap": {
+            "type": "primary_energy",
+            "carrier_attribute": "co2_emissions",
+            "sense": "<=",
+            "constant": 100.0,
+            "mu": 0.0,
+        }
+    }
+
+
 def test_technologies(solved: dict) -> None:
     assert solved["tech_metadata"] == {
         "pv": {"parent": "supply", "carrier_out": "power"},
@@ -157,6 +202,15 @@ def test_a_network_that_has_not_been_optimised(tmp_path: Path) -> None:
     assert found["objective"] is None
     assert "objective_function_value" not in found
     assert found["dispatch"] == {}
+    for key in (
+        "storage_levels",
+        "prices",
+        "curtailment",
+        "emissions_by_location",
+        "fixed_costs_by_location",
+        "variable_costs_by_location",
+    ):
+        assert key not in found
     assert found["capacities"] == {
         "a::pv": 0.0,
         "b::gas": 0.0,
@@ -166,7 +220,8 @@ def test_a_network_that_has_not_been_optimised(tmp_path: Path) -> None:
     }
     assert found["costs_by_location"] == {}
     assert found["costs_by_tech"] == {}
-    assert "details" not in found
+    # The limit on emissions is part of the model, decided or not; nothing else is to report.
+    assert list(found["details"]) == ["global_constraints"]
     assert found["warnings"] == [
         (
             "the network has no objective: it has not been optimised,"
@@ -862,7 +917,7 @@ def test_a_network_with_a_power_flow_record_but_no_results_is_not_solved(tmp_pat
     found = document(files.pypsa_netcdf(tmp_path / "network.nc", solved=False))
     assert found["success"] is False
     assert found["termination_condition"] == "not_solved"
-    assert "details" not in found
+    assert "power_flow" not in found["details"]
 
 
 def test_a_power_flow_of_one_bus_has_voltages_alone(tmp_path: Path) -> None:
@@ -881,3 +936,130 @@ def test_a_power_flow_of_one_bus_has_voltages_alone(tmp_path: Path) -> None:
             "voltage_angle": {"hub": [0.0, 0.0]},
         }
     }
+
+
+# -- prices, emissions and levels -------------------------------------------------------------
+
+
+def test_the_price_of_a_bus_is_named_by_location_and_carrier(tmp_path: Path) -> None:
+    # A bus named north::electricity is the price of electricity at north; a bus named with
+    # more parts keeps its name; any other bus is named by its location and its carrier.
+    path = _network(
+        tmp_path,
+        buses_i=(("buses_i",), ["hub::power", "hub::power::tank", "plain"]),
+        buses_carrier=(("buses_i",), ["AC", "AC", "gas"]),
+        buses_t_marginal_price_i=(("buses_t_marginal_price_i",), ["hub::power", "plain"]),
+        buses_t_marginal_price=(
+            ("snapshots", "buses_t_marginal_price_i"),
+            [[5.0, 1.0], [6.0, 1.0]],
+        ),
+    )
+    found = document(path)
+    assert found["prices"] == {
+        "hub::power": [5.0, 6.0],
+        "hub::power::tank": [0.0, 0.0],
+        "plain::gas": [1.0, 1.0],
+    }
+
+
+def test_a_store_that_is_not_cyclic_emits_what_it_gives_off(tmp_path: Path) -> None:
+    # The tank of gas starts with 10 and ends with 4: it gave off 6 at 0.5 a unit. The dam is
+    # cyclic and emits nothing, whatever it holds.
+    path = _network(
+        tmp_path,
+        objective=0.0,
+        buses_i=(("buses_i",), ["hub::gas", "hub::power"]),
+        carriers_i=(("carriers_i",), ["gas", "water"]),
+        carriers_co2_emissions=(("carriers_i",), [0.5, 0.0]),
+        stores_i=(("stores_i",), ["tank"]),
+        stores_bus=(("stores_i",), ["hub::gas"]),
+        stores_carrier=(("stores_i",), ["gas"]),
+        stores_e_initial=(("stores_i",), [10.0]),
+        stores_e_nom_opt=(("stores_i",), [10.0]),
+        stores_t_e_i=(("stores_t_e_i",), ["tank"]),
+        stores_t_e=(("snapshots", "stores_t_e_i"), [[7.0], [4.0]]),
+        storage_units_i=(("storage_units_i",), ["dam"]),
+        storage_units_bus=(("storage_units_i",), ["hub::power"]),
+        storage_units_carrier=(("storage_units_i",), ["gas"]),
+        storage_units_cyclic_state_of_charge=(("storage_units_i",), np.array([True])),
+        storage_units_p_nom_opt=(("storage_units_i",), [3.0]),
+        storage_units_t_state_of_charge_i=(("storage_units_t_state_of_charge_i",), ["dam"]),
+        storage_units_t_state_of_charge=(
+            ("snapshots", "storage_units_t_state_of_charge_i"),
+            [[2.0], [1.0]],
+        ),
+        generators_i=(("generators_i",), ["ccgt"]),
+        generators_bus=(("generators_i",), ["hub::power"]),
+        generators_carrier=(("generators_i",), ["gas"]),
+        generators_efficiency=(("generators_i",), [0.5]),
+        generators_p_nom_opt=(("generators_i",), [10.0]),
+        generators_t_p_i=(("generators_t_p_i",), ["ccgt"]),
+        generators_t_p=(("snapshots", "generators_t_p_i"), [[4.0], [2.0]]),
+    )
+    found = document(path)
+    # The plant burns 8 and 4 of gas for 4 and 2 of power.
+    assert found["emissions_by_location"] == {"hub::tank": 3.0, "hub::ccgt": 6.0}
+    assert found["total_emissions"] == 9.0
+    assert found["storage_levels"] == {"hub::tank": [7.0, 4.0], "hub::dam": [2.0, 1.0]}
+
+
+def test_without_emitting_carriers_there_are_no_emissions(tmp_path: Path) -> None:
+    path = _network(
+        tmp_path,
+        carriers_i=(("carriers_i",), ["wind"]),
+        generators_i=(("generators_i",), ["turbine"]),
+        generators_bus=(("generators_i",), ["hub"]),
+        generators_carrier=(("generators_i",), ["wind"]),
+        generators_t_p_i=(("generators_t_p_i",), ["turbine"]),
+        generators_t_p=(("snapshots", "generators_t_p_i"), [[4.0], [2.0]]),
+    )
+    found = document(path)
+    assert "emissions_by_location" not in found
+    assert "curtailment" not in found
+
+
+def test_a_store_that_was_never_filled_held_nothing(tmp_path: Path) -> None:
+    path = _network(
+        tmp_path,
+        stores_i=(("stores_i",), ["tank"]),
+        stores_bus=(("stores_i",), ["hub"]),
+        stores_e_nom_opt=(("stores_i",), [10.0]),
+    )
+    assert document(path)["storage_levels"] == {"hub::tank": [0.0, 0.0]}
+
+
+def test_scenarios_blend_the_levels_the_prices_and_the_emissions(tmp_path: Path) -> None:
+    path = files.write_netcdf(
+        tmp_path / "network.nc",
+        {
+            "attributes": {"network_pypsa_version": "1.2.4", "network__objective": 0.0},
+            "dimensions": {"snapshots": 2, "scenario": 2, "generators_i": 1, "buses_i": 1,
+                           "carriers_i": 1, "generators_t_p_i": 1, "buses_t_marginal_price_i": 1},
+            "variables": {
+                "snapshots": (("snapshots",), np.arange(2)),
+                "scenario": (("scenario",), ["dear", "cheap"]),
+                "scenario_weight": (("scenario",), [0.5, 0.5]),
+                "buses_i": (("buses_i",), ["hub::power"]),
+                "carriers_i": (("carriers_i",), ["gas"]),
+                "carriers_co2_emissions": (("carriers_i",), [1.0]),
+                "generators_i": (("generators_i",), ["gas"]),
+                "generators_bus": (("scenario", "generators_i"), [["hub::power"], ["hub::power"]]),
+                "generators_carrier": (("scenario", "generators_i"), [["gas"], ["gas"]]),
+                "generators_p_nom_opt": (("scenario", "generators_i"), [[10.0], [10.0]]),
+                "generators_t_p_i": (("generators_t_p_i",), ["gas"]),
+                "generators_t_p": (
+                    ("snapshots", "scenario", "generators_t_p_i"),
+                    [[[2.0], [6.0]], [[4.0], [8.0]]],
+                ),
+                "buses_t_marginal_price_i": (("buses_t_marginal_price_i",), ["hub::power"]),
+                "buses_t_marginal_price": (
+                    ("snapshots", "scenario", "buses_t_marginal_price_i"),
+                    [[[10.0], [20.0]], [[30.0], [50.0]]],
+                ),
+            },
+        },
+    )  # fmt: skip
+    found = document(path)
+    assert found["emissions_by_location"] == {"hub::gas": 0.5 * 6 + 0.5 * 14}
+    assert found["prices"] == {"hub::power": [15.0, 40.0]}
+    assert found["fixed_costs_by_location"] == {"hub": {"gas": 0.0}}

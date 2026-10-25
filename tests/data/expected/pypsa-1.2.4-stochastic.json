@@ -24,15 +24,33 @@
   "dispatch": {
     "gas": [100.0, 120.0, 110.0, 90.0]
   },
+  "curtailment": {
+    "hub::pv": 0.0
+  },
   "demand_timeseries": [100.0, 120.0, 110.0, 90.0],
   "demand_by_location": {
     "hub": 420.0
   },
   "transmission_flow": {},
+  "prices": {
+    "hub::electricity": [22.5, 22.5, 22.5, 22.5]
+  },
   "costs_by_tech": {
     "gas": 18900.0
   },
   "costs_by_location": {
+    "hub": {
+      "gas": 18900.0,
+      "pv": 0.0
+    }
+  },
+  "fixed_costs_by_location": {
+    "hub": {
+      "gas": 0.0,
+      "pv": 0.0
+    }
+  },
+  "variable_costs_by_location": {
     "hub": {
       "gas": 18900.0,
       "pv": 0.0

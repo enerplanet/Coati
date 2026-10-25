@@ -66,6 +66,8 @@ def against_facts(document: dict[str, Any], facts: dict[str, Any]) -> list[str]:
         if key == "costs":
             found = _costs_by_technology(document, expected)
             lines += differences(found, expected, "$.costs", ROUNDED)
+        elif key in ("fixed_costs_by_location", "variable_costs_by_location"):
+            lines += differences(document.get(key, {}), expected, f"$.{key}", ROUNDED)
         elif key == "transmission_flow":
             flows = {pair: entry["timeseries"] for pair, entry in document[key].items()}
             lines += differences(flows, expected, f"$.{key}")

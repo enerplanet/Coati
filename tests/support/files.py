@@ -375,6 +375,18 @@ PYPSA_TABLES: dict[str, dict[str, Any]] = {
         "max_hours": [4.0],
         "cyclic_state_of_charge": [True],
     },
+    "carriers": {
+        "name": ["solar", "gas", "load_shedding", "power"],
+        "co2_emissions": [0.0, 0.2, 0.0, 0.0],
+    },
+    "global_constraints": {
+        "name": ["co2_cap"],
+        "type": ["primary_energy"],
+        "carrier_attribute": ["co2_emissions"],
+        "sense": ["<="],
+        "constant": [100.0],
+        "mu": [0.0],
+    },
 }
 
 #: What the network states as its objective, and the part of the cost that PyPSA leaves out
@@ -385,8 +397,10 @@ PYPSA_CONSTANT = 10.0
 
 #: The time series of the network: the names of the components and their values.
 PYPSA_SERIES: dict[str, dict[str, tuple[list[str], list[list[float]]]]] = {
+    "buses": {"marginal_price": (["a::power", "b::power"], [[30, 30], [40, 40], [50, 50]])},
     "generators": {
         "p": (["pv@a", "b::gas", "shed"], [[6, 1, 0], [8, 0, 0.5], [4, 2, 0]]),
+        "p_max_pu": (["pv@a"], [[0.8], [1.0], [0.5]]),
         "marginal_cost": (["b::gas"], [[30], [40], [50]]),
     },
     "loads": {"p": (["load"], [[5], [6], [7]])},
@@ -394,7 +408,10 @@ PYPSA_SERIES: dict[str, dict[str, tuple[list[str], list[list[float]]]]] = {
         "p0": (["line"], [[4], [6], [-2]]),
         "p1": (["line"], [[-2], [-3], [1]]),
     },
-    "storage_units": {"p": (["battery"], [[0], [1], [-2]])},
+    "storage_units": {
+        "p": (["battery"], [[0], [1], [-2]]),
+        "state_of_charge": (["battery"], [[2], [1], [3]]),
+    },
 }
 
 
