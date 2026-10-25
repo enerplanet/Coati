@@ -50,7 +50,8 @@ the document that `coati dump SOURCE OUTPUT` writes.
 ## Where to go next
 
 - [Installation](usage/installation.md) and the [Quickstart](usage/quickstart.md)
-- Using the [command line](usage/cli.md) or the [Python package](usage/python.md)
+- Using the [command line](usage/cli.md) or the [Python package](usage/python.md),
+  and reading the bundles of [MEME](usage/meme.md)
 - The frameworks: how a file is [recognised and named](frameworks/overview.md),
   and how each key follows from a file of [Calliope](frameworks/calliope.md),
   [PyPSA](frameworks/pypsa.md) and [AdOpT-NET0](frameworks/adopt-net0.md)

@@ -147,6 +147,7 @@ nav:
       - Quickstart: usage/quickstart.md
       - Command line: usage/cli.md
       - Python package: usage/python.md
+      - With MEME: usage/meme.md
   - Frameworks:
       - Overview: frameworks/overview.md
       - Calliope: frameworks/calliope.md
