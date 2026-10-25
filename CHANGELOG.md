@@ -9,6 +9,13 @@ minor release may change the Python interface and the command line.
 
 ## [Unreleased]
 
+## [0.1.0-alpha] - 2026-10-25
+
+The first pre-release. It reads every result file that
+[MEME](https://github.com/enerplanet/meme) 0.1.0-alpha produces: every
+scenario and example of MEME, run on every target that accepts it, gives a
+document that agrees with what the framework itself reports for the file.
+
 ### Added
 
 - The Coati identity: the banner on the README and the docs landing page
@@ -30,8 +37,9 @@ minor release may change the Python interface and the command line.
   results of a model.
 - Results of Calliope 0.6 and 0.7, including the SPORES and the operate
   mode; of PyPSA 0.25 and later, from netCDF and from HDF5, including
-  networks with several investment periods and stochastic networks; and of
-  AdOpT-NET0 0.1, including typical days and several investment periods.
+  committable units, networks with several investment periods and stochastic
+  networks; and of AdOpT-NET0 0.1, including typical days and several
+  investment periods.
 - The dataset document, schema version 1.0: the groups, dimensions,
   variables and attributes of any netCDF or HDF5 file, with the values read
   according to the CF conventions: times, missing values, packed numbers,
@@ -43,7 +51,7 @@ minor release may change the Python interface and the command line.
   string or an error, as the caller chooses; large arrays are written in
   pieces; a file is replaced only once its document is complete.
 - JSON Schemas of both documents, shipped with the package.
-- Tests against files that the frameworks have written, of Calliope 0.6.10,
+- Tests against files that the frameworks have written, of Calliope 0.6.8, 0.6.10,
   0.7.0.dev7 and 0.7.0, of PyPSA 0.25.2, 0.35.2, 1.2.4 and 1.3.0 and of
   AdOpT-NET0 0.1.10, which compare the documents with what each framework
   says about its model through its own interface; tests that solve the models
@@ -56,3 +64,6 @@ minor release may change the Python interface and the command line.
 - `environment/`: a containerized development and test environment with
   compose services for the tests, the checks, the docs server, the `coati`
   command and a shell, selected with `ENV=dev|test`.
+
+[Unreleased]: https://github.com/enerplanet/Coati/compare/v0.1.0-alpha...HEAD
+[0.1.0-alpha]: https://github.com/enerplanet/Coati/releases/tag/v0.1.0-alpha
