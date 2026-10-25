@@ -472,6 +472,28 @@ def test_a_unit_that_is_not_committable_does_not_stand_by(tmp_path: Path) -> Non
     assert found["warnings"] == []
 
 
+def test_a_carrier_named_unmet_is_demand_that_is_not_met(tmp_path: Path) -> None:
+    path = _network(
+        tmp_path,
+        objective=500.0 * 3,
+        generators_i=(("generators_i",), ["hub::electricity::unmet"]),
+        generators_bus=(("generators_i",), ["hub"]),
+        generators_carrier=(("generators_i",), ["unmet"]),
+        generators_p_nom_opt=(("generators_i",), [3.0]),
+        generators_p_nom_extendable=(("generators_i",), np.array([True])),
+        generators_marginal_cost=(("generators_i",), [500.0]),
+        generators_t_p_i=(("generators_t_p_i",), ["hub::electricity::unmet"]),
+        generators_t_p=(("snapshots", "generators_t_p_i"), [[1.0], [2.0]]),
+    )
+    found = document(path)
+    assert found["capacities"] == {}
+    assert found["unmet_demand_timeseries"] == [1.0, 2.0]
+    assert found["unmet_demand_by_location"] == {"hub": 3.0}
+    assert found["objective"] == 0.0
+    assert found["details"] == {"cost_of_unmet_demand": 1500.0}
+    assert found["warnings"] == []
+
+
 def test_the_costs_of_a_store_and_of_spilling_are_counted(tmp_path: Path) -> None:
     path = _network(
         tmp_path,

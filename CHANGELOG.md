@@ -15,6 +15,8 @@ minor release may change the Python interface and the command line.
   attribute `carrier` says, as the documentation promised; a further part of
   the name, as in `north::electricity::battery`, tells buses apart. (Keys of
   `generation` and `carrier_out` of `tech_metadata`.)
+- PyPSA: a generator whose carrier or name is `unmet` stands for demand that
+  is not met, as one named `unmet_demand` does.
 
 ### Fixed
 

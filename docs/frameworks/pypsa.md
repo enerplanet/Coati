@@ -42,9 +42,10 @@ of the same name at several locations are one technology.
 | `Line`, `Transformer` | `transmission` |
 
 **Demand that is not met.** A generator stands for demand that the system
-fails to meet if its carrier or its name is `load_shedding`, `load shedding`
-or `unmet_demand`. It is reported as `unmet_demand_timeseries`, not as a
-technology, and what it costs is no cost of the system.
+fails to meet if its carrier or its name is `unmet`, `unmet_demand`,
+`load_shedding` or `load shedding`. It is reported as
+`unmet_demand_timeseries`, not as a technology, and what it costs is no cost
+of the system.
 
 ## Keys
 

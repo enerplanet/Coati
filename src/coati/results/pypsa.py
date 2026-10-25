@@ -81,7 +81,7 @@ _CONVERSION: Final = "conversion"
 _TRANSMISSION: Final = "transmission"
 
 # Generators that stand for demand the system fails to meet, by carrier or technology.
-_SHORTFALL: Final = frozenset({"unmet_demand", "load_shedding", "load shedding"})
+_SHORTFALL: Final = frozenset({"unmet", "unmet_demand", "load_shedding", "load shedding"})
 
 # The coordinate reference system in which x is the longitude and y the latitude.
 _WGS84: Final = 4326
